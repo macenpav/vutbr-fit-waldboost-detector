@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="headers">
+      <UniqueIdentifier>{d124286f-6524-4785-96cb-d6725203f107}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="sources">
+      <UniqueIdentifier>{8982b9da-d976-41ad-9b7c-1f5f309fe1ff}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="..\src\main.cu">
+      <Filter>sources</Filter>
+    </CudaCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\wb_waldboostdetector.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\wb_enums.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\general.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\wb_structures.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\wb_waldboostdetector.cu">
+      <Filter>sources</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
