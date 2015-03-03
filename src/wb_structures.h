@@ -26,6 +26,25 @@ namespace wb {
 		/** @brief response */
 		float response;
 	};
+
+	struct ImageInfo {
+		uint32	width, height, imageSize;
+		uint8	channels;
+	};
+
+	struct Pyramid {
+		uint32	width, height, imageSize;
+		uint32	yOffsets[PYRAMID_IMAGE_COUNT];
+		float	scales[PYRAMID_IMAGE_COUNT];
+		uint32	imageWidths[PYRAMID_IMAGE_COUNT];
+		uint32	imageHeights[PYRAMID_IMAGE_COUNT];
+	};
+
+	struct SurvivorData {
+		uint32 x, y;
+		float response;
+	};
+	
 }
 
 #endif

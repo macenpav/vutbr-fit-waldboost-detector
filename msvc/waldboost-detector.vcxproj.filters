@@ -12,6 +12,7 @@
     <CudaCompile Include="..\src\main.cu">
       <Filter>sources</Filter>
     </CudaCompile>
+    <CudaCompile Include="..\src\wb_waldboostdetector.cu" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\wb_waldboostdetector.h">
@@ -23,13 +24,14 @@
     <ClInclude Include="..\src\general.h">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\wb_detector.h">
+      <Filter>headers</Filter>
+    </ClInclude>
     <ClInclude Include="..\src\wb_structures.h">
       <Filter>headers</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\src\wb_waldboostdetector.cu">
-      <Filter>sources</Filter>
-    </ClCompile>
+    <ClInclude Include="..\src\wb_alphas.h">
+      <Filter>headers</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

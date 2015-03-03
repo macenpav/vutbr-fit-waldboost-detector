@@ -7,11 +7,12 @@
 #include <fstream>
 #include <string>
 #include <iostream>
+#include <chrono>
 
-#include "general.h"
-#include "wb_enums.h"
 #include "wb_waldboostdetector.h"
-
+#include "wb_enums.h"
+#include "general.h"
+#include "wb_structures.h"
 
 const std::string LIBNAME = "waldboost-detector";
 
@@ -93,7 +94,8 @@ bool processVideo(std::string filename, uint32 param)
 		std::cout << "[" << LIBNAME << "]: " << "Initialized detector." << std::endl;			
 
 	while (true)
-	{
+	{		
+		auto start_time = std::chrono::high_resolution_clock::now();
 		video >> image;
 
 		if (image.empty())
@@ -118,6 +120,8 @@ bool processVideo(std::string filename, uint32 param)
 			cv::imshow(LIBNAME, image);
 			cv::waitKey(WAIT_DELAY);
 		}
+		auto end_time = std::chrono::high_resolution_clock::now();
+		std::cout << "TOTAL TIME: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " FPS: " << 1000 / std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
 	}
 	detector.free();
 	video.release();
