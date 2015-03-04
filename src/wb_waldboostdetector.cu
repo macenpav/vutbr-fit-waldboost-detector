@@ -3,29 +3,16 @@
 #include <iostream>
 
 #include "cuda_runtime.h"
-#include "general.h"
 
+#include "wb_general.h"
 #include "wb_structures.h"
 #include "wb_detector.h"
 #include "wb_alphas.h"
 
 namespace wb {
-	
-	/** @brief Final detection processing
-	*
-	* Processes detections on an image beginning at a starting stage, until the end.
-	* Processes only given surviving positions and outputs detections, which can then
-	* be displayed.
-	*
-	* @param imageData			Input image.
-	* @param survivors			Input array of surviving positions.
-	* @param detections			Output array of detections.
-	* @param detectionCount		Number of detections.
-	* @param startStage			Starting stage of the waldboost detector.
-	* @param bounds				Data about the different subsampled images.
-	* @return Void.
-	*/
-	__device__ void detectDetections(		
+		
+	__device__ 
+	void detectDetections(		
 		SurvivorData*	survivors,
 		Detection*		detections,
 		uint32*			detectionCount,
@@ -59,21 +46,8 @@ namespace wb {
 		}
 	}
 
-	/** @brief Initial survivor detection processing
-	*
-	* Processes detections on an image from the first stage (of the waldboost detector).
-	* Processes the whole image and outputs the remaining surviving positions after reaching
-	* the ending stage.
-	*
-	* @param imageData			Input image.
-	* @param survivors			Output array of surviving positions.
-	* @param endStage			Ending stage of the waldboost detector.
-	* @return Void.
-	*
-	* @todo calculate newThreadId using prefix sum and shared memory to remove global memory
-	*		atomic instructio bottlenect
-	*/
-	__device__ void detectSurvivorsInit(		
+	__device__ 
+	void detectSurvivorsInit(		
 		SurvivorData*	survivors,
 		uint16			endStage)
 	{
@@ -140,21 +114,6 @@ namespace wb {
 		}
 	}
 
-	/** @brief Survivor detection processing
-	*
-	* Processes detections on an image from a set starting stage (of the waldboost detector).
-	* Processes only positions in the initSurvivors array and outputs still surviving positions
-	* after reaching the ending stage.
-	*
-	* @param imageData			Input image.
-	* @param survivors			Output and input array of surviving positions.
-	* @param startStage			Starting stage of the waldboost detector.
-	* @param endStage			Ending stage of the waldboost detector.
-	* @return Void.
-	*
-	* @todo calculate newThreadId using prefix sum and shared memory to remove global memory
-	*		atomic instructio bottlenect
-	*/
 	__device__ void detectSurvivors(
 		SurvivorData*	survivors,
 		uint16			startStage,
@@ -403,6 +362,11 @@ namespace wb {
 		#ifdef DEBUG
 		_frameCount = 0;
 		#endif
+	}
+
+	void WaldboostDetector::setAttributes(DetectorConfiguration const& config)
+	{
+		_config = config;
 	}
 
 	void WaldboostDetector::setImage(cv::Mat* image)

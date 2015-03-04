@@ -1,7 +1,7 @@
 #ifndef H_DETECTOR
 #define H_DETECTOR
 
-#include "general.h"
+#include "wb_general.h"
 
 wb::Stage hostStages[STAGE_COUNT] = {
 { 12, 6, 2, 2, -0.71673900, 0},

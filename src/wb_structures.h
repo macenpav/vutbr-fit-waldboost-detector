@@ -1,7 +1,8 @@
 #ifndef H_WB_STRUCTURES
 #define H_WB_STRUCTURES
 
-#include "general.h"
+#include "wb_general.h"
+#include "wb_enums.h"
 
 namespace wb {
 
@@ -43,6 +44,10 @@ namespace wb {
 	struct SurvivorData {
 		uint32 x, y;
 		float response;
+	};
+
+	struct DetectorConfiguration {
+		dim3 kernelConfig[MAX_KERNEL_CONFIG];
 	};
 	
 }

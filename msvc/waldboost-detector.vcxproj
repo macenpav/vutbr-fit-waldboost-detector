@@ -30,7 +30,7 @@
     <ClInclude Include="..\src\wb_structures.h" />
     <ClInclude Include="..\src\wb_alphas.h" />
     <ClInclude Include="..\src\wb_detector.h" />
-    <ClInclude Include="..\src\general.h" />
+    <ClInclude Include="..\src\wb_general.h" />
     <ClInclude Include="..\src\wb_waldboostdetector.h" />
     <ClInclude Include="..\src\wb_enums.h" />
   </ItemGroup>

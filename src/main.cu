@@ -11,7 +11,7 @@
 
 #include "wb_waldboostdetector.h"
 #include "wb_enums.h"
-#include "general.h"
+#include "wb_general.h"
 #include "wb_structures.h"
 
 const std::string LIBNAME = "waldboost-detector";
