@@ -1,0 +1,45 @@
+%============================================================================
+% tento soubor pouzijete pro vysazeni desek
+% (c) 2008 Michal Bidlo
+% E-mail: bidlom AT fit vutbr cz
+% kodovaní: iso-8859-2 (zmena prikazem iconv, recode nebo cstocs)
+%----------------------------------------------------------------------------
+% zpracování: make desky, make clean
+% vim: set syntax=tex encoding=latin2:
+%============================================================================
+\documentclass{fitthesis}
+%Je-li prace psana v anglickem jazyce, je zapotrebi u tridy pouzit parametr 
+%english  \documentclass[english]{fitthesis}
+
+% zde zvolime kodovani, ve kterem je napsan text prace
+% "latin2" pro iso8859-2 nebo "cp1250" pro windows-1250
+\usepackage[latin2]{inputenc}
+
+%Informace o praci/projektu
+%---------------------------------------------------------------------------
+\projectinfo{
+  %Prace
+  project=DP,           %typ prace BP/DP
+  year=2015,             %rok
+  date=\today,           %datum odevzdani
+  %Nazev prace
+  title.cs=Detekce objektù na GPU,  %nazev prace v cestine
+  title.en=Object Detection on GPU, %nazev prace v anglictine
+  %Autor
+  author=Pavel Macenauer,   %jmeno prijmeni autora
+  author.title.p=Bc., %titul pred jmenem (nepovinne)
+  %author.title.a=PhD, %titul za jmenem (nepovinne)
+  %Ustav
+  department=UPGM, % doplnte spravnou zkratku ustavu: UPSY/UIFS/UITS/UPGM
+  %Skolitel
+  supervisor=Roman Juránek, %jmeno prijmeni skolitele
+  supervisor.title.p=Ing.,   %titul pred jmenem (nepovinne)
+  supervisor.title.a=Ph.D.,    %titul za jmenem (nepovinne)
+}
+
+
+\begin{document}
+  % Vysazeni desek
+  % ----------------------------------------------
+  \makecover
+\end{document}

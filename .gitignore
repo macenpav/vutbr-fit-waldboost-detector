@@ -6,6 +6,11 @@
 *.user
 *.sln.docstates
 
+# data stuff
+data/
+temp/
+tmp/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -181,3 +186,35 @@ UpgradeLog*.htm
 
 # Microsoft Fakes
 FakesAssemblies/
+
+# LATEX
+*.aux
+*.glo
+*.idx
+*.log
+*.toc
+*.ist
+*.acn
+*.acr
+*.alg
+*.bbl
+*.blg
+*.dvi
+*.glg
+*.gls
+*.ilg
+*.ind
+*.lof
+*.lot
+*.maf
+*.mtc
+*.mtc1
+*.out
+*.synctex.gz
+*.nav
+*.snm
+*.vrb
+doc.pdf
+*.vpp~*
+*-converted-to.pdf
+

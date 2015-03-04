@@ -1,0 +1,9 @@
+- do cls/fitthesis.cls pridany "SP" (semestralni projekt/term project)
+- fontenc (aby se dalo copy/paste kopirovat z prace)
+- formatovani citaci podle csn (viz. http://www.fit.vutbr.cz/~martinek/latex/czechiso.html.cs.iso-8859-2 )
+- listoffigures, listoftables, appendix
+- Rok pomoci \yyyydate
+- parametr "print" pro \documentclass[print]{...}, ktery ve vyslednem vypne aktivni odkazy v pdf (na papire
+  cerveny obsah vypada hodne divne)
+- prevedeno do utf-8 (v linuxu je to default vsech editoru, windowsaci si nejak poradi)
+- do komentare bylo pridane \listoffigures a \listoftables
