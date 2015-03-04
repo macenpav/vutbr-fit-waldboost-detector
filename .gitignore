@@ -10,6 +10,7 @@
 data/
 temp/
 tmp/
+msvc/src
 
 # Build results
 [Dd]ebug/
@@ -218,3 +219,5 @@ doc.pdf
 *.vpp~*
 *-converted-to.pdf
 
+# cuda
+*.cu.deps
