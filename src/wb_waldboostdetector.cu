@@ -22,7 +22,8 @@ namespace wb {
 		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;		
 		const uint32 globalId = y * PYRAMID.width + x;
 
-		if (x < (PYRAMID.width - CLASSIFIER_WIDTH) && y < (PYRAMID.height - CLASSIFIER_HEIGHT))
+		if ((x < (PYRAMID.width - CLASSIFIER_WIDTH) && y < (PYRAMID.height - CLASSIFIER_HEIGHT)) ||
+			(x < (PYRAMID.widthL1 - CLASSIFIER_WIDTH) && y < (PYRAMID.heightL1 / 2 - CLASSIFIER_HEIGHT)))
 		{
 			float response = survivors[globalId].response;
 
@@ -60,8 +61,9 @@ namespace wb {
 
 		localSurvivors[blockId] = 0;
 
-		if (x < (PYRAMID.width - CLASSIFIER_WIDTH) && y < (PYRAMID.height - CLASSIFIER_HEIGHT)) 
-		{			
+		if ((x < (PYRAMID.width - CLASSIFIER_WIDTH) && y < (PYRAMID.height - CLASSIFIER_HEIGHT)) ||
+			(x < (PYRAMID.widthL1 - CLASSIFIER_WIDTH) && y < (PYRAMID.heightL1 / 2 - CLASSIFIER_HEIGHT)))
+		{
 			float response = 0.0f;
 			bool survived = eval(x, y, &response, 0, endStage);
 
@@ -128,7 +130,8 @@ namespace wb {
 
 		localSurvivors[blockId] = 0;
 
-		if (x < (PYRAMID.width - CLASSIFIER_WIDTH) && y < (PYRAMID.height - CLASSIFIER_HEIGHT))
+		if ((x < (PYRAMID.width - CLASSIFIER_WIDTH) && y < (PYRAMID.height - CLASSIFIER_HEIGHT)) ||
+			(x < (PYRAMID.widthL1 - CLASSIFIER_WIDTH) && y < (PYRAMID.heightL1 / 2 - CLASSIFIER_HEIGHT)))
 		{
 			float response = survivors[globalId].response;
 
@@ -196,34 +199,33 @@ namespace wb {
 		uint32*			detectionCount,
 		SurvivorData*	survivors)
 	{
-		detectSurvivorsInit(survivors, 16);
-		detectSurvivors(survivors, 16, 32);
-		detectSurvivors(survivors, 32, 64);
-		detectSurvivors(survivors, 64, 128);
-		detectSurvivors(survivors, 128, 256);
+		detectSurvivorsInit(survivors, 1);
+		detectSurvivors(survivors, 1, 8);
+		detectSurvivors(survivors, 8, 64);
+		detectSurvivors(survivors, 64, 256);
 		detectSurvivors(survivors, 256, 512);
 		detectDetections(survivors, detections, detectionCount, 512);
 	}
 
-	__device__ void sumRegions(float* values, uint32 x, uint32 y, Stage* stage)
+	__device__ void sumRegions(float* values, float x, float y, Stage* stage)
 	{
-		values[0] = tex2D(textureImagePyramid, x, y);
+		values[0] = tex2D(textureImagePyramid1, x, y);
 		x += stage->width;
-		values[1] = tex2D(textureImagePyramid, x, y);
+		values[1] = tex2D(textureImagePyramid1, x, y);
 		x += stage->width;
-		values[2] = tex2D(textureImagePyramid, x, y);
+		values[2] = tex2D(textureImagePyramid1, x, y);
 		y += stage->height;
-		values[5] = tex2D(textureImagePyramid, x, y);
+		values[5] = tex2D(textureImagePyramid1, x, y);
 		y += stage->height;
-		values[8] = tex2D(textureImagePyramid, x, y);
+		values[8] = tex2D(textureImagePyramid1, x, y);
 		x -= stage->width;
-		values[7] = tex2D(textureImagePyramid, x, y);
+		values[7] = tex2D(textureImagePyramid1, x, y);
 		x -= stage->width;
-		values[6] = tex2D(textureImagePyramid, x, y);
+		values[6] = tex2D(textureImagePyramid1, x, y);
 		y -= stage->height;
-		values[3] = tex2D(textureImagePyramid, x, y);
+		values[3] = tex2D(textureImagePyramid1, x, y);
 		x += stage->width;
-		values[4] = tex2D(textureImagePyramid, x, y);
+		values[4] = tex2D(textureImagePyramid1, x, y);
 	}
 
 	__device__ float evalLBP(uint32 x, uint32 y, Stage* stage)
@@ -232,7 +234,7 @@ namespace wb {
 
 		float values[9];
 
-		sumRegions(values, x + (stage->width * 0.5f), y + (stage->height * 0.5f), stage);
+		sumRegions(values, static_cast<float>(x) + (static_cast<float>(stage->width) * 0.5f), y + (static_cast<float>(stage->height) * 0.5f), stage);
 
 		uint8 code = 0;
 		for (uint8 i = 0; i < 8; ++i)
@@ -274,7 +276,7 @@ namespace wb {
 		}			
 	}	
 
-	__global__ void pyramidKernel(float* outData)
+	__global__ void pyramidKernelL0(float* outData)
 	{		
 		// coords in the original image
 		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -282,22 +284,104 @@ namespace wb {
 
 		if (x < PYRAMID.width && y < PYRAMID.height)
 		{
+			uint32 offsetX = 0;
+			
+			Octave oct = PYRAMID.octaves[0];
+			float res;
 			uint8 i = 1;
-			for (; i < PYRAMID_IMAGE_COUNT; ++i)
+			for (; i < WB_LEVELS_PER_OCTAVE; ++i)
 			{
-				if (y < PYRAMID.yOffsets[i])
+				if (y < oct.images[i].offsetY)
 					break;
 			}
-			uint8 imageIndex = i - 1;
 
-			if (x < PYRAMID.imageWidths[imageIndex]) {
-				float origX = static_cast<float>(x) / static_cast<float>(PYRAMID.imageWidths[imageIndex]) * static_cast<float>(DEV_INFO.width);
-				float origY = static_cast<float>(y - PYRAMID.yOffsets[imageIndex]) / static_cast<float>(PYRAMID.imageHeights[imageIndex]) * static_cast<float>(DEV_INFO.height);
-
-				float res = tex2D(textureWorkingImage, origX, origY);
-				outData[y * PYRAMID.width + x] = res;
+			if (x > oct.images[i - 1].width)
+			{
+				res = 0.f;
 			}
+			else
+			{
+				float origX = static_cast<float>(x - oct.images[i - 1].offsetX) / static_cast<float>(oct.images[i - 1].width) * static_cast<float>(DEV_INFO.width);
+				float origY = static_cast<float>(y - oct.images[i - 1].offsetY) / static_cast<float>(oct.images[i - 1].height) * static_cast<float>(DEV_INFO.height);
+				res = tex2D(textureWorkingImage, origX, origY);
+			}
+
+			outData[y * PYRAMID.width + x] = res;			
+		}		
+	}
+
+	__global__ void pyramidKernelL1(float* outData)
+	{
+		// coords in the original image
+		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
+		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
+				
+		if (x < PYRAMID.width && y < PYRAMID.height)
+		{
+			float res = tex2D(textureImagePyramid0, x + 0.5f, y + 0.5f);
+			outData[y * PYRAMID.widthL1 + x] = res;
+			return;
 		}
+
+		
+		if (x < PYRAMID.widthL1 && y < PYRAMID.heightL1 / 2)
+		{
+			float origX = static_cast<float>(x - PYRAMID.width) * 2.f;
+			float origY = static_cast<float>(y)* 2.f;
+			float res = tex2D(textureImagePyramid0, origX, origY);
+			outData[(y * PYRAMID.widthL1) + x] = res;
+			return;
+		}		
+					;
+	}
+
+	void WaldboostDetector::_precalcPyramid()
+	{		
+		float scaledWidth, scaledHeight;
+		float parentWidth = _info.width, parentHeight = _info.height;
+		uint32 currentOffset = 0, parentOffset = 0, currentOffsetX = 0, currentOffsetY = 0;
+		const uint32 pitch = _info.width;
+
+		// 1st octave
+		uint8 oct = 0;
+		
+		float scale = 1.0f;
+		for (uint8 lvl = 0; lvl < WB_LEVELS_PER_OCTAVE; ++lvl)
+		{
+			ImageData data;
+
+			scaledHeight = parentHeight / scale;
+			scaledWidth = parentWidth / scale;
+
+			data.width = static_cast<uint32>(scaledWidth);
+			data.height = static_cast<uint32>(scaledHeight);				
+			data.offsetY = currentOffsetY;
+			data.offsetX = currentOffsetX;
+
+			scale *= WB_SCALING_FACTOR;
+			currentOffsetY += data.height;
+
+			_pyramid.octaves[oct].images[lvl] = data;
+		}
+
+		currentOffsetX += _pyramid.octaves[oct].images[0].width;
+		parentWidth = _pyramid.octaves[oct].images[0].width;
+		parentHeight = _pyramid.octaves[oct].images[0].height;
+		
+		_pyramid.height = currentOffsetY;
+		_pyramid.heightL1 = _pyramid.height;
+		_pyramid.width = currentOffsetX;
+		_pyramid.widthL1 = _pyramid.width + _pyramid.width / 2;
+		_pyramid.imageSize = _pyramid.width * _pyramid.height;	
+		_pyramid.imageSizeL1 = (_pyramid.width + _pyramid.width / 2) * _pyramid.height;
+
+		/*Octave oct = _pyramid.octaves[0];
+		for (uint32 i = 0; i < WB_LEVELS_PER_OCTAVE; ++i) {
+			std::cout << i << ". image " << oct.images[i].width << "x" << oct.images[i].height << std::endl;
+			std::cout << i << ". image offsets x: " << oct.images[i].offsetX<< " y: " << oct.images[i].offsetY << std::endl;
+		}
+
+		std::cout << "pyramid size: " << _pyramid.width << "x" << _pyramid.height << std::endl;	*/
 	}
 
 	void WaldboostDetector::init(cv::Mat* image)
@@ -305,35 +389,9 @@ namespace wb {
 		_info.width = image->cols;
 		_info.height = image->rows;
 		_info.imageSize = image->cols * image->rows;		
-		_info.channels = image->channels();
+		_info.channels = image->channels();		
 
-		// pyramid image calcs
-		float scale = _info.width / MAX_PYRAMID_WIDTH;
-		float scaledHeight = _info.height / scale;
-		float scaledWidth = _info.width / scale;
-		float totalHeight = scaledHeight;
-
-		_pyramid.yOffsets[0] = 0;		
-		_pyramid.scales[0] = scale;		
-		_pyramid.imageWidths[0] = scaledWidth;
-		_pyramid.imageHeights[0] = scaledHeight;
-
-		for (uint8 i = 1; i < 8; ++i)
-		{
-			scale *= SCALING_FACTOR;
-			scaledHeight = _info.height / scale;
-			scaledWidth = _info.width / scale;
-
-			_pyramid.yOffsets[i] = totalHeight;
-			_pyramid.scales[i] = scale;
-			_pyramid.imageWidths[i] = scaledWidth;
-			_pyramid.imageHeights[i] = scaledHeight;
-		
-			totalHeight += scaledHeight;
-		}
-		_pyramid.height = totalHeight;
-		_pyramid.width = MAX_PYRAMID_WIDTH;
-		_pyramid.imageSize = _pyramid.width * _pyramid.height;
+		_precalcPyramid();
 
 		cudaMemcpyToSymbol(devPyramid, &_pyramid, sizeof(Pyramid));
 		cudaMemcpyToSymbol(devInfo, &_info, sizeof(ImageInfo));
@@ -341,8 +399,8 @@ namespace wb {
 
 		cudaMalloc((void**)&_devOriginalImage, sizeof(uint8) * _info.imageSize * _info.channels);
 		cudaMalloc((void**)&_devWorkingImage, sizeof(float) * _info.imageSize);
-		cudaMalloc((void**)&_devPyramidImage, sizeof(float) * _pyramid.imageSize);
-		cudaMemset((void**)&_devPyramidImage, 0, sizeof(float) * _pyramid.imageSize);
+		cudaMalloc((void**)&_devPyramidImage0, sizeof(float) * _pyramid.imageSize);		
+		cudaMalloc((void**)&_devPyramidImage1, sizeof(float) * _pyramid.imageSizeL1);
 		cudaMalloc((void**)&_devDetections, sizeof(Detection) * MAX_DETECTIONS);
 		cudaMalloc((void**)&_devDetectionCount, sizeof(uint32));
 		cudaMemset((void**)&_devDetectionCount, 0, sizeof(uint32));
@@ -356,10 +414,14 @@ namespace wb {
 		cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<float>();
 		cudaBindTexture2D(nullptr, &textureWorkingImage, _devWorkingImage, &channelDesc, _info.width, _info.height, sizeof(float) * _info.width);
 
-		cudaChannelFormatDesc pyramidDesc = cudaCreateChannelDesc<float>();
-		cudaBindTexture2D(nullptr, &textureImagePyramid, _devPyramidImage, &pyramidDesc, _pyramid.width, _pyramid.height, sizeof(float) * _pyramid.width);		
+		 
+		cudaChannelFormatDesc pyramidDesc0 = cudaCreateChannelDesc<float>();
+		cudaBindTexture2D(nullptr, &textureImagePyramid0, _devPyramidImage0, &pyramidDesc0, _pyramid.width, _pyramid.height, sizeof(float) * _pyramid.width);		
+		
+		cudaChannelFormatDesc pyramidDesc1 = cudaCreateChannelDesc<float>();
+		cudaBindTexture2D(nullptr, &textureImagePyramid1, _devPyramidImage1, &pyramidDesc1, _pyramid.widthL1, _pyramid.heightL1, sizeof(float) * (_pyramid.widthL1));
 
-		#ifdef DEBUG
+		#ifdef WB_DEBUG
 		_frameCount = 0;
 		#endif
 	}
@@ -371,7 +433,22 @@ namespace wb {
 
 	void WaldboostDetector::setImage(cv::Mat* image)
 	{		
-		#ifdef DEBUG
+		textureWorkingImage.addressMode[0] = cudaAddressModeClamp;
+		textureWorkingImage.addressMode[1] = cudaAddressModeClamp;
+		textureWorkingImage.filterMode = cudaFilterModeLinear;
+		textureWorkingImage.normalized = false;
+
+		textureImagePyramid0.addressMode[0] = cudaAddressModeClamp;
+		textureImagePyramid0.addressMode[1] = cudaAddressModeClamp;
+		textureImagePyramid0.filterMode = cudaFilterModeLinear;
+		textureImagePyramid0.normalized = false;
+
+		textureImagePyramid1.addressMode[0] = cudaAddressModeClamp;
+		textureImagePyramid1.addressMode[1] = cudaAddressModeClamp;
+		textureImagePyramid1.filterMode = cudaFilterModeLinear;
+		textureImagePyramid1.normalized = false;
+
+		#ifdef WB_DEBUG
 		std::cout << "------- FRAME " << _frameCount++ << "------" << std::endl;
 		_totalTime = 0.f;
 		#endif
@@ -382,7 +459,7 @@ namespace wb {
 		dim3 grid(64, 32, 1);
 		dim3 block(32, 32, 1);
 
-		#ifdef DEBUG
+		#ifdef WB_DEBUG
 		cudaEvent_t start_preprocess, stop_preprocess;
 		float preprocess_time = 0.f;
 		cudaEventCreate(&start_preprocess);
@@ -392,7 +469,7 @@ namespace wb {
 
 		preprocessKernel <<<grid, block>>>(_devWorkingImage, _devOriginalImage);
 
-		#ifdef DEBUG
+		#ifdef WB_DEBUG
 		cudaEventRecord(stop_preprocess);
 		cudaEventSynchronize(stop_preprocess);
 		cudaEventElapsedTime(&preprocess_time, start_preprocess, stop_preprocess);
@@ -401,7 +478,7 @@ namespace wb {
 		#endif
 								
 		// should display black and white floating-point image
-		#ifdef DEBUG
+		#ifdef WB_DEBUG
 		cv::Mat tmp(cv::Size(_info.width, _info.height), CV_32FC1);
 		cudaMemcpy(tmp.data, _devWorkingImage, _info.imageSize * sizeof(float), cudaMemcpyDeviceToHost);
 		cv::imshow("converted to float and bw", tmp);
@@ -409,10 +486,10 @@ namespace wb {
 		#endif	
 
 		// allows max size 2048x1024
-		dim3 grid2(16, 32, 1);
+		dim3 grid2(64, 64, 1);
 		dim3 block2(32, 32, 1);
 
-		#ifdef DEBUG
+		#ifdef WB_DEBUG
 		cudaEvent_t start_pyramid, stop_pyramid;
 		float pyramid_time = 0.f;
 		cudaEventCreate(&start_pyramid);
@@ -420,9 +497,10 @@ namespace wb {
 		cudaEventRecord(start_pyramid);
 		#endif
 
-		pyramidKernel <<<grid2, block2>>>(_devPyramidImage);
+		pyramidKernelL0 <<<grid2, block2>>>(_devPyramidImage0);
+		pyramidKernelL1 <<<grid2, block2>>>(_devPyramidImage1);
 
-		#ifdef DEBUG
+		#ifdef WB_DEBUG
 		cudaEventRecord(stop_pyramid);
 		cudaEventSynchronize(stop_pyramid);
 		cudaEventElapsedTime(&pyramid_time, start_pyramid, stop_pyramid);
@@ -431,9 +509,9 @@ namespace wb {
 		#endif
 
 		// should display black and white floating-point image
-		#ifdef DEBUG
-		cv::Mat tmp2(cv::Size(_pyramid.width, _pyramid.height), CV_32FC1);
-		cudaMemcpy(tmp2.data, _devPyramidImage, _pyramid.imageSize * sizeof(float), cudaMemcpyDeviceToHost);
+		#ifdef WB_DEBUG
+		cv::Mat tmp2(cv::Size(_pyramid.widthL1, _pyramid.heightL1), CV_32FC1);
+		cudaMemcpy(tmp2.data, _devPyramidImage1, _pyramid.imageSizeL1 * sizeof(float), cudaMemcpyDeviceToHost);
 		cv::imshow("pyramid image", tmp2);
 		cv::waitKey(WAIT_DELAY);
 		#endif	
@@ -442,12 +520,12 @@ namespace wb {
 	void WaldboostDetector::run()
 	{
 		// allows max size 2048x1024
-		dim3 grid(16, 32, 1);
+		dim3 grid(64, 64, 1);
 		dim3 block(32, 32, 1);
 
 		cudaMemset(_devDetectionCount, 0, sizeof(uint32));
 		
-		#ifdef DEBUG
+		#ifdef WB_DEBUG
 		cudaEvent_t start_detection, stop_detection;
 		float detection_time = 0.f;
 		cudaEventCreate(&start_detection);
@@ -457,7 +535,7 @@ namespace wb {
 
 		detectionKernel <<<grid, block>>>(_devDetections, _devDetectionCount, _devSurvivors);
 		
-		#ifdef DEBUG
+		#ifdef WB_DEBUG
 		cudaEventRecord(stop_detection);
 		cudaEventSynchronize(stop_detection);
 		cudaEventElapsedTime(&detection_time, start_detection, stop_detection);
@@ -466,19 +544,19 @@ namespace wb {
 		printf("TOTAL KERNEL TIME: %f ms\n", _totalTime);
 		#endif
 
-		cv::Mat tmp(cv::Size(_pyramid.width, _pyramid.height), CV_32FC1);
+		cv::Mat tmp(cv::Size(_pyramid.widthL1, _pyramid.heightL1), CV_32FC1);
 		uint32 detectionCount;
 		cudaMemcpy(&detectionCount, _devDetectionCount, sizeof(uint32), cudaMemcpyDeviceToHost);
 
-		#ifdef DEBUG
+		#ifdef WB_DEBUG
 		std::cout << "DETECTION COUNT: " << detectionCount << std::endl;		
 		#endif
 
 		Detection detections[MAX_DETECTIONS];
 		cudaMemcpy(&detections, _devDetections, detectionCount * sizeof(Detection), cudaMemcpyDeviceToHost);
-		cudaMemcpy(tmp.data, _devPyramidImage, _pyramid.imageSize * sizeof(float), cudaMemcpyDeviceToHost);
+		cudaMemcpy(tmp.data, _devPyramidImage1, _pyramid.imageSizeL1 * sizeof(float), cudaMemcpyDeviceToHost);
 
-		#ifdef DEBUG
+		#ifdef WB_DEBUG
 		for (uint32 i = 0; i < detectionCount; ++i)
 			cv::rectangle(tmp, cvPoint(detections[i].x, detections[i].y), cvPoint(detections[i].x + detections[i].width, detections[i].y + detections[i].height), CV_RGB(255, 255, 255), 1);
 
@@ -491,11 +569,13 @@ namespace wb {
 	{
 		cudaUnbindTexture(textureWorkingImage);
 		cudaUnbindTexture(textureAlphas);
-		cudaUnbindTexture(textureImagePyramid);
+		cudaUnbindTexture(textureImagePyramid0);
+		cudaUnbindTexture(textureImagePyramid1);
 
 		cudaFree(_devOriginalImage);
 		cudaFree(_devWorkingImage);
-		cudaFree(_devPyramidImage);
+		cudaFree(_devPyramidImage0);
+		cudaFree(_devPyramidImage1);
 		cudaFree(_devAlphaBuffer);
 		cudaFree(_devDetections);
 		cudaFree(_devDetectionCount);

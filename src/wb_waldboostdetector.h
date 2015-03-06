@@ -21,20 +21,20 @@
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/nonfree/features2d.hpp>
 
-namespace wb {	
+namespace wb {
 
 	/** @brief Initial survivor detection processing
 	 *
 	 * Processes detections on an image from the first stage (of the waldboost detector).
 	 * Processes the whole image and outputs the remaining surviving positions after reaching
 	 * the ending stage.
-	 *	
+	 *
 	 * @param survivors			Output array of surviving positions.
 	 * @param endStage			Ending stage of the waldboost detector.
 	 * @return					Void.
 	 */
-	__device__ 
-	void detectSurvivorsInit(SurvivorData* survivors, uint16 endStage);
+	__device__
+		void detectSurvivorsInit(SurvivorData* survivors, uint16 endStage);
 
 	/** @brief Survivor detection processing
 	 *
@@ -45,29 +45,29 @@ namespace wb {
 	 * @param survivors			Output and input array of surviving positions.
 	 * @param startStage		Starting stage of the waldboost detector.
 	 * @param endStage			Ending stage of the waldboost detector.
-	 * @return					Void.	 
+	 * @return					Void.
 	 */
-	__device__ 
-	void detectSurvivors(SurvivorData* survivors, uint16 startStage, uint16 endStage);
+	__device__
+		void detectSurvivors(SurvivorData* survivors, uint16 startStage, uint16 endStage);
 
 	/** @brief Final detection processing
 	 *
 	 * Processes detections on an image beginning at a starting stage, until the end.
 	 * Processes only given surviving positions and outputs detections, which can then
 	 * be displayed.
-	 *	
+	 *
 	 * @param survivors			Input array of surviving positions.
 	 * @param detections		Output array of detections.
 	 * @param detectionCount	Number of detections.
-	 * @param startStage		Starting stage of the waldboost detector.	
+	 * @param startStage		Starting stage of the waldboost detector.
 	 * @return					Void.
 	 */
-	__device__ 
-	void detectDetections(SurvivorData* survivors, Detection* detections, uint32* detectionCount, uint16 startStage);
+	__device__
+		void detectDetections(SurvivorData* survivors, Detection* detections, uint32* detectionCount, uint16 startStage);
 
 	/** @brief Evaluates stages for a given coordinate
-	 * 
-	 * Evaluates stages for a given coordinate from a starting stage to an end stage, 
+	 *
+	 * Evaluates stages for a given coordinate from a starting stage to an end stage,
 	 * accumulates a response and determines if given sample is an object.
 	 *
 	 * @param x				X-coordinate.
@@ -77,8 +77,8 @@ namespace wb {
 	 * @param endStage		Ending stage.
 	 * @return				Detection success.
 	 */
-	__device__ 
-	bool eval(uint32 x, uint32 y, float* response, uint16 startStage, uint16 endStage);
+	__device__
+		bool eval(uint32 x, uint32 y, float* response, uint16 startStage, uint16 endStage);
 
 	/** @brief Evaluates LBP for a given coordinate
 	 *
@@ -90,11 +90,11 @@ namespace wb {
 	 * @return				A response.
 	 */
 	__device__
-	float evalLBP(uint32 x, uint32 y, Stage* stage);
+		float evalLBP(uint32 x, uint32 y, Stage* stage);
 
-	/** @brief Sums regions for LBP calculation. 
-	 * 
-	 * Interpolates image regions (1x1, 2x1, 1x2, 2x2) for LBP calculation. Uses 
+	/** @brief Sums regions for LBP calculation.
+	 *
+	 * Interpolates image regions (1x1, 2x1, 1x2, 2x2) for LBP calculation. Uses
 	 * texture unit bilinear interpolation capabilities.
 	 *
 	 * @param values	Values used for LBP calculation.
@@ -104,7 +104,7 @@ namespace wb {
 	 * @return			Void.
 	 */
 	__device__
-	void sumRegions(float* values, uint32 x, uint32 y, Stage* stage);
+		void sumRegions(float* values, uint32 x, uint32 y, Stage* stage);
 
 	/** @brief Preprocessing kernel.
 	 *
@@ -112,28 +112,29 @@ namespace wb {
 	 * values to float.	FP values are then stored as a texture.
 	 *
 	 * @param outData	Output data.
-	 * @param inData	Input data.	
+	 * @param inData	Input data.
 	 * @return			Void.
-	*/
+	 */
 	__global__
-	void preprocessKernel(float* outData, uint8* inData);
+		void preprocessKernel(float* outData, uint8* inData);
 
 	/** @brief Pyramidal image kernel.
 	*
 	* GPU kernel, which creates a pyramidal image from a texture. Uses texture unit
 	* bilinear interpolation.
 	*
-	* @param outData	Output data.	
+	* @param outData	Output data.
 	* @return			Void.
 	*/
 	__global__
-	void pyramidKernel(float* outData);
+		void pyramidKernel(float* outData);
 
 	/** @brief Black and white floating=point texture. */
-	texture<float,2> textureWorkingImage;
+	texture<float, 2> textureWorkingImage;
 
 	/** @brief Pyramid image texture. */
-	texture<float,2> textureImagePyramid;
+	texture<float, 2> textureImagePyramid0;
+	texture<float, 2> textureImagePyramid1;
 
 	/** @brief Detector alphas saved as texture. */
 	texture<float> textureAlphas;
@@ -197,22 +198,28 @@ namespace wb {
 			 *			
 			 * @return Void.
 			 */
-			void free();			
+			void free();	
 
 		private:
+			/** @brief Precalculates images sizes, offsets, and so on ... 
+			 *
+			 * @return Void.
+			 */
+			void _precalcPyramid();
+
 			ImageInfo _info;						///< image information
 			Pyramid _pyramid;						///< pyramid image information
 
 			uint8* _devOriginalImage;				///< pointer to device original image memory
 			float* _devWorkingImage;				///< pointer to device preprocessed image memory
-			float* _devPyramidImage;				///< pointer to device pyramid image memory
+			float* _devPyramidImage0, *_devPyramidImage1;	///< pointers to device pyramid image memory
 			float* _devAlphaBuffer;					///< pointer to device alpha memory
 			Detection* _devDetections;				///< pointer to the detections in device memory
 			uint32* _devDetectionCount;				///< pointer to the number of detections in device memory
 			SurvivorData* _devSurvivors;			///< pointer to device survivor memory
 			DetectorConfiguration _config;			///< detector configuration
 
-			#ifdef DEBUG
+			#ifdef WB_DEBUG
 			float _totalTime;			///< total time class runs
 			uint32 _frameCount;			///< number of frames it processed
 			#endif
