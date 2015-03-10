@@ -14,7 +14,7 @@ typedef int int32;
 
 #define MAX_PYRAMID_WIDTH 320
 #define PYRAMID_IMAGE_COUNT 8
-#define FINAL_THRESHOLD 0.0f
+#define FINAL_THRESHOLD 0.f
 #define ALPHA_COUNT 256
 #define STAGE_COUNT 2048
 #define CLASSIFIER_WIDTH 26
@@ -31,14 +31,15 @@ typedef int int32;
  * is created. Smaller number would generate bigger images, bigger number
  * smaller images and the last image wouldn't be half the width/height. 
  */
-#define WB_SCALING_FACTOR 1.1892071f
+#define WB_SCALING_FACTOR 1.09050773f
 
 /** @brief Number of downsampled images before the original image is 1/2 the width/height */
-#define WB_LEVELS_PER_OCTAVE 4
+#define WB_LEVELS_PER_OCTAVE 8
 
 /** @brief Number of image sets sampled from 1:1 to 1:0.5 scale */
 #define WB_OCTAVES 4
 
+/** @brief last octave index, should be WB_OCTAVES-1 */
 #define WB_MAX_OCTAVE_INDEX 3
 
 /** @brief Comment to switch off WB_DEBUG mode */

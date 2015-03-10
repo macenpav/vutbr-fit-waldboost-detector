@@ -387,6 +387,7 @@ namespace wb {
 			_pyramid.canvasWidth[oct] = totalWidth;			
 
 			float scale = pow(2.f, oct);
+			currentOffsetY = 0;
 			for (uint8 lvl = 0; lvl < WB_LEVELS_PER_OCTAVE; ++lvl)
 			{
 				ImageData data;
@@ -409,18 +410,19 @@ namespace wb {
 			_pyramid.height[oct] = _pyramid.canvasHeight[oct] >> oct;
 			_pyramid.canvasImageSize[oct] = _pyramid.height[oct] * _pyramid.width[oct];
 			_pyramid.canvasImageSize[oct] = _pyramid.canvasWidth[oct] * _pyramid.canvasHeight[oct];
-			currentOffsetX += _pyramid.canvasWidth[oct];
+			currentOffsetX += _pyramid.width[oct];
 		}
 
-		Octave oct = _pyramid.octaves[0];
-		for (uint32 i = 0; i < WB_LEVELS_PER_OCTAVE; ++i) {
-			std::cout << i << ". image " << oct.images[i].width << "x" << oct.images[i].height << std::endl;
-			std::cout << i << ". image offsets x: " << oct.images[i].offsetX<< " y: " << oct.images[i].offsetY << std::endl;
-		}
+		
 
-		for (uint32 i = 0; i < WB_OCTAVES; ++i) {
+		/*for (uint32 i = 0; i < WB_OCTAVES; ++i) {
 			std::cout << i << " canvas pyramid size: " << _pyramid.canvasWidth[i] << "x" << _pyramid.canvasHeight[i] << std::endl;
-		}
+			Octave oct = _pyramid.octaves[i];
+			for (uint32 i = 0; i < WB_LEVELS_PER_OCTAVE; ++i) {
+				std::cout << i << ". image " << oct.images[i].width << "x" << oct.images[i].height << std::endl;
+				std::cout << i << ". image offsets x: " << oct.images[i].offsetX << " y: " << oct.images[i].offsetY << std::endl;
+			}
+		}*/
 	}
 
 	void WaldboostDetector::init(cv::Mat* image)
@@ -488,11 +490,13 @@ namespace wb {
 		_totalTime = 0.f;
 		#endif
 
+		_myImage = image;
+
 		cudaMemcpy(_devOriginalImage, image->data, _info.imageSize * _info.channels * sizeof(uint8), cudaMemcpyHostToDevice);
 		
-		// allows max size 2048x1024
-		dim3 grid(64, 32, 1);
+		// allows max size 2048x1024		
 		dim3 block(32, 32, 1);
+		dim3 grid(_info.width / block.x, _info.height / block.y, 1);
 
 		#ifdef WB_DEBUG
 		cudaEvent_t start_preprocess, stop_preprocess;
@@ -521,8 +525,9 @@ namespace wb {
 		#endif	
 
 		// allows max size 2048x1024
-		dim3 grid2(64, 64, 1);
-		dim3 block2(32, 32, 1);
+		
+		dim3 block_first(32, 32, 1);
+		dim3 grid_first(_pyramid.canvasWidth[1] / block_first.x, _pyramid.canvasHeight[1] / block_first.y, 1);
 
 		#ifdef WB_DEBUG
 		cudaEvent_t start_pyramid, stop_pyramid;
@@ -532,7 +537,7 @@ namespace wb {
 		cudaEventRecord(start_pyramid);
 		#endif
 
-		pyramidKernelL0 <<<grid2, block2>>>(_devPyramidImage[0]);	
+		pyramidKernelL0 <<<grid_first, block_first>>>(_devPyramidImage[0]);	
 		
 		cudaResourceDesc resDesc;
 		memset(&resDesc, 0, sizeof(resDesc));
@@ -550,30 +555,11 @@ namespace wb {
 		
 		cudaCreateTextureObject(&_texturePyramid[0], &resDesc, &texDesc, NULL);
 
-#ifdef WB_DEBUG
-		float* pyramidCopiedFromTxt;
-		cudaMalloc((void**)&pyramidCopiedFromTxt, _pyramid.canvasImageSize[0] * sizeof(float));
-		copyKernel <<<grid2, block2>>>(pyramidCopiedFromTxt, _texturePyramid[0], _pyramid.canvasWidth[0], _pyramid.canvasHeight[0]);
-		
-		cv::Mat mat(cv::Size(_pyramid.width[0], _pyramid.height[0]), CV_32FC1);
-		cudaMemcpy(mat.data, pyramidCopiedFromTxt, _pyramid.canvasImageSize[0] * sizeof(float), cudaMemcpyDeviceToHost);
-		cv::imshow("pyramid image from texture", mat);
-		cv::waitKey(WAIT_DELAY);
-
-		cv::Mat mat2(cv::Size(_pyramid.width[0], _pyramid.height[0]), CV_32FC1);
-		cudaMemcpy(mat2.data, _devPyramidImage[0], _pyramid.canvasImageSize[0] * sizeof(float), cudaMemcpyDeviceToHost);
-		cv::imshow("pyramid image from array", mat2);
-		cv::waitKey(WAIT_DELAY);
-		
-		cudaFree(pyramidCopiedFromTxt);		
-#endif
-	
-
-		dim3 grid3(128, 64, 1);
-		dim3 block3(32, 32, 1);
 		for (uint8 oct = 1; oct < WB_OCTAVES; ++oct)
 		{
-			pyramidKernelUni<<<grid3, block3>>>(_devPyramidImage[oct], _texturePyramid[oct-1], oct);			
+			dim3 block(32, 32, 1);
+			dim3 grid(_pyramid.canvasWidth[oct] / block.x, _pyramid.canvasHeight[oct] / block.y, 1);			
+			pyramidKernelUni<<<grid, block>>>(_devPyramidImage[oct], _texturePyramid[oct-1], oct);			
 
 			cudaResourceDesc resDescUni;
 			memset(&resDescUni, 0, sizeof(resDescUni));
@@ -608,8 +594,10 @@ namespace wb {
 		// should display black and white floating-point image
 		#ifdef WB_DEBUG
 		float* copied;
+		dim3 block_tmp(32, 32, 1);
+		dim3 grid_tmp(_pyramid.canvasWidth[WB_MAX_OCTAVE_INDEX] / block_tmp.x, _pyramid.canvasHeight[WB_MAX_OCTAVE_INDEX] / block_tmp.y, 1);
 		cudaMalloc((void**)&copied, _pyramid.canvasImageSize[WB_MAX_OCTAVE_INDEX] * sizeof(float));
-		copyKernel <<<grid3, block3>>>(copied, _texturePyramid[WB_MAX_OCTAVE_INDEX], _pyramid.canvasWidth[WB_MAX_OCTAVE_INDEX], _pyramid.canvasHeight[WB_MAX_OCTAVE_INDEX]);
+		copyKernel <<<grid_tmp, block_tmp>>>(copied, _texturePyramid[WB_MAX_OCTAVE_INDEX], _pyramid.canvasWidth[WB_MAX_OCTAVE_INDEX], _pyramid.canvasHeight[WB_MAX_OCTAVE_INDEX]);
 	
 
 		cv::Mat mat3(cv::Size(_pyramid.canvasWidth[WB_MAX_OCTAVE_INDEX], _pyramid.canvasHeight[WB_MAX_OCTAVE_INDEX]), CV_32FC1);
@@ -623,8 +611,8 @@ namespace wb {
 	void WaldboostDetector::run()
 	{
 		// allows max size 2048x1024
-		dim3 grid(128, 64, 1);
 		dim3 block(32, 32, 1);
+		dim3 grid(_pyramid.canvasWidth[WB_MAX_OCTAVE_INDEX] / block.x, _pyramid.canvasHeight[WB_MAX_OCTAVE_INDEX] / block.y, 1);
 
 		cudaMemset(_devDetectionCount, 0, sizeof(uint32));
 		
@@ -661,9 +649,38 @@ namespace wb {
 
 		#ifdef WB_DEBUG
 		for (uint32 i = 0; i < detectionCount; ++i)
-			cv::rectangle(tmp, cvPoint(detections[i].x, detections[i].y), cvPoint(detections[i].x + detections[i].width, detections[i].y + detections[i].height), CV_RGB(255, 255, 255), 1);
+		{
+			Detection d = detections[i];			
 
-		cv::imshow("detections", tmp);
+			uint8 x, y;
+			for (x = 0; x < WB_OCTAVES; ++x)
+			{
+				if (d.x < _pyramid.canvasWidth[x])
+				{
+					for (y = 0; y < WB_LEVELS_PER_OCTAVE; ++y)
+					{
+						if (d.y < _pyramid.octaves[x].images[y].offsetY + _pyramid.octaves[x].images[y].height)
+							break;
+					}
+					break;
+				}
+			}
+
+			float scale = pow(2, static_cast<float>(x) + 1.f / static_cast<float>(WB_LEVELS_PER_OCTAVE) * static_cast<float>(y));
+
+			d.width = static_cast<uint32>(static_cast<float>(d.width) * scale);
+			d.height = static_cast<uint32>(static_cast<float>(d.height) * scale);
+			
+			d.x -= (_pyramid.octaves[x].images[y].offsetX);
+			d.x = static_cast<uint32>(static_cast<float>(d.x) * scale);
+
+			d.y -= (_pyramid.octaves[x].images[y].offsetY);
+			d.y = static_cast<uint32>(static_cast<float>(d.y) * scale);
+
+			cv::rectangle(*_myImage, cvPoint(d.x, d.y), cvPoint(d.x + d.width, d.y + d.height), CV_RGB(0, 255, 0));
+		}
+
+		cv::imshow("detections", *_myImage);
 		cv::waitKey(WAIT_DELAY);
 		#endif
 	}

@@ -215,6 +215,7 @@ namespace wb {
 			uint32* _devDetectionCount;				///< pointer to the number of detections in device memory
 			SurvivorData* _devSurvivors;			///< pointer to device survivor memory
 			DetectorConfiguration _config;			///< detector configuration
+			cv::Mat* _myImage;
 
 			#ifdef WB_DEBUG
 			float _totalTime;			///< total time class runs
