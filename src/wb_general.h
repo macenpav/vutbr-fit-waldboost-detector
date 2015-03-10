@@ -19,7 +19,7 @@ typedef int int32;
 #define STAGE_COUNT 2048
 #define CLASSIFIER_WIDTH 26
 #define CLASSIFIER_HEIGHT 26
-#define BLOCK_SIZE 1024
+#define BLOCK_SIZE 2048
 #define BAD_RESPONSE -5000.f
 #define MAX_DETECTIONS 2048
 
@@ -37,7 +37,9 @@ typedef int int32;
 #define WB_LEVELS_PER_OCTAVE 4
 
 /** @brief Number of image sets sampled from 1:1 to 1:0.5 scale */
-#define WB_OCTAVES 2
+#define WB_OCTAVES 4
+
+#define WB_MAX_OCTAVE_INDEX 3
 
 /** @brief Comment to switch off WB_DEBUG mode */
 #define WB_DEBUG

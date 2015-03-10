@@ -34,7 +34,7 @@ namespace wb {
 	 * @return					Void.
 	 */
 	__device__
-		void detectSurvivorsInit(SurvivorData* survivors, uint16 endStage);
+	void detectSurvivorsInit(SurvivorData* survivors, cudaTextureObject_t inTexture, uint16 endStage);
 
 	/** @brief Survivor detection processing
 	 *
@@ -48,7 +48,7 @@ namespace wb {
 	 * @return					Void.
 	 */
 	__device__
-		void detectSurvivors(SurvivorData* survivors, uint16 startStage, uint16 endStage);
+	void detectSurvivors(SurvivorData* survivors, cudaTextureObject_t inTexture, uint16 startStage, uint16 endStage);
 
 	/** @brief Final detection processing
 	 *
@@ -63,7 +63,7 @@ namespace wb {
 	 * @return					Void.
 	 */
 	__device__
-		void detectDetections(SurvivorData* survivors, Detection* detections, uint32* detectionCount, uint16 startStage);
+	void detectDetections(SurvivorData* survivors, cudaTextureObject_t inTexture, Detection* detections, uint32* detectionCount, uint16 startStage);
 
 	/** @brief Evaluates stages for a given coordinate
 	 *
@@ -78,7 +78,7 @@ namespace wb {
 	 * @return				Detection success.
 	 */
 	__device__
-		bool eval(uint32 x, uint32 y, float* response, uint16 startStage, uint16 endStage);
+	bool eval(cudaTextureObject_t inTexture, uint32 x, uint32 y, float* response, uint16 startStage, uint16 endStage);
 
 	/** @brief Evaluates LBP for a given coordinate
 	 *
@@ -90,7 +90,7 @@ namespace wb {
 	 * @return				A response.
 	 */
 	__device__
-		float evalLBP(uint32 x, uint32 y, Stage* stage);
+	float evalLBP(cudaTextureObject_t inTexture, uint32 x, uint32 y, Stage* stage);
 
 	/** @brief Sums regions for LBP calculation.
 	 *
@@ -104,7 +104,7 @@ namespace wb {
 	 * @return			Void.
 	 */
 	__device__
-		void sumRegions(float* values, uint32 x, uint32 y, Stage* stage);
+	void sumRegions(cudaTextureObject_t inTexture, float* values, uint32 x, uint32 y, Stage* stage);
 
 	/** @brief Preprocessing kernel.
 	 *
@@ -116,7 +116,7 @@ namespace wb {
 	 * @return			Void.
 	 */
 	__global__
-		void preprocessKernel(float* outData, uint8* inData);
+	void preprocessKernel(float* outData, uint8* inData);
 
 	/** @brief Pyramidal image kernel.
 	*
@@ -131,10 +131,6 @@ namespace wb {
 
 	/** @brief Black and white floating=point texture. */
 	texture<float, 2> textureWorkingImage;
-
-	/** @brief Pyramid image texture. */
-	texture<float, 2> textureImagePyramid0;
-	texture<float, 2> textureImagePyramid1;
 
 	/** @brief Detector alphas saved as texture. */
 	texture<float> textureAlphas;
@@ -211,8 +207,9 @@ namespace wb {
 			Pyramid _pyramid;						///< pyramid image information
 
 			uint8* _devOriginalImage;				///< pointer to device original image memory
-			float* _devWorkingImage;				///< pointer to device preprocessed image memory
-			float* _devPyramidImage0, *_devPyramidImage1;	///< pointers to device pyramid image memory
+			float* _devWorkingImage;				///< pointer to device preprocessed image memory			
+			float* _devPyramidImage[WB_OCTAVES];
+			cudaTextureObject_t _texturePyramid[WB_OCTAVES];
 			float* _devAlphaBuffer;					///< pointer to device alpha memory
 			Detection* _devDetections;				///< pointer to the detections in device memory
 			uint32* _devDetectionCount;				///< pointer to the number of detections in device memory

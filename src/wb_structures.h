@@ -44,8 +44,8 @@ namespace wb {
 	};
 
 	struct Pyramid {
-		uint32 width, height, imageSize;
-		uint32 widthL1, heightL1, imageSizeL1;
+		uint32 width[WB_OCTAVES], height[WB_OCTAVES], imageSize[WB_OCTAVES];
+		uint32 canvasWidth[WB_OCTAVES], canvasHeight[WB_OCTAVES], canvasImageSize[WB_OCTAVES];
 		Octave octaves[WB_OCTAVES];
 	};
 
