@@ -34,7 +34,7 @@ namespace wb {
 	 * @return					Void.
 	 */
 	__device__
-	void detectSurvivorsInit(SurvivorData* survivors, cudaTextureObject_t inTexture, uint16 endStage);
+	void detectSurvivorsInit(SurvivorData* survivors, uint16 endStage);
 
 	/** @brief Survivor detection processing
 	 *
@@ -48,7 +48,7 @@ namespace wb {
 	 * @return					Void.
 	 */
 	__device__
-	void detectSurvivors(SurvivorData* survivors, cudaTextureObject_t inTexture, uint16 startStage, uint16 endStage);
+	void detectSurvivors(SurvivorData* survivors,uint16 startStage, uint16 endStage);
 
 	/** @brief Final detection processing
 	 *
@@ -63,7 +63,7 @@ namespace wb {
 	 * @return					Void.
 	 */
 	__device__
-	void detectDetections(SurvivorData* survivors, cudaTextureObject_t inTexture, Detection* detections, uint32* detectionCount, uint16 startStage);
+	void detectDetections(SurvivorData* survivors, Detection* detections, uint32* detectionCount, uint16 startStage);
 
 	/** @brief Evaluates stages for a given coordinate
 	 *
@@ -78,7 +78,7 @@ namespace wb {
 	 * @return				Detection success.
 	 */
 	__device__
-	bool eval(cudaTextureObject_t inTexture, uint32 x, uint32 y, float* response, uint16 startStage, uint16 endStage);
+	bool eval(uint32 x, uint32 y, float* response, uint16 startStage, uint16 endStage);
 
 	/** @brief Evaluates LBP for a given coordinate
 	 *
@@ -90,7 +90,7 @@ namespace wb {
 	 * @return				A response.
 	 */
 	__device__
-	float evalLBP(cudaTextureObject_t inTexture, uint32 x, uint32 y, Stage* stage);
+	float evalLBP(uint32 x, uint32 y, Stage* stage);
 
 	/** @brief Sums regions for LBP calculation.
 	 *
@@ -104,7 +104,7 @@ namespace wb {
 	 * @return			Void.
 	 */
 	__device__
-	void sumRegions(cudaTextureObject_t inTexture, float* values, uint32 x, uint32 y, Stage* stage);
+	void sumRegions(float* values, uint32 x, uint32 y, Stage* stage);
 
 	/** @brief Preprocessing kernel.
 	 *
@@ -127,10 +127,34 @@ namespace wb {
 	* @return			Void.
 	*/
 	__global__
-		void pyramidKernel(float* outData);
+	void pyramidKernel(float* outData);
 
-	/** @brief Black and white floating=point texture. */
+	__global__ 
+	void firstPyramidKernel(float* outData, float* finalData);
+
+	__global__ 
+	void pyramidFromPyramidKernel(float* outData, float* finalData, cudaTextureObject_t inData, uint8 level);
+
+	/** @brief Copies image from a statically set texture. */
+	__global__
+	void copyKernel(float* out, uint32 width, uint32 height);
+
+	/** @brief Copies image from a dynamically set texture. */
+	__global__
+	void copyKernel(float* out, cudaTextureObject_t obj, uint32 width, uint32 height);
+
+	/** @brief Clears an image.
+	 * 
+	 * Sets all floating-point pixels to 0.
+	 */
+	__global__
+	void clearKernel(float* data, uint32 width, uint32 height);
+
+	/** @brief Black and white floating-point texture. */
 	texture<float, 2> textureWorkingImage;
+
+	/** @brief Final texture used for detection */
+	texture<float, 2> texturePyramidImage;
 
 	/** @brief Detector alphas saved as texture. */
 	texture<float> textureAlphas;
@@ -160,16 +184,6 @@ namespace wb {
 			 */
 			void init(cv::Mat* image);
 
-			/** @brief Sets kernel configuration. 
-			 *
-			 * Sets the configuration such as how many blocks and threads to use, how
-			 * they are organized and so on for easier detector manipulation. 
-			 *
-			 * @param config	Passed configuration.
-			 * @returns			Void.
-			 */
-			void setAttributes(DetectorConfiguration const& config);
-
 			/** @brief Passes an image to the detector. 
 			 *
 			 * Passes image to the detector and does the preprocessing. This means, it
@@ -196,33 +210,104 @@ namespace wb {
 			 */
 			void free();	
 
+			/** @brief Sets pyramid generation mode. */
+			void setPyGenMode(PyramidGenModes const& mode) { _pyGenMode = mode; } 
+
+			/** @brief Sets pyramid type. */
+			void setPyType(PyramidTypes const& type) { _pyType = type; }
+
+			/** @brief Sets the kernel block size. */
+			void setBlockSize(uint32 const& x = 32, uint32 const& y = 32, uint32 const& z = 1){ _block = dim3(x, y, z); }
+
+			/** @brief Passes run parameters to the detector. */
+			void setRunParameters(uint32 const& param) { _opt = param; }
+
 		private:
-			/** @brief Precalculates images sizes, offsets, and so on ... 
+			/** @brief Precalculates image sizes and offsets horizontally.
+			 *
+			 * Precalculates pyramids in a horizontal manner, that means every pyramid next to each other.
+			 *
+			 * @return Void.
+			 * @todo fix crash
+			 */
+			void _precalcHorizontalPyramid();
+
+			/** @brief Precalculates image sizes and offsets in a user defined manner.
+			 *
+			 * Precalculates pyramids in a user defined manner. Currently 1st octave is on the left, 2nd
+			 * top-right, 3rd bottom-left (right from 1st), 4th bottom-right.
 			 *
 			 * @return Void.
 			 */
-			void _precalcPyramid();
+			void _precalc4x8Pyramid();
 
-			ImageInfo _info;						///< image information
-			Pyramid _pyramid;						///< pyramid image information
+			/** @brief Wrapper around pyramid kernels. 
+			 *
+			 * @return Void. 
+			 */
+			void _pyramidKernelWrapper();
 
-			uint8* _devOriginalImage;				///< pointer to device original image memory
-			float* _devWorkingImage;				///< pointer to device preprocessed image memory			
-			float* _devPyramidImage[WB_OCTAVES];
-			cudaTextureObject_t _texturePyramid[WB_OCTAVES];
-			float* _devAlphaBuffer;					///< pointer to device alpha memory
-			Detection* _devDetections;				///< pointer to the detections in device memory
-			uint32* _devDetectionCount;				///< pointer to the number of detections in device memory
-			SurvivorData* _devSurvivors;			///< pointer to device survivor memory
-			DetectorConfiguration _config;			///< detector configuration
-			cv::Mat* _myImage;
+			/** @brief Single texture pyramid generation.
+			 *
+			 * Pyramid is generated by creating a single texture canvas, generating the first octave from 
+			 * the original preprocessed image and then creating downsapled pyramids from the same texture, 
+			 * which leads reads and writes from the same texture. Every octave needs only its width x height
+			 * number of threads, that means, that every octave several threads (and blocks) return.
+			 *
+			 * @return Void.
+			 */
+			void _pyramidGenSingleTexture();
 
-			#ifdef WB_DEBUG
-			float _totalTime;			///< total time class runs
-			uint32 _frameCount;			///< number of frames it processed
-			#endif
+			/** @brief Bindless texture pyramid generation. 
+			 *
+			 * Pyramid is generated using multiple textures, always downsampling from a previously generated textury.
+			 * This leads to reads only from textures. While a new texture is generated, the result is simultaneously
+			 * copied to the final texture. Disadvantage of this method is initialization for every texture and
+			 * kernel run per octave.
+			 *
+			 * @return Void.
+			 */
+			void _pyramidGenBindlessTexture();
+			
+			/** @brief Clears timers.
+			 *
+			 * @return Void.
+			 */
+			void _initTimers();
 
-				
+			/** @brief Recalcs detections. 
+			 *
+			 * Detections are detected on an image containing lots of downsampled images (pyramids). Here we map detected
+			 * positions to the original image.
+			 *
+			 * @return Void.
+			 */
+			void _processDetections();
+
+
+			ImageInfo			_info;				///< image information
+
+			Pyramid				_pyramid;			///< pyramid image information
+			PyramidGenModes		_pyGenMode;			///< pyramid generation mode
+			PyramidTypes		_pyType;			///< pyramid type (look)
+			uint32				_opt;				///< run options/parameters
+			float				_timers[MAX_TIMERS];///< timers
+			dim3				_block;				///< kernel block size
+
+			uint8*				_devOriginalImage;					///< pointer to device original image memory
+			float*				_devWorkingImage;					///< pointer to device preprocessed image memory					
+
+			float*				_devPyramidData;					///< pointer to device pyramid memory (used by single texture)
+
+			float*				_devPyramidImage[WB_OCTAVES];		///< pointer to device pyramid memory (used by bindless texture)	
+			cudaTextureObject_t	_texturePyramidObjects[WB_OCTAVES]; /// cuda texture objects (used by bindless texture)
+
+			float*				_devAlphaBuffer;		///< pointer to device alpha memory
+			Detection*			_devDetections;			///< pointer to the detections in device memory
+			uint32*				_devDetectionCount;		///< pointer to the number of detections in device memory
+			SurvivorData*		_devSurvivors;			///< pointer to device survivor memory			
+			cv::Mat*			_myImage;				///< pointer to the original processed image
+
 	};
 }
 

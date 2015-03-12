@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['stage',['Stage',['../structwb_1_1_stage.html',1,'wb']]],
-  ['survivordata',['SurvivorData',['../structwb_1_1_survivor_data.html',1,'wb']]]
+  ['pyramid',['Pyramid',['../structwb_1_1_pyramid.html',1,'wb']]],
+  ['pyramidimage',['PyramidImage',['../structwb_1_1_pyramid_image.html',1,'wb']]]
 ];

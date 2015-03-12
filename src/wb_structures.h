@@ -33,19 +33,20 @@ namespace wb {
 		uint8	channels;
 	};
 
-	struct ImageData {
+	struct PyramidImage {
 		uint32 width, height;
-		uint32 offset, offsetX, offsetY;
+		uint32 offsetX, offsetY;
 		float scale;
 	};
 
 	struct Octave {
-		ImageData images[WB_LEVELS_PER_OCTAVE];
+		uint32 width, height, imageSize;
+		uint32 offsetX, offsetY;
+		PyramidImage images[WB_LEVELS_PER_OCTAVE];
 	};
 
 	struct Pyramid {
-		uint32 width[WB_OCTAVES], height[WB_OCTAVES], imageSize[WB_OCTAVES];
-		uint32 canvasWidth[WB_OCTAVES], canvasHeight[WB_OCTAVES], canvasImageSize[WB_OCTAVES];
+		uint32 canvasWidth, canvasHeight, canvasImageSize;		
 		Octave octaves[WB_OCTAVES];
 	};
 
@@ -53,10 +54,6 @@ namespace wb {
 		uint32 x, y;
 		float response;
 	};
-
-	struct DetectorConfiguration {
-		dim3 kernelConfig[MAX_KERNEL_CONFIG];
-	};		
 }
 
 #endif

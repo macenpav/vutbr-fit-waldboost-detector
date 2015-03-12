@@ -147,17 +147,34 @@ Functions</h2></td></tr>
 <tr class="memitem:acddbd5db2d930e106354881243af9269"><td class="memItemLeft" align="right" valign="top">__global__ void&#160;</td><td class="memItemRight" valign="bottom"><b>wb::pyramidKernel</b> (float *outData)</td></tr>
 <tr class="memdesc:acddbd5db2d930e106354881243af9269"><td class="mdescLeft">&#160;</td><td class="mdescRight">Pyramidal image kernel.  <a href="#acddbd5db2d930e106354881243af9269">More...</a><br /></td></tr>
 <tr class="separator:acddbd5db2d930e106354881243af9269"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a634970793049c2d02e22ba72fb4b645d"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a634970793049c2d02e22ba72fb4b645d"></a>
+__global__ void&#160;</td><td class="memItemRight" valign="bottom"><b>wb::firstPyramidKernel</b> (float *outData, float *finalData)</td></tr>
+<tr class="separator:a634970793049c2d02e22ba72fb4b645d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a045aa2c9f4cfc2ac5aaf0253b4c3c992"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a045aa2c9f4cfc2ac5aaf0253b4c3c992"></a>
+__global__ void&#160;</td><td class="memItemRight" valign="bottom"><b>wb::pyramidFromPyramidKernel</b> (float *outData, float *finalData, cudaTextureObject_t inData, uint8 level)</td></tr>
+<tr class="separator:a045aa2c9f4cfc2ac5aaf0253b4c3c992"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4f403a3d5608ddd27912e2547c78c383"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a4f403a3d5608ddd27912e2547c78c383"></a>
+__global__ void&#160;</td><td class="memItemRight" valign="bottom"><b>wb::copyKernel</b> (float *out, uint32 width, uint32 height)</td></tr>
+<tr class="memdesc:a4f403a3d5608ddd27912e2547c78c383"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies image from a statically set texture. <br /></td></tr>
+<tr class="separator:a4f403a3d5608ddd27912e2547c78c383"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8af20943d4cf563340cefd49362ffb6f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a8af20943d4cf563340cefd49362ffb6f"></a>
+__global__ void&#160;</td><td class="memItemRight" valign="bottom"><b>wb::copyKernel</b> (float *out, cudaTextureObject_t obj, uint32 width, uint32 height)</td></tr>
+<tr class="memdesc:a8af20943d4cf563340cefd49362ffb6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Copies image from a dynamically set texture. <br /></td></tr>
+<tr class="separator:a8af20943d4cf563340cefd49362ffb6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5b8870cfc72597884231f8e007732d0d"><td class="memItemLeft" align="right" valign="top">__global__ void&#160;</td><td class="memItemRight" valign="bottom"><b>wb::clearKernel</b> (float *data, uint32 width, uint32 height)</td></tr>
+<tr class="memdesc:a5b8870cfc72597884231f8e007732d0d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Clears an image.  <a href="#a5b8870cfc72597884231f8e007732d0d">More...</a><br /></td></tr>
+<tr class="separator:a5b8870cfc72597884231f8e007732d0d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="var-members"></a>
 Variables</h2></td></tr>
-<tr class="memitem:a184ba9e796414dc9a5fd76fb31426088"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a184ba9e796414dc9a5fd76fb31426088"></a>
+<tr class="memitem:a706fcad978d6a1e235538c75b3195e5f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a706fcad978d6a1e235538c75b3195e5f"></a>
 texture&lt; float, 2 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>wb::textureWorkingImage</b></td></tr>
-<tr class="memdesc:a184ba9e796414dc9a5fd76fb31426088"><td class="mdescLeft">&#160;</td><td class="mdescRight">Black and white floating=point texture. <br /></td></tr>
-<tr class="separator:a184ba9e796414dc9a5fd76fb31426088"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a03418903f07529b4c3dbd3539e621a76"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a03418903f07529b4c3dbd3539e621a76"></a>
-texture&lt; float, 2 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>wb::textureImagePyramid</b></td></tr>
-<tr class="memdesc:a03418903f07529b4c3dbd3539e621a76"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="structwb_1_1_pyramid.html">Pyramid</a> image texture. <br /></td></tr>
-<tr class="separator:a03418903f07529b4c3dbd3539e621a76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memdesc:a706fcad978d6a1e235538c75b3195e5f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Black and white floating-point texture. <br /></td></tr>
+<tr class="separator:a706fcad978d6a1e235538c75b3195e5f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1e29a0eeaf25d26712271cd718ed3c1b"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a1e29a0eeaf25d26712271cd718ed3c1b"></a>
+texture&lt; float, 2 &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>wb::texturePyramidImage</b></td></tr>
+<tr class="memdesc:a1e29a0eeaf25d26712271cd718ed3c1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Final texture used for detection. <br /></td></tr>
+<tr class="separator:a1e29a0eeaf25d26712271cd718ed3c1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83e629d3913c664541023ad19e8f7c0f"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a83e629d3913c664541023ad19e8f7c0f"></a>
 texture&lt; float &gt;&#160;</td><td class="memItemRight" valign="bottom"><b>wb::textureAlphas</b></td></tr>
 <tr class="memdesc:a83e629d3913c664541023ad19e8f7c0f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Detector alphas saved as texture. <br /></td></tr>
@@ -182,7 +199,7 @@ __constant__ Stage&#160;</td><td class="memItemRight" valign="bottom"><b>wb::sta
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed Mar 4 2015 17:16:10 for Waldboost detector using LBP by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Thu Mar 12 2015 12:44:10 for Waldboost detector using LBP by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

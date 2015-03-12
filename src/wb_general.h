@@ -1,6 +1,8 @@
 #ifndef H_GENERAL
 #define H_GENERAL
 
+#include <string>
+
 typedef unsigned char uint8;
 typedef unsigned short uint16;
 typedef unsigned int uint32;
@@ -9,23 +11,33 @@ typedef char int8;
 typedef short int16;
 typedef int int32;
 
-/** @brief Delay in ms between displaying frames */
-#define WAIT_DELAY 1
-
-#define MAX_PYRAMID_WIDTH 320
-#define PYRAMID_IMAGE_COUNT 8
 #define FINAL_THRESHOLD 0.f
 #define ALPHA_COUNT 256
 #define STAGE_COUNT 2048
-#define CLASSIFIER_WIDTH 26
-#define CLASSIFIER_HEIGHT 26
-#define BLOCK_SIZE 2048
-#define BAD_RESPONSE -5000.f
-#define MAX_DETECTIONS 2048
+
+#define BLOCK_SIZE 1024
+
+/** @brief Discarded sample. */
+#define WB_BAD_RESPONSE -5000.f
+
+/** @brief Delay in ms between displaying frames */
+#define WB_WAIT_DELAY 1
+
+/** @brief Max. number of detections per frame. 
+ *
+ * Allocates memory and cannot overflow, but can be kept lower to save GPU memory.
+ */
+#define WB_MAX_DETECTIONS 512
+
+/** @brief Classifier window width. */
+#define WB_CLASSIFIER_WIDTH 26
+
+/** @brief Classifier window height. */
+#define WB_CLASSIFIER_HEIGHT 26
 
 /** @brief Downsampling scaling factor. 
  *
- * 1.1892071f = 2^(1/4)
+ * 1.09050773f = 2^(1/8)
  * Should be 2^(1/WB_LEVELS_PER_OCTAVE), because the number of levels says
  * how many downsampled images are created before an image of 1/2 width/height
  * is created. Smaller number would generate bigger images, bigger number
@@ -42,7 +54,7 @@ typedef int int32;
 /** @brief last octave index, should be WB_OCTAVES-1 */
 #define WB_MAX_OCTAVE_INDEX 3
 
-/** @brief Comment to switch off WB_DEBUG mode */
-#define WB_DEBUG
+const std::string LIBNAME = "waldboost-detector";
+const std::string LIBHEADER = "[" + LIBNAME + "]: ";
 
 #endif

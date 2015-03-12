@@ -14,8 +14,6 @@
 #include "wb_general.h"
 #include "wb_structures.h"
 
-const std::string LIBNAME = "waldboost-detector";
-
 /**
 * @brief Processes an image dataset - a text file with a list of images.
 *
@@ -59,7 +57,7 @@ bool processImageDataset(std::string filename, uint32 param)
 		if (param & wb::OPT_VISUAL_OUTPUT)
 		{
 			cv::imshow(LIBNAME, image);
-			cv::waitKey(WAIT_DELAY);
+			cv::waitKey(WB_WAIT_DELAY);
 		}
 
 		detector.free();
@@ -87,7 +85,12 @@ bool processVideo(std::string filename, uint32 param)
 	if (image.empty())
 		return false;
 
-	wb::WaldboostDetector detector;
+	wb::WaldboostDetector detector;	
+	detector.setBlockSize(32, 32);
+	detector.setPyGenMode(wb::PYGEN_SINGLE_TEXTURE);
+	detector.setPyType(wb::PYTYPE_OPTIMIZED);
+	detector.setRunParameters(param);
+
 	detector.init(&image);
 
 	if (param & wb::OPT_VERBOSE)	
@@ -118,7 +121,7 @@ bool processVideo(std::string filename, uint32 param)
 		if (param & wb::OPT_VISUAL_OUTPUT)
 		{
 			cv::imshow(LIBNAME, image);
-			cv::waitKey(WAIT_DELAY);
+			cv::waitKey(WB_WAIT_DELAY);
 		}
 		auto end_time = std::chrono::high_resolution_clock::now();
 		std::cout << "TOTAL TIME: " << std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " FPS: " << 1000 / std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time).count() << " ms" << std::endl;
@@ -139,7 +142,7 @@ bool processVideo(std::string filename, uint32 param)
 * @param inputType	type of input
 * @param param		run parameters
 */
-bool process(std::string filename, wb::WBInputTypes inputType, uint32 param)
+bool process(std::string filename, wb::InputTypes inputType, uint32 param)
 {	
 	switch (inputType)
 	{
@@ -170,7 +173,7 @@ bool process(std::string filename, wb::WBInputTypes inputType, uint32 param)
 int main(int argc, char** argv)
 {
 	std::string filename;
-	wb::WBInputTypes mode;
+	wb::InputTypes mode;
 	for (int i = 1; i < argc; ++i)
 	{
 		if (std::string(argv[i]) == "-id" && i + 1 < argc) {

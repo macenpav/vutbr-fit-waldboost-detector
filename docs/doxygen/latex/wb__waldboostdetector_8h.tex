@@ -44,16 +44,30 @@ class \hyperlink{classwb_1_1_waldboost_detector}{wb\+::\+Waldboost\+Detector}
 \+\_\+\+\_\+global\+\_\+\+\_\+ void {\bfseries wb\+::preprocess\+Kernel} (float $\ast$out\+Data, uint8 $\ast$in\+Data)
 \begin{DoxyCompactList}\small\item\em Preprocessing kernel. \end{DoxyCompactList}\item 
 \+\_\+\+\_\+global\+\_\+\+\_\+ void {\bfseries wb\+::pyramid\+Kernel} (float $\ast$out\+Data)
-\begin{DoxyCompactList}\small\item\em Pyramidal image kernel. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\begin{DoxyCompactList}\small\item\em Pyramidal image kernel. \end{DoxyCompactList}\item 
+\hypertarget{namespacewb_a634970793049c2d02e22ba72fb4b645d}{}\+\_\+\+\_\+global\+\_\+\+\_\+ void {\bfseries wb\+::first\+Pyramid\+Kernel} (float $\ast$out\+Data, float $\ast$final\+Data)\label{namespacewb_a634970793049c2d02e22ba72fb4b645d}
+
+\item 
+\hypertarget{namespacewb_a045aa2c9f4cfc2ac5aaf0253b4c3c992}{}\+\_\+\+\_\+global\+\_\+\+\_\+ void {\bfseries wb\+::pyramid\+From\+Pyramid\+Kernel} (float $\ast$out\+Data, float $\ast$final\+Data, cuda\+Texture\+Object\+\_\+t in\+Data, uint8 level)\label{namespacewb_a045aa2c9f4cfc2ac5aaf0253b4c3c992}
+
+\item 
+\hypertarget{namespacewb_a4f403a3d5608ddd27912e2547c78c383}{}\+\_\+\+\_\+global\+\_\+\+\_\+ void {\bfseries wb\+::copy\+Kernel} (float $\ast$out, uint32 width, uint32 height)\label{namespacewb_a4f403a3d5608ddd27912e2547c78c383}
+
+\begin{DoxyCompactList}\small\item\em Copies image from a statically set texture. \end{DoxyCompactList}\item 
+\hypertarget{namespacewb_a8af20943d4cf563340cefd49362ffb6f}{}\+\_\+\+\_\+global\+\_\+\+\_\+ void {\bfseries wb\+::copy\+Kernel} (float $\ast$out, cuda\+Texture\+Object\+\_\+t obj, uint32 width, uint32 height)\label{namespacewb_a8af20943d4cf563340cefd49362ffb6f}
+
+\begin{DoxyCompactList}\small\item\em Copies image from a dynamically set texture. \end{DoxyCompactList}\item 
+\+\_\+\+\_\+global\+\_\+\+\_\+ void {\bfseries wb\+::clear\+Kernel} (float $\ast$data, uint32 width, uint32 height)
+\begin{DoxyCompactList}\small\item\em Clears an image. \end{DoxyCompactList}\end{DoxyCompactItemize}
 \subsection*{Variables}
 \begin{DoxyCompactItemize}
 \item 
-\hypertarget{namespacewb_a184ba9e796414dc9a5fd76fb31426088}{}texture$<$ float, 2 $>$ {\bfseries wb\+::texture\+Working\+Image}\label{namespacewb_a184ba9e796414dc9a5fd76fb31426088}
+\hypertarget{namespacewb_a706fcad978d6a1e235538c75b3195e5f}{}texture$<$ float, 2 $>$ {\bfseries wb\+::texture\+Working\+Image}\label{namespacewb_a706fcad978d6a1e235538c75b3195e5f}
 
-\begin{DoxyCompactList}\small\item\em Black and white floating=point texture. \end{DoxyCompactList}\item 
-\hypertarget{namespacewb_a03418903f07529b4c3dbd3539e621a76}{}texture$<$ float, 2 $>$ {\bfseries wb\+::texture\+Image\+Pyramid}\label{namespacewb_a03418903f07529b4c3dbd3539e621a76}
+\begin{DoxyCompactList}\small\item\em Black and white floating-\/point texture. \end{DoxyCompactList}\item 
+\hypertarget{namespacewb_a1e29a0eeaf25d26712271cd718ed3c1b}{}texture$<$ float, 2 $>$ {\bfseries wb\+::texture\+Pyramid\+Image}\label{namespacewb_a1e29a0eeaf25d26712271cd718ed3c1b}
 
-\begin{DoxyCompactList}\small\item\em \hyperlink{structwb_1_1_pyramid}{Pyramid} image texture. \end{DoxyCompactList}\item 
+\begin{DoxyCompactList}\small\item\em Final texture used for detection. \end{DoxyCompactList}\item 
 \hypertarget{namespacewb_a83e629d3913c664541023ad19e8f7c0f}{}texture$<$ float $>$ {\bfseries wb\+::texture\+Alphas}\label{namespacewb_a83e629d3913c664541023ad19e8f7c0f}
 
 \begin{DoxyCompactList}\small\item\em Detector alphas saved as texture. \end{DoxyCompactList}\item 

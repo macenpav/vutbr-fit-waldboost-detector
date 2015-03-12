@@ -1,0 +1,57 @@
+\hypertarget{wb__enums_8h}{}\section{C\+:/dev/repositories/vutbr-\/fit-\/waldboost-\/detector/src/wb\+\_\+enums.h File Reference}
+\label{wb__enums_8h}\index{C\+:/dev/repositories/vutbr-\/fit-\/waldboost-\/detector/src/wb\+\_\+enums.\+h@{C\+:/dev/repositories/vutbr-\/fit-\/waldboost-\/detector/src/wb\+\_\+enums.\+h}}
+
+
+Waldboost detector enums.  
+
+
+\subsection*{Enumerations}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{namespacewb_a6590cc1302a1a93f655194db403a5b90}{}enum {\bfseries Input\+Types} \{ {\bfseries wb\+::\+I\+N\+P\+U\+T\+\_\+\+I\+M\+A\+G\+E\+\_\+\+D\+A\+T\+A\+S\+E\+T} = 1, 
+{\bfseries wb\+::\+I\+N\+P\+U\+T\+\_\+\+V\+I\+D\+E\+O}
+ \}\label{namespacewb_a6590cc1302a1a93f655194db403a5b90}
+
+\begin{DoxyCompactList}\small\item\em Allowed input types for a sample program. \end{DoxyCompactList}\item 
+\hypertarget{namespacewb_a65382ccb78308a4ad85da4790f7d5468}{}enum {\bfseries Run\+Options} \{ \\*
+{\bfseries wb\+::\+O\+P\+T\+\_\+\+V\+I\+S\+U\+A\+L\+\_\+\+O\+U\+T\+P\+U\+T} = 0x00000001, 
+{\bfseries wb\+::\+O\+P\+T\+\_\+\+V\+E\+R\+B\+O\+S\+E} = 0x00000002, 
+{\bfseries wb\+::\+O\+P\+T\+\_\+\+T\+I\+M\+E\+R} = 0x00000004, 
+{\bfseries wb\+::\+O\+P\+T\+\_\+\+V\+I\+S\+U\+A\+L\+\_\+\+D\+E\+B\+U\+G} = 0x00000008, 
+\\*
+{\bfseries wb\+::\+O\+P\+T\+\_\+\+A\+L\+L} = 0x\+F\+F\+F\+F\+F\+F\+F\+F
+ \}\label{namespacewb_a65382ccb78308a4ad85da4790f7d5468}
+
+\begin{DoxyCompactList}\small\item\em Run option parameters. \end{DoxyCompactList}\item 
+\hypertarget{namespacewb_a55869d8e9f5aac025baefd239f4810c9}{}enum {\bfseries Pyramid\+Gen\+Modes} \{ {\bfseries wb\+::\+P\+Y\+G\+E\+N\+\_\+\+S\+I\+N\+G\+L\+E\+\_\+\+T\+E\+X\+T\+U\+R\+E}, 
+{\bfseries wb\+::\+P\+Y\+G\+E\+N\+\_\+\+B\+I\+N\+D\+L\+E\+S\+S\+\_\+\+T\+E\+X\+T\+U\+R\+E}, 
+{\bfseries M\+A\+X\+\_\+\+P\+Y\+G\+E\+N\+\_\+\+M\+O\+D\+E\+S}
+ \}\label{namespacewb_a55869d8e9f5aac025baefd239f4810c9}
+
+\begin{DoxyCompactList}\small\item\em How the pyramid is generated. \end{DoxyCompactList}\item 
+\hypertarget{namespacewb_abe36a0d83dbbeb2f42996558b7e30e21}{}enum {\bfseries Pyramid\+Types} \{ {\bfseries wb\+::\+P\+Y\+T\+Y\+P\+E\+\_\+\+O\+P\+T\+I\+M\+I\+Z\+E\+D}, 
+{\bfseries wb\+::\+P\+Y\+T\+Y\+P\+E\+\_\+\+H\+O\+R\+I\+Z\+O\+N\+A\+L}, 
+{\bfseries M\+A\+X\+\_\+\+P\+Y\+T\+Y\+P\+E\+S}
+ \}\label{namespacewb_abe36a0d83dbbeb2f42996558b7e30e21}
+
+\begin{DoxyCompactList}\small\item\em How the pyramid image will look like. \end{DoxyCompactList}\item 
+\hypertarget{namespacewb_a298ee80e47712a323a6294419a2682d2}{}enum {\bfseries Timers} \{ \\*
+{\bfseries wb\+::\+T\+I\+M\+E\+R\+\_\+\+P\+Y\+R\+A\+M\+I\+D}, 
+{\bfseries wb\+::\+T\+I\+M\+E\+R\+\_\+\+D\+E\+T\+E\+C\+T\+I\+O\+N}, 
+{\bfseries wb\+::\+T\+I\+M\+E\+R\+\_\+\+P\+R\+E\+P\+R\+O\+C\+E\+S\+S}, 
+{\bfseries wb\+::\+T\+I\+M\+E\+R\+\_\+\+T\+O\+T\+A\+L}, 
+\\*
+{\bfseries M\+A\+X\+\_\+\+T\+I\+M\+E\+R\+S}
+ \}\label{namespacewb_a298ee80e47712a323a6294419a2682d2}
+
+\begin{DoxyCompactList}\small\item\em Timers for separate measurements. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Waldboost detector enums. 
+
+All enums are held hear. That means run parameters, pyramid generation modes and other such options. When implementing a way how to generate a pyramid a new mode should be defined here.
+
+\begin{DoxyAuthor}{Author}
+Pavel Macenauer \href{mailto:macenauer.p@gmail.com}{\tt macenauer.\+p@gmail.\+com} 
+\end{DoxyAuthor}

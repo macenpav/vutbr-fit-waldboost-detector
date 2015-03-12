@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['pyramid',['Pyramid',['../structwb_1_1_pyramid.html',1,'wb']]]
+  ['octave',['Octave',['../structwb_1_1_octave.html',1,'wb']]]
 ];
