@@ -63,6 +63,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow2" class="tabs2">
     <ul class="tablist">
       <li><a href="files.html"><span>File&#160;List</span></a></li>
+      <li><a href="globals.html"><span>File&#160;Members</span></a></li>
     </ul>
   </div>
 <!-- window showing the filter options -->
@@ -89,76 +90,80 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">wb_structures.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;<span class="preprocessor">#ifndef H_WB_STRUCTURES</span></div>
-<div class="line"><a name="l00002"></a><span class="lineno">    2</span>&#160;<span class="preprocessor">#define H_WB_STRUCTURES</span></div>
-<div class="line"><a name="l00003"></a><span class="lineno">    3</span>&#160;</div>
-<div class="line"><a name="l00004"></a><span class="lineno">    4</span>&#160;<span class="preprocessor">#include &quot;wb_general.h&quot;</span></div>
-<div class="line"><a name="l00005"></a><span class="lineno">    5</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="wb__enums_8h.html">wb_enums.h</a>&quot;</span></div>
-<div class="line"><a name="l00006"></a><span class="lineno">    6</span>&#160;</div>
-<div class="line"><a name="l00007"></a><span class="lineno">    7</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacewb.html">wb</a> {</div>
-<div class="line"><a name="l00008"></a><span class="lineno">    8</span>&#160;</div>
-<div class="line"><a name="l00010"></a><span class="lineno"><a class="line" href="structwb_1_1_stage.html">   10</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structwb_1_1_stage.html">Stage</a> {</div>
-<div class="line"><a name="l00012"></a><span class="lineno"><a class="line" href="structwb_1_1_stage.html#af56278d9aea7d089dabc36cf728b7a21">   12</a></span>&#160;        uint8 <a class="code" href="structwb_1_1_stage.html#af56278d9aea7d089dabc36cf728b7a21">x</a>, y;</div>
-<div class="line"><a name="l00014"></a><span class="lineno"><a class="line" href="structwb_1_1_stage.html#aadc51276d2281146c172125c310b6c98">   14</a></span>&#160;        uint8 <a class="code" href="structwb_1_1_stage.html#aadc51276d2281146c172125c310b6c98">width</a>, height;</div>
-<div class="line"><a name="l00016"></a><span class="lineno"><a class="line" href="structwb_1_1_stage.html#a0068e63c0f28d015c62a3e1032602bcd">   16</a></span>&#160;        <span class="keywordtype">float</span> <a class="code" href="structwb_1_1_stage.html#a0068e63c0f28d015c62a3e1032602bcd">thetaB</a>;</div>
-<div class="line"><a name="l00018"></a><span class="lineno"><a class="line" href="structwb_1_1_stage.html#a31da72c77e291c77751a5d457ca4a434">   18</a></span>&#160;        uint32 <a class="code" href="structwb_1_1_stage.html#a31da72c77e291c77751a5d457ca4a434">alphaOffset</a>;</div>
-<div class="line"><a name="l00019"></a><span class="lineno">   19</span>&#160;    };</div>
-<div class="line"><a name="l00020"></a><span class="lineno">   20</span>&#160;</div>
-<div class="line"><a name="l00022"></a><span class="lineno"><a class="line" href="structwb_1_1_detection.html">   22</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structwb_1_1_detection.html">Detection</a> {</div>
-<div class="line"><a name="l00024"></a><span class="lineno"><a class="line" href="structwb_1_1_detection.html#acef36bb494f55b5e267be048c61740e8">   24</a></span>&#160;        uint32 <a class="code" href="structwb_1_1_detection.html#acef36bb494f55b5e267be048c61740e8">x</a>, y;</div>
-<div class="line"><a name="l00026"></a><span class="lineno"><a class="line" href="structwb_1_1_detection.html#a0908dbf2256d884d5605752e20eb2d7a">   26</a></span>&#160;        uint32 <a class="code" href="structwb_1_1_detection.html#a0908dbf2256d884d5605752e20eb2d7a">width</a>, height;</div>
-<div class="line"><a name="l00028"></a><span class="lineno"><a class="line" href="structwb_1_1_detection.html#ae5d2ccff9e2911cb57c629a4b45fecb7">   28</a></span>&#160;        <span class="keywordtype">float</span> <a class="code" href="structwb_1_1_detection.html#ae5d2ccff9e2911cb57c629a4b45fecb7">response</a>;</div>
-<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;    };</div>
-<div class="line"><a name="l00030"></a><span class="lineno">   30</span>&#160;</div>
-<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="structwb_1_1_image_info.html">   31</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structwb_1_1_image_info.html">ImageInfo</a> {</div>
-<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;        uint32  width, height, imageSize;</div>
-<div class="line"><a name="l00033"></a><span class="lineno">   33</span>&#160;        uint8   channels;</div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;    };</div>
-<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;</div>
-<div class="line"><a name="l00036"></a><span class="lineno"><a class="line" href="structwb_1_1_pyramid_image.html">   36</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structwb_1_1_pyramid_image.html">PyramidImage</a> {</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;        uint32 width, height;</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        uint32 offsetX, offsetY;</div>
-<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        <span class="keywordtype">float</span> scale;</div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;    };</div>
-<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
-<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="structwb_1_1_octave.html">   42</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structwb_1_1_octave.html">Octave</a> {</div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        uint32 width, height, imageSize;</div>
-<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        uint32 offsetX, offsetY;</div>
-<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        <a class="code" href="structwb_1_1_pyramid_image.html">PyramidImage</a> images[WB_LEVELS_PER_OCTAVE];</div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;    };</div>
-<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div>
-<div class="line"><a name="l00048"></a><span class="lineno"><a class="line" href="structwb_1_1_pyramid.html">   48</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structwb_1_1_pyramid.html">Pyramid</a> {</div>
-<div class="line"><a name="l00049"></a><span class="lineno">   49</span>&#160;        uint32 canvasWidth, canvasHeight, canvasImageSize;      </div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;        <a class="code" href="structwb_1_1_octave.html">Octave</a> octaves[WB_OCTAVES];</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    };</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
-<div class="line"><a name="l00053"></a><span class="lineno"><a class="line" href="structwb_1_1_survivor_data.html">   53</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structwb_1_1_survivor_data.html">SurvivorData</a> {</div>
-<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;        uint32 x, y;</div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;        <span class="keywordtype">float</span> response;</div>
-<div class="line"><a name="l00056"></a><span class="lineno">   56</span>&#160;    };</div>
-<div class="line"><a name="l00057"></a><span class="lineno">   57</span>&#160;}</div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;</div>
-<div class="line"><a name="l00059"></a><span class="lineno">   59</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="structwb_1_1_stage_html_af56278d9aea7d089dabc36cf728b7a21"><div class="ttname"><a href="structwb_1_1_stage.html#af56278d9aea7d089dabc36cf728b7a21">wb::Stage::x</a></div><div class="ttdeci">uint8 x</div><div class="ttdoc">position </div><div class="ttdef"><b>Definition:</b> wb_structures.h:12</div></div>
-<div class="ttc" id="structwb_1_1_detection_html"><div class="ttname"><a href="structwb_1_1_detection.html">wb::Detection</a></div><div class="ttdoc">Allowed input types for a sample program. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:22</div></div>
-<div class="ttc" id="structwb_1_1_stage_html"><div class="ttname"><a href="structwb_1_1_stage.html">wb::Stage</a></div><div class="ttdoc">A waldboost detection stage. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:10</div></div>
+<div class="fragment"><div class="line"><a name="l00001"></a><span class="lineno">    1</span>&#160;</div>
+<div class="line"><a name="l00010"></a><span class="lineno">   10</span>&#160;<span class="preprocessor">#ifndef H_WB_STRUCTURES</span></div>
+<div class="line"><a name="l00011"></a><span class="lineno">   11</span>&#160;<span class="preprocessor">#define H_WB_STRUCTURES</span></div>
+<div class="line"><a name="l00012"></a><span class="lineno">   12</span>&#160;</div>
+<div class="line"><a name="l00013"></a><span class="lineno">   13</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="wb__general_8h.html">wb_general.h</a>&quot;</span></div>
+<div class="line"><a name="l00014"></a><span class="lineno">   14</span>&#160;<span class="preprocessor">#include &quot;<a class="code" href="wb__enums_8h.html">wb_enums.h</a>&quot;</span></div>
+<div class="line"><a name="l00015"></a><span class="lineno">   15</span>&#160;</div>
+<div class="line"><a name="l00016"></a><span class="lineno">   16</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacewb.html">wb</a> {</div>
+<div class="line"><a name="l00017"></a><span class="lineno">   17</span>&#160;</div>
+<div class="line"><a name="l00019"></a><span class="lineno"><a class="line" href="structwb_1_1_stage.html">   19</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structwb_1_1_stage.html">Stage</a> {</div>
+<div class="line"><a name="l00021"></a><span class="lineno"><a class="line" href="structwb_1_1_stage.html#af56278d9aea7d089dabc36cf728b7a21">   21</a></span>&#160;        uint8 <a class="code" href="structwb_1_1_stage.html#af56278d9aea7d089dabc36cf728b7a21">x</a>, y;</div>
+<div class="line"><a name="l00023"></a><span class="lineno"><a class="line" href="structwb_1_1_stage.html#aadc51276d2281146c172125c310b6c98">   23</a></span>&#160;        uint8 <a class="code" href="structwb_1_1_stage.html#aadc51276d2281146c172125c310b6c98">width</a>, height;</div>
+<div class="line"><a name="l00025"></a><span class="lineno"><a class="line" href="structwb_1_1_stage.html#a0068e63c0f28d015c62a3e1032602bcd">   25</a></span>&#160;        <span class="keywordtype">float</span> <a class="code" href="structwb_1_1_stage.html#a0068e63c0f28d015c62a3e1032602bcd">thetaB</a>;</div>
+<div class="line"><a name="l00027"></a><span class="lineno"><a class="line" href="structwb_1_1_stage.html#a31da72c77e291c77751a5d457ca4a434">   27</a></span>&#160;        uint32 <a class="code" href="structwb_1_1_stage.html#a31da72c77e291c77751a5d457ca4a434">alphaOffset</a>;</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;    };</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
+<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="structwb_1_1_detection.html">   31</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structwb_1_1_detection.html">Detection</a> {</div>
+<div class="line"><a name="l00033"></a><span class="lineno"><a class="line" href="structwb_1_1_detection.html#acef36bb494f55b5e267be048c61740e8">   33</a></span>&#160;        uint32 <a class="code" href="structwb_1_1_detection.html#acef36bb494f55b5e267be048c61740e8">x</a>, y;</div>
+<div class="line"><a name="l00035"></a><span class="lineno"><a class="line" href="structwb_1_1_detection.html#a0908dbf2256d884d5605752e20eb2d7a">   35</a></span>&#160;        uint32 <a class="code" href="structwb_1_1_detection.html#a0908dbf2256d884d5605752e20eb2d7a">width</a>, height;</div>
+<div class="line"><a name="l00037"></a><span class="lineno"><a class="line" href="structwb_1_1_detection.html#ae5d2ccff9e2911cb57c629a4b45fecb7">   37</a></span>&#160;        <span class="keywordtype">float</span> <a class="code" href="structwb_1_1_detection.html#ae5d2ccff9e2911cb57c629a4b45fecb7">response</a>;</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;    };</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;</div>
+<div class="line"><a name="l00044"></a><span class="lineno"><a class="line" href="structwb_1_1_image_info.html">   44</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structwb_1_1_image_info.html">ImageInfo</a> {</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        uint32  width, height, imageSize;</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        uint8   channels;</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    };</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;</div>
+<div class="line"><a name="l00050"></a><span class="lineno"><a class="line" href="structwb_1_1_pyramid_image.html">   50</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structwb_1_1_pyramid_image.html">PyramidImage</a> {</div>
+<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;        uint32 width, height;</div>
+<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;        uint32 offsetX, offsetY;</div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;        <span class="keywordtype">float</span> scale;</div>
+<div class="line"><a name="l00054"></a><span class="lineno">   54</span>&#160;    };</div>
+<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div>
+<div class="line"><a name="l00061"></a><span class="lineno"><a class="line" href="structwb_1_1_octave.html">   61</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structwb_1_1_octave.html">Octave</a> {</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        uint32 width, height, imageSize;</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        uint32 offsetX, offsetY;</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        <a class="code" href="structwb_1_1_pyramid_image.html">PyramidImage</a> images[<a class="code" href="wb__general_8h.html#a030a247d769d3e676108d35add058810">WB_LEVELS_PER_OCTAVE</a>];</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    };</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;</div>
+<div class="line"><a name="l00072"></a><span class="lineno"><a class="line" href="structwb_1_1_pyramid.html">   72</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structwb_1_1_pyramid.html">Pyramid</a> {</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;        uint32 canvasWidth, canvasHeight, canvasImageSize;      </div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;        <a class="code" href="structwb_1_1_octave.html">Octave</a> octaves[<a class="code" href="wb__general_8h.html#a3ee0080df2ddeddbb7502ae4e47c5101">WB_OCTAVES</a>];</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;    };</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;</div>
+<div class="line"><a name="l00082"></a><span class="lineno"><a class="line" href="structwb_1_1_survivor_data.html">   82</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structwb_1_1_survivor_data.html">SurvivorData</a> {</div>
+<div class="line"><a name="l00083"></a><span class="lineno">   83</span>&#160;        uint32 x, y;</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;        <span class="keywordtype">float</span> response;</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    };</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;}</div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="ttc" id="structwb_1_1_stage_html_af56278d9aea7d089dabc36cf728b7a21"><div class="ttname"><a href="structwb_1_1_stage.html#af56278d9aea7d089dabc36cf728b7a21">wb::Stage::x</a></div><div class="ttdeci">uint8 x</div><div class="ttdoc">position </div><div class="ttdef"><b>Definition:</b> wb_structures.h:21</div></div>
+<div class="ttc" id="structwb_1_1_detection_html"><div class="ttname"><a href="structwb_1_1_detection.html">wb::Detection</a></div><div class="ttdoc">Allowed input types for a sample program. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:31</div></div>
+<div class="ttc" id="structwb_1_1_stage_html"><div class="ttname"><a href="structwb_1_1_stage.html">wb::Stage</a></div><div class="ttdoc">A waldboost detection stage. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:19</div></div>
 <div class="ttc" id="wb__enums_8h_html"><div class="ttname"><a href="wb__enums_8h.html">wb_enums.h</a></div><div class="ttdoc">Waldboost detector enums. </div></div>
-<div class="ttc" id="structwb_1_1_detection_html_acef36bb494f55b5e267be048c61740e8"><div class="ttname"><a href="structwb_1_1_detection.html#acef36bb494f55b5e267be048c61740e8">wb::Detection::x</a></div><div class="ttdeci">uint32 x</div><div class="ttdoc">position </div><div class="ttdef"><b>Definition:</b> wb_structures.h:24</div></div>
-<div class="ttc" id="structwb_1_1_survivor_data_html"><div class="ttname"><a href="structwb_1_1_survivor_data.html">wb::SurvivorData</a></div><div class="ttdef"><b>Definition:</b> wb_structures.h:53</div></div>
-<div class="ttc" id="structwb_1_1_image_info_html"><div class="ttname"><a href="structwb_1_1_image_info.html">wb::ImageInfo</a></div><div class="ttdef"><b>Definition:</b> wb_structures.h:31</div></div>
-<div class="ttc" id="structwb_1_1_stage_html_a0068e63c0f28d015c62a3e1032602bcd"><div class="ttname"><a href="structwb_1_1_stage.html#a0068e63c0f28d015c62a3e1032602bcd">wb::Stage::thetaB</a></div><div class="ttdeci">float thetaB</div><div class="ttdoc">compared response </div><div class="ttdef"><b>Definition:</b> wb_structures.h:16</div></div>
-<div class="ttc" id="structwb_1_1_pyramid_image_html"><div class="ttname"><a href="structwb_1_1_pyramid_image.html">wb::PyramidImage</a></div><div class="ttdef"><b>Definition:</b> wb_structures.h:36</div></div>
-<div class="ttc" id="structwb_1_1_stage_html_aadc51276d2281146c172125c310b6c98"><div class="ttname"><a href="structwb_1_1_stage.html#aadc51276d2281146c172125c310b6c98">wb::Stage::width</a></div><div class="ttdeci">uint8 width</div><div class="ttdoc">size </div><div class="ttdef"><b>Definition:</b> wb_structures.h:14</div></div>
-<div class="ttc" id="structwb_1_1_pyramid_html"><div class="ttname"><a href="structwb_1_1_pyramid.html">wb::Pyramid</a></div><div class="ttdef"><b>Definition:</b> wb_structures.h:48</div></div>
-<div class="ttc" id="structwb_1_1_detection_html_a0908dbf2256d884d5605752e20eb2d7a"><div class="ttname"><a href="structwb_1_1_detection.html#a0908dbf2256d884d5605752e20eb2d7a">wb::Detection::width</a></div><div class="ttdeci">uint32 width</div><div class="ttdoc">size </div><div class="ttdef"><b>Definition:</b> wb_structures.h:26</div></div>
-<div class="ttc" id="structwb_1_1_stage_html_a31da72c77e291c77751a5d457ca4a434"><div class="ttname"><a href="structwb_1_1_stage.html#a31da72c77e291c77751a5d457ca4a434">wb::Stage::alphaOffset</a></div><div class="ttdeci">uint32 alphaOffset</div><div class="ttdoc">alpha offset in alpha array </div><div class="ttdef"><b>Definition:</b> wb_structures.h:18</div></div>
-<div class="ttc" id="structwb_1_1_octave_html"><div class="ttname"><a href="structwb_1_1_octave.html">wb::Octave</a></div><div class="ttdef"><b>Definition:</b> wb_structures.h:42</div></div>
+<div class="ttc" id="structwb_1_1_detection_html_acef36bb494f55b5e267be048c61740e8"><div class="ttname"><a href="structwb_1_1_detection.html#acef36bb494f55b5e267be048c61740e8">wb::Detection::x</a></div><div class="ttdeci">uint32 x</div><div class="ttdoc">position </div><div class="ttdef"><b>Definition:</b> wb_structures.h:33</div></div>
+<div class="ttc" id="structwb_1_1_survivor_data_html"><div class="ttname"><a href="structwb_1_1_survivor_data.html">wb::SurvivorData</a></div><div class="ttdoc">Info about a still running detection. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:82</div></div>
+<div class="ttc" id="structwb_1_1_image_info_html"><div class="ttname"><a href="structwb_1_1_image_info.html">wb::ImageInfo</a></div><div class="ttdoc">Info about an image. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:44</div></div>
+<div class="ttc" id="wb__general_8h_html"><div class="ttname"><a href="wb__general_8h.html">wb_general.h</a></div><div class="ttdoc">Waldboost detector general settings. </div></div>
+<div class="ttc" id="structwb_1_1_stage_html_a0068e63c0f28d015c62a3e1032602bcd"><div class="ttname"><a href="structwb_1_1_stage.html#a0068e63c0f28d015c62a3e1032602bcd">wb::Stage::thetaB</a></div><div class="ttdeci">float thetaB</div><div class="ttdoc">compared response </div><div class="ttdef"><b>Definition:</b> wb_structures.h:25</div></div>
+<div class="ttc" id="structwb_1_1_pyramid_image_html"><div class="ttname"><a href="structwb_1_1_pyramid_image.html">wb::PyramidImage</a></div><div class="ttdoc">Info about an image inside a pyramid. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:50</div></div>
+<div class="ttc" id="structwb_1_1_stage_html_aadc51276d2281146c172125c310b6c98"><div class="ttname"><a href="structwb_1_1_stage.html#aadc51276d2281146c172125c310b6c98">wb::Stage::width</a></div><div class="ttdeci">uint8 width</div><div class="ttdoc">size </div><div class="ttdef"><b>Definition:</b> wb_structures.h:23</div></div>
+<div class="ttc" id="structwb_1_1_pyramid_html"><div class="ttname"><a href="structwb_1_1_pyramid.html">wb::Pyramid</a></div><div class="ttdoc">Info about a pyramid. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:72</div></div>
+<div class="ttc" id="wb__general_8h_html_a3ee0080df2ddeddbb7502ae4e47c5101"><div class="ttname"><a href="wb__general_8h.html#a3ee0080df2ddeddbb7502ae4e47c5101">WB_OCTAVES</a></div><div class="ttdeci">#define WB_OCTAVES</div><div class="ttdoc">Number of image sets sampled from 1:1 to 1:0.5 scale. </div><div class="ttdef"><b>Definition:</b> wb_general.h:73</div></div>
+<div class="ttc" id="wb__general_8h_html_a030a247d769d3e676108d35add058810"><div class="ttname"><a href="wb__general_8h.html#a030a247d769d3e676108d35add058810">WB_LEVELS_PER_OCTAVE</a></div><div class="ttdeci">#define WB_LEVELS_PER_OCTAVE</div><div class="ttdoc">Number of downsampled images before the original image is 1/2 the width/height. </div><div class="ttdef"><b>Definition:</b> wb_general.h:70</div></div>
+<div class="ttc" id="structwb_1_1_detection_html_a0908dbf2256d884d5605752e20eb2d7a"><div class="ttname"><a href="structwb_1_1_detection.html#a0908dbf2256d884d5605752e20eb2d7a">wb::Detection::width</a></div><div class="ttdeci">uint32 width</div><div class="ttdoc">size </div><div class="ttdef"><b>Definition:</b> wb_structures.h:35</div></div>
+<div class="ttc" id="structwb_1_1_stage_html_a31da72c77e291c77751a5d457ca4a434"><div class="ttname"><a href="structwb_1_1_stage.html#a31da72c77e291c77751a5d457ca4a434">wb::Stage::alphaOffset</a></div><div class="ttdeci">uint32 alphaOffset</div><div class="ttdoc">alpha offset in alpha array </div><div class="ttdef"><b>Definition:</b> wb_structures.h:27</div></div>
+<div class="ttc" id="structwb_1_1_octave_html"><div class="ttname"><a href="structwb_1_1_octave.html">wb::Octave</a></div><div class="ttdoc">Info about an octave. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:61</div></div>
 <div class="ttc" id="namespacewb_html"><div class="ttname"><a href="namespacewb.html">wb</a></div><div class="ttdef"><b>Definition:</b> wb_enums.h:15</div></div>
-<div class="ttc" id="structwb_1_1_detection_html_ae5d2ccff9e2911cb57c629a4b45fecb7"><div class="ttname"><a href="structwb_1_1_detection.html#ae5d2ccff9e2911cb57c629a4b45fecb7">wb::Detection::response</a></div><div class="ttdeci">float response</div><div class="ttdoc">response </div><div class="ttdef"><b>Definition:</b> wb_structures.h:28</div></div>
+<div class="ttc" id="structwb_1_1_detection_html_ae5d2ccff9e2911cb57c629a4b45fecb7"><div class="ttname"><a href="structwb_1_1_detection.html#ae5d2ccff9e2911cb57c629a4b45fecb7">wb::Detection::response</a></div><div class="ttdeci">float response</div><div class="ttdoc">response </div><div class="ttdef"><b>Definition:</b> wb_structures.h:37</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Thu Mar 12 2015 12:44:10 for Waldboost detector using LBP by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Fri Mar 13 2015 03:32:28 for Waldboost detector using LBP by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

@@ -1,5 +1,14 @@
 \hypertarget{structwb_1_1_survivor_data}{}\section{wb\+:\+:Survivor\+Data Struct Reference}
 \label{structwb_1_1_survivor_data}\index{wb\+::\+Survivor\+Data@{wb\+::\+Survivor\+Data}}
+
+
+Info about a still running detection.  
+
+
+
+
+{\ttfamily \#include $<$wb\+\_\+structures.\+h$>$}
+
 \subsection*{Public Attributes}
 \begin{DoxyCompactItemize}
 \item 
@@ -13,6 +22,11 @@
 
 \end{DoxyCompactItemize}
 
+
+\subsection{Detailed Description}
+Info about a still running detection. 
+
+Threads calculating detections get discarded, but those still running keep their data in this structure, so we can continue with computation, when we rerun detection. 
 
 The documentation for this struct was generated from the following file\+:\begin{DoxyCompactItemize}
 \item 

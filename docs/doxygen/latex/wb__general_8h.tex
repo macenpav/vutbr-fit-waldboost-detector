@@ -1,0 +1,116 @@
+\hypertarget{wb__general_8h}{}\section{C\+:/dev/repositories/vutbr-\/fit-\/waldboost-\/detector/src/wb\+\_\+general.h File Reference}
+\label{wb__general_8h}\index{C\+:/dev/repositories/vutbr-\/fit-\/waldboost-\/detector/src/wb\+\_\+general.\+h@{C\+:/dev/repositories/vutbr-\/fit-\/waldboost-\/detector/src/wb\+\_\+general.\+h}}
+
+
+Waldboost detector general settings.  
+
+
+{\ttfamily \#include $<$string$>$}\\*
+{\ttfamily \#include $<$chrono$>$}\\*
+\subsection*{Macros}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{wb__general_8h_aa1e48d2cb1557fe5f8b00c60294e818e}{}\#define \hyperlink{wb__general_8h_aa1e48d2cb1557fe5f8b00c60294e818e}{F\+I\+N\+A\+L\+\_\+\+T\+H\+R\+E\+S\+H\+O\+L\+D}~0.f\label{wb__general_8h_aa1e48d2cb1557fe5f8b00c60294e818e}
+
+\begin{DoxyCompactList}\small\item\em Final detector threshold. \end{DoxyCompactList}\item 
+\hypertarget{wb__general_8h_aeb0136b3ced60283f607f9070ae26009}{}\#define \hyperlink{wb__general_8h_aeb0136b3ced60283f607f9070ae26009}{A\+L\+P\+H\+A\+\_\+\+C\+O\+U\+N\+T}~256\label{wb__general_8h_aeb0136b3ced60283f607f9070ae26009}
+
+\begin{DoxyCompactList}\small\item\em Number of alphas in the detector. \end{DoxyCompactList}\item 
+\hypertarget{wb__general_8h_a61a0193997f8bfbffdf7594a5396ff46}{}\#define \hyperlink{wb__general_8h_a61a0193997f8bfbffdf7594a5396ff46}{S\+T\+A\+G\+E\+\_\+\+C\+O\+U\+N\+T}~2048\label{wb__general_8h_a61a0193997f8bfbffdf7594a5396ff46}
+
+\begin{DoxyCompactList}\small\item\em Number of stages of the detector. \end{DoxyCompactList}\item 
+\hypertarget{wb__general_8h_ad51ded0bbd705f02f73fc60c0b721ced}{}\#define \hyperlink{wb__general_8h_ad51ded0bbd705f02f73fc60c0b721ced}{B\+L\+O\+C\+K\+\_\+\+S\+I\+Z\+E}~1024\label{wb__general_8h_ad51ded0bbd705f02f73fc60c0b721ced}
+
+\begin{DoxyCompactList}\small\item\em G\+P\+U block size (used as shared memory size). \end{DoxyCompactList}\item 
+\hypertarget{wb__general_8h_a06a2f322c75631cf4d7263a51b24b64b}{}\#define \hyperlink{wb__general_8h_a06a2f322c75631cf4d7263a51b24b64b}{W\+B\+\_\+\+B\+A\+D\+\_\+\+R\+E\+S\+P\+O\+N\+S\+E}~-\/5000.f\label{wb__general_8h_a06a2f322c75631cf4d7263a51b24b64b}
+
+\begin{DoxyCompactList}\small\item\em Discarded sample. \end{DoxyCompactList}\item 
+\hypertarget{wb__general_8h_a35989c8ec8c938577e9c125daec197b6}{}\#define \hyperlink{wb__general_8h_a35989c8ec8c938577e9c125daec197b6}{W\+B\+\_\+\+W\+A\+I\+T\+\_\+\+D\+E\+L\+A\+Y}~1\label{wb__general_8h_a35989c8ec8c938577e9c125daec197b6}
+
+\begin{DoxyCompactList}\small\item\em Delay in ms between displaying frames. \end{DoxyCompactList}\item 
+\#define \hyperlink{wb__general_8h_ab255b63e82dd0a59244beb4372429c38}{W\+B\+\_\+\+M\+A\+X\+\_\+\+D\+E\+T\+E\+C\+T\+I\+O\+N\+S}~512
+\begin{DoxyCompactList}\small\item\em Max. number of detections per frame. \end{DoxyCompactList}\item 
+\hypertarget{wb__general_8h_a5dc8476e7d2c62d8f74272f36a5e4a7c}{}\#define \hyperlink{wb__general_8h_a5dc8476e7d2c62d8f74272f36a5e4a7c}{W\+B\+\_\+\+C\+L\+A\+S\+S\+I\+F\+I\+E\+R\+\_\+\+W\+I\+D\+T\+H}~26\label{wb__general_8h_a5dc8476e7d2c62d8f74272f36a5e4a7c}
+
+\begin{DoxyCompactList}\small\item\em Classifier window width. \end{DoxyCompactList}\item 
+\hypertarget{wb__general_8h_a71b60fa3d98d70df1f08f0376ab1ac28}{}\#define \hyperlink{wb__general_8h_a71b60fa3d98d70df1f08f0376ab1ac28}{W\+B\+\_\+\+C\+L\+A\+S\+S\+I\+F\+I\+E\+R\+\_\+\+H\+E\+I\+G\+H\+T}~26\label{wb__general_8h_a71b60fa3d98d70df1f08f0376ab1ac28}
+
+\begin{DoxyCompactList}\small\item\em Classifier window height. \end{DoxyCompactList}\item 
+\#define \hyperlink{wb__general_8h_ab34281faeff6cbd4bc45dc26c9c7b9ed}{W\+B\+\_\+\+S\+C\+A\+L\+I\+N\+G\+\_\+\+F\+A\+C\+T\+O\+R}~1.\+09050773f
+\begin{DoxyCompactList}\small\item\em Downsampling scaling factor. \end{DoxyCompactList}\item 
+\hypertarget{wb__general_8h_a030a247d769d3e676108d35add058810}{}\#define \hyperlink{wb__general_8h_a030a247d769d3e676108d35add058810}{W\+B\+\_\+\+L\+E\+V\+E\+L\+S\+\_\+\+P\+E\+R\+\_\+\+O\+C\+T\+A\+V\+E}~8\label{wb__general_8h_a030a247d769d3e676108d35add058810}
+
+\begin{DoxyCompactList}\small\item\em Number of downsampled images before the original image is 1/2 the width/height. \end{DoxyCompactList}\item 
+\hypertarget{wb__general_8h_a3ee0080df2ddeddbb7502ae4e47c5101}{}\#define \hyperlink{wb__general_8h_a3ee0080df2ddeddbb7502ae4e47c5101}{W\+B\+\_\+\+O\+C\+T\+A\+V\+E\+S}~4\label{wb__general_8h_a3ee0080df2ddeddbb7502ae4e47c5101}
+
+\begin{DoxyCompactList}\small\item\em Number of image sets sampled from 1\+:1 to 1\+:0.\+5 scale. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{wb__general_8h_adde6aaee8457bee49c2a92621fe22b79}{}typedef unsigned char {\bfseries uint8}\label{wb__general_8h_adde6aaee8457bee49c2a92621fe22b79}
+
+\item 
+\hypertarget{wb__general_8h_a05f6b0ae8f6a6e135b0e290c25fe0e4e}{}typedef unsigned short {\bfseries uint16}\label{wb__general_8h_a05f6b0ae8f6a6e135b0e290c25fe0e4e}
+
+\item 
+\hypertarget{wb__general_8h_a1134b580f8da4de94ca6b1de4d37975e}{}typedef unsigned int {\bfseries uint32}\label{wb__general_8h_a1134b580f8da4de94ca6b1de4d37975e}
+
+\item 
+\hypertarget{wb__general_8h_ae47c588f3ab8c61121c1c7ab7edc47cd}{}typedef char {\bfseries int8}\label{wb__general_8h_ae47c588f3ab8c61121c1c7ab7edc47cd}
+
+\item 
+\hypertarget{wb__general_8h_a4355d16fcf9f644c9ac84293f0b1801f}{}typedef short {\bfseries int16}\label{wb__general_8h_a4355d16fcf9f644c9ac84293f0b1801f}
+
+\item 
+\hypertarget{wb__general_8h_a56f1a81c92849566ae864511088eb7e8}{}typedef int {\bfseries int32}\label{wb__general_8h_a56f1a81c92849566ae864511088eb7e8}
+
+\item 
+\hypertarget{wb__general_8h_a0ef8d951d1ca5ab3cfaf7ab4c7a6fd80}{}typedef std\+::chrono\+::high\+\_\+resolution\+\_\+clock {\bfseries Clock}\label{wb__general_8h_a0ef8d951d1ca5ab3cfaf7ab4c7a6fd80}
+
+\item 
+\hypertarget{wb__general_8h_a97e964e8eec5ef3902ff1168c66be9fe}{}typedef std\+::chrono\+::milliseconds {\bfseries Milliseconds}\label{wb__general_8h_a97e964e8eec5ef3902ff1168c66be9fe}
+
+\item 
+\hypertarget{wb__general_8h_a6ca606d047a74e565342a965130886a5}{}typedef std\+::chrono\+::duration$<$ float $>$ {\bfseries F\+P\+Duration}\label{wb__general_8h_a6ca606d047a74e565342a965130886a5}
+
+\item 
+\hypertarget{wb__general_8h_a1f5a66c29f1324aa796525f0e14c22b4}{}typedef std\+::chrono\+::system\+\_\+clock\+::time\+\_\+point {\bfseries Clock\+Point}\label{wb__general_8h_a1f5a66c29f1324aa796525f0e14c22b4}
+
+\end{DoxyCompactItemize}
+\subsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{wb__general_8h_a3bbb216380a5140edccfab78f41e5aef}{}const std\+::string \hyperlink{wb__general_8h_a3bbb216380a5140edccfab78f41e5aef}{L\+I\+B\+N\+A\+M\+E} = \char`\"{}waldboost-\/detector\char`\"{}\label{wb__general_8h_a3bbb216380a5140edccfab78f41e5aef}
+
+\begin{DoxyCompactList}\small\item\em Library name. \end{DoxyCompactList}\item 
+\hypertarget{wb__general_8h_ac059212137df82d64704fbd47f84a1da}{}const std\+::string \hyperlink{wb__general_8h_ac059212137df82d64704fbd47f84a1da}{L\+I\+B\+H\+E\+A\+D\+E\+R} = \char`\"{}\mbox{[}\char`\"{} + \hyperlink{wb__general_8h_a3bbb216380a5140edccfab78f41e5aef}{L\+I\+B\+N\+A\+M\+E} + \char`\"{}\mbox{]}\+: \char`\"{}\label{wb__general_8h_ac059212137df82d64704fbd47f84a1da}
+
+\begin{DoxyCompactList}\small\item\em Just a helper so we don\textquotesingle{}t have to write the whole thing in debug output. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Waldboost detector general settings. 
+
+Settings and constants are held here.
+
+\begin{DoxyAuthor}{Author}
+Pavel Macenauer \href{mailto:macenauer.p@gmail.com}{\tt macenauer.\+p@gmail.\+com} 
+\end{DoxyAuthor}
+
+
+\subsection{Macro Definition Documentation}
+\hypertarget{wb__general_8h_ab255b63e82dd0a59244beb4372429c38}{}\index{wb\+\_\+general.\+h@{wb\+\_\+general.\+h}!W\+B\+\_\+\+M\+A\+X\+\_\+\+D\+E\+T\+E\+C\+T\+I\+O\+N\+S@{W\+B\+\_\+\+M\+A\+X\+\_\+\+D\+E\+T\+E\+C\+T\+I\+O\+N\+S}}
+\index{W\+B\+\_\+\+M\+A\+X\+\_\+\+D\+E\+T\+E\+C\+T\+I\+O\+N\+S@{W\+B\+\_\+\+M\+A\+X\+\_\+\+D\+E\+T\+E\+C\+T\+I\+O\+N\+S}!wb\+\_\+general.\+h@{wb\+\_\+general.\+h}}
+\subsubsection[{W\+B\+\_\+\+M\+A\+X\+\_\+\+D\+E\+T\+E\+C\+T\+I\+O\+N\+S}]{\setlength{\rightskip}{0pt plus 5cm}\#define W\+B\+\_\+\+M\+A\+X\+\_\+\+D\+E\+T\+E\+C\+T\+I\+O\+N\+S~512}\label{wb__general_8h_ab255b63e82dd0a59244beb4372429c38}
+
+
+Max. number of detections per frame. 
+
+Allocates memory and cannot overflow, but can be kept lower to save G\+P\+U memory. \hypertarget{wb__general_8h_ab34281faeff6cbd4bc45dc26c9c7b9ed}{}\index{wb\+\_\+general.\+h@{wb\+\_\+general.\+h}!W\+B\+\_\+\+S\+C\+A\+L\+I\+N\+G\+\_\+\+F\+A\+C\+T\+O\+R@{W\+B\+\_\+\+S\+C\+A\+L\+I\+N\+G\+\_\+\+F\+A\+C\+T\+O\+R}}
+\index{W\+B\+\_\+\+S\+C\+A\+L\+I\+N\+G\+\_\+\+F\+A\+C\+T\+O\+R@{W\+B\+\_\+\+S\+C\+A\+L\+I\+N\+G\+\_\+\+F\+A\+C\+T\+O\+R}!wb\+\_\+general.\+h@{wb\+\_\+general.\+h}}
+\subsubsection[{W\+B\+\_\+\+S\+C\+A\+L\+I\+N\+G\+\_\+\+F\+A\+C\+T\+O\+R}]{\setlength{\rightskip}{0pt plus 5cm}\#define W\+B\+\_\+\+S\+C\+A\+L\+I\+N\+G\+\_\+\+F\+A\+C\+T\+O\+R~1.\+09050773f}\label{wb__general_8h_ab34281faeff6cbd4bc45dc26c9c7b9ed}
+
+
+Downsampling scaling factor. 
+
+1.\+09050773f = 2$^\wedge$(1/8) Should be 2$^\wedge$(1/\+W\+B\+\_\+\+L\+E\+V\+E\+L\+S\+\_\+\+P\+E\+R\+\_\+\+O\+C\+T\+A\+V\+E), because the number of levels says how many downsampled images are created before an image of 1/2 width/height is created. Smaller number would generate bigger images, bigger number smaller images and the last image wouldn\textquotesingle{}t be half the width/height. 

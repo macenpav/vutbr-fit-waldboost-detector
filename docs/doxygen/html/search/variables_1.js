@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['response',['response',['../structwb_1_1_detection.html#ae5d2ccff9e2911cb57c629a4b45fecb7',1,'wb::Detection']]]
+  ['libheader',['LIBHEADER',['../wb__general_8h.html#ac059212137df82d64704fbd47f84a1da',1,'wb_general.h']]],
+  ['libname',['LIBNAME',['../wb__general_8h.html#a3bbb216380a5140edccfab78f41e5aef',1,'wb_general.h']]]
 ];
