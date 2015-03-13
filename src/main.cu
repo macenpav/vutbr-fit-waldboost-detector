@@ -141,7 +141,7 @@ bool processVideo(std::string const& filename, uint32 const& param, std::string 
 * @param inputType	type of input
 * @param param		run parameters
 */
-bool process(std::string input, wb::InputTypes inputType, uint32 param = 0, std::string output = std::string(""), wb::PyramidGenModes pyGenMode = wb::MAX_PYGEN_MODES)
+bool process(std::string input, wb::InputTypes inputType, uint32 param = 0, std::string output = std::string(""), wb::PyramidGenModes pyGenMode = wb::PYGEN_BINDLESS_TEXTURE)
 {	
 	switch (inputType)
 	{
