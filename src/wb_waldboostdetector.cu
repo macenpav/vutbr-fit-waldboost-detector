@@ -1,6 +1,8 @@
 #include "wb_waldboostdetector.h"
 
 #include <iostream>
+#include <fstream>
+#include <chrono>
 #include "cuda_runtime.h"
 
 #include "wb_general.h"
@@ -567,15 +569,24 @@ namespace wb {
 
 		_pyramid.canvasHeight = _pyramid.octaves[0].height;
 		_pyramid.canvasImageSize = _pyramid.canvasWidth * _pyramid.canvasHeight;		
-	}
+	}	
 
 	void WaldboostDetector::init(cv::Mat* image)
 	{
 		_info.width = image->cols;
 		_info.height = image->rows;
 		_info.imageSize = image->cols * image->rows;		
-		_info.channels = image->channels();		
+		_info.channels = image->channels();	
 
+		_frame = 0;
+
+		ClockPoint init_time_start, init_time_end;
+		if (_opt & OPT_TIMER)
+		{ 
+			_initTimers();
+			init_time_start = Clock::now();
+		}
+	
 		switch (_pyType)
 		{
 			case PYTYPE_OPTIMIZED:
@@ -586,8 +597,14 @@ namespace wb {
 				_precalcHorizontalPyramid();
 				break;
 		}
-		
 
+		if (_opt & OPT_TIMER)
+		{
+			init_time_end = Clock::now();
+			FPDuration duration = init_time_end - init_time_start;
+			_timers[TIMER_INIT] += static_cast<float>(std::chrono::duration_cast<Milliseconds>(duration).count()) / 1000.f;
+		}
+		
 		if (_opt & OPT_VERBOSE)
 		{
 			std::cout << LIBHEADER << "Finished generating pyramid." << std::endl;
@@ -612,6 +629,11 @@ namespace wb {
 				}
 				std::cout << std::endl;
 			}
+		}
+
+		if (_opt & OPT_TIMER)
+		{
+			init_time_start = Clock::now();
 		}
 
 		cudaMemcpyToSymbol(devPyramid, &_pyramid, sizeof(Pyramid));
@@ -643,9 +665,23 @@ namespace wb {
 		cudaChannelFormatDesc finalDesc = cudaCreateChannelDesc<float>();
 		cudaBindTexture2D(nullptr, &texturePyramidImage, _devPyramidData, &finalDesc, _pyramid.canvasWidth, _pyramid.canvasHeight, sizeof(float) * _pyramid.canvasWidth);
 
-		#ifdef WB_DEBUG
-		_frameCount = 0;
-		#endif
+		cudaDeviceSynchronize();
+
+		if (_opt & OPT_TIMER)
+		{
+			init_time_end = Clock::now();
+			FPDuration duration = init_time_end - init_time_start;
+			_timers[TIMER_INIT] += static_cast<float>(std::chrono::duration_cast<Milliseconds>(duration).count()) / 1000.f;
+		}
+
+		if (_opt & OPT_OUTPUT_CSV)
+		{
+			std::ofstream file;
+			file.open(_outputFilename, std::ios::out);
+			file << "init;" << _timers[TIMER_INIT] << std::endl << std::endl;
+			file << "frame;preprocessing;pyramid gen.;detection" << std::endl;
+			file.close();
+		}
 	}
 
 	__global__ void clearKernel(float* data, uint32 width, uint32 height)
@@ -723,21 +759,21 @@ namespace wb {
 			cv::waitKey(WB_WAIT_DELAY);
 		}
 
-		cudaEvent_t start_pyramid, stop_pyramid;		
+		cudaEvent_t start_pyramid, stop_pyramid;			
 		if (_opt & OPT_TIMER)
 		{
 			cudaEventCreate(&start_pyramid);
 			cudaEventCreate(&stop_pyramid);
-			cudaEventRecord(start_pyramid);
+			cudaEventRecord(start_pyramid);			
 		}
 
-		_pyramidKernelWrapper();
+		_pyramidKernelWrapper();		
 		
 		if (_opt & OPT_TIMER)
-		{
+		{			
 			cudaEventRecord(stop_pyramid);
 			cudaEventSynchronize(stop_pyramid);
-			cudaEventElapsedTime(&_timers[TIMER_PYRAMID], start_pyramid, stop_pyramid);
+			cudaEventElapsedTime(&_timers[TIMER_PYRAMID], start_pyramid, stop_pyramid);				
 		}
 		
 		if (_opt & OPT_VISUAL_DEBUG)
@@ -861,7 +897,17 @@ namespace wb {
 				cv::putText(*_myImage, t2, cv::Point(10, 35), cv::FONT_HERSHEY_SIMPLEX, 0.35, CV_RGB(0, 255, 0));
 				cv::putText(*_myImage, t3, cv::Point(10, 50), cv::FONT_HERSHEY_SIMPLEX, 0.35, CV_RGB(0, 255, 0));
 			}
+
+			if (_opt & OPT_OUTPUT_CSV)
+			{				
+				std::ofstream file;
+				file.open(_outputFilename, std::ios::out|std::ios::app);
+				file << _frame << ";" << _timers[TIMER_PREPROCESS] << ";" << _timers[TIMER_PYRAMID] << ";" << _timers[TIMER_DETECTION] << std::endl;
+				file.close();				
+			}
 		}
+
+		_frame++;
 	}
 
 	void WaldboostDetector::free()

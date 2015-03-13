@@ -32,6 +32,8 @@ namespace wb {
 		OPT_TIMER			= 0x00000004,
 		/** @brief Outputs different stages of the detector. */
 		OPT_VISUAL_DEBUG	= 0x00000008,
+		/** @brief Output measurements to a CSV file. */
+		OPT_OUTPUT_CSV		= 0x00000010|OPT_TIMER,
 
 		/** @brief All options are switched on. */
 		OPT_ALL				= 0xFFFFFFFF
@@ -65,6 +67,8 @@ namespace wb {
 		TIMER_DETECTION,
 		/** @brief Image preprocessing timer. */
 		TIMER_PREPROCESS,
+		/** @brief Init timer. */
+		TIMER_INIT,
 		/** @brief Total time. */
 		TIMER_TOTAL,
 

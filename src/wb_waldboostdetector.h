@@ -1,6 +1,6 @@
 /**   
- * @file	wb_waldboostdetector.h
- * @brief	Waldboost detector.
+ * @file wb_waldboostdetector.h
+ * @brief Waldboost detector.
  *
  * Global and device functions (all in wb namespace) and a WaldboostDetector class
  * which uses the as gpu kernels for object detection using waldboost metaalgorithm
@@ -222,6 +222,9 @@ namespace wb {
 			/** @brief Passes run parameters to the detector. */
 			void setRunParameters(uint32 const& param) { _opt = param; }
 
+			/** @brief Sets a file for output. */
+			void setOutputFile(std::string const& output) { _outputFilename = output; }
+
 		private:
 			/** @brief Precalculates image sizes and offsets horizontally.
 			 *
@@ -300,14 +303,16 @@ namespace wb {
 			float*				_devPyramidData;					///< pointer to device pyramid memory (used by single texture)
 
 			float*				_devPyramidImage[WB_OCTAVES];		///< pointer to device pyramid memory (used by bindless texture)	
-			cudaTextureObject_t	_texturePyramidObjects[WB_OCTAVES]; /// cuda texture objects (used by bindless texture)
+			cudaTextureObject_t	_texturePyramidObjects[WB_OCTAVES]; ///< cuda texture objects (used by bindless texture)
 
 			float*				_devAlphaBuffer;		///< pointer to device alpha memory
 			Detection*			_devDetections;			///< pointer to the detections in device memory
 			uint32*				_devDetectionCount;		///< pointer to the number of detections in device memory
 			SurvivorData*		_devSurvivors;			///< pointer to device survivor memory			
 			cv::Mat*			_myImage;				///< pointer to the original processed image
+			std::string			_outputFilename;		///< filename for csv output
 
+			uint32				_frame;					///< frame counter
 	};
 }
 
