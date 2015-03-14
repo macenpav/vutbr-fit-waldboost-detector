@@ -905,9 +905,8 @@ namespace wb {
 				file << _frame << ";" << _timers[TIMER_PREPROCESS] << ";" << _timers[TIMER_PYRAMID] << ";" << _timers[TIMER_DETECTION] << std::endl;
 				file.close();				
 			}
-		}
-
-		_frame++;
+		}		
+		_frame++;		
 	}
 
 	void WaldboostDetector::free()

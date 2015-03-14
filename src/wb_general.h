@@ -58,7 +58,7 @@ typedef std::chrono::system_clock::time_point ClockPoint;
 
 /** @brief Downsampling scaling factor. 
  *
- * 1.09050773f = 2^(1/8)
+ * @details 1.09050773f = 2^(1/8)
  * Should be 2^(1/WB_LEVELS_PER_OCTAVE), because the number of levels says
  * how many downsampled images are created before an image of 1/2 width/height
  * is created. Smaller number would generate bigger images, bigger number

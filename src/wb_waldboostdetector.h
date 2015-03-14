@@ -2,7 +2,7 @@
  * @file wb_waldboostdetector.h
  * @brief Waldboost detector.
  *
- * Global and device functions (all in wb namespace) and a WaldboostDetector class
+ * @details Global and device functions (all in wb namespace) and a WaldboostDetector class
  * which uses the as gpu kernels for object detection using waldboost metaalgorithm
  * and LBP features. Only the WaldboostDetector class should be used on its own.
  *
@@ -25,7 +25,7 @@ namespace wb {
 
 	/** @brief Initial survivor detection processing
 	 *
-	 * Processes detections on an image from the first stage (of the waldboost detector).
+	 * @details Processes detections on an image from the first stage (of the waldboost detector).
 	 * Processes the whole image and outputs the remaining surviving positions after reaching
 	 * the ending stage.
 	 *
@@ -38,7 +38,7 @@ namespace wb {
 
 	/** @brief Survivor detection processing
 	 *
-	 * Processes detections on an image from a set starting stage (of the waldboost detector).
+	 * @details Processes detections on an image from a set starting stage (of the waldboost detector).
 	 * Processes only positions in the initSurvivors array and outputs still surviving positions
 	 * after reaching the ending stage.
 	 *
@@ -52,7 +52,7 @@ namespace wb {
 
 	/** @brief Final detection processing
 	 *
-	 * Processes detections on an image beginning at a starting stage, until the end.
+	 * @details Processes detections on an image beginning at a starting stage, until the end.
 	 * Processes only given surviving positions and outputs detections, which can then
 	 * be displayed.
 	 *
@@ -67,7 +67,7 @@ namespace wb {
 
 	/** @brief Evaluates stages for a given coordinate
 	 *
-	 * Evaluates stages for a given coordinate from a starting stage to an end stage,
+	 * @details Evaluates stages for a given coordinate from a starting stage to an end stage,
 	 * accumulates a response and determines if given sample is an object.
 	 *
 	 * @param x				X-coordinate.
@@ -82,7 +82,7 @@ namespace wb {
 
 	/** @brief Evaluates LBP for a given coordinate
 	 *
-	 * Evaluates LBP for a given coordinate with a given stage and returns a response.
+	 * @details Evaluates LBP for a given coordinate with a given stage and returns a response.
 	 *
 	 * @param x				X-coordinate.
 	 * @param y				Y-coordinate.
@@ -94,7 +94,7 @@ namespace wb {
 
 	/** @brief Sums regions for LBP calculation.
 	 *
-	 * Interpolates image regions (1x1, 2x1, 1x2, 2x2) for LBP calculation. Uses
+	 * @details Interpolates image regions (1x1, 2x1, 1x2, 2x2) for LBP calculation. Uses
 	 * texture unit bilinear interpolation capabilities.
 	 *
 	 * @param values	Values used for LBP calculation.
@@ -108,7 +108,7 @@ namespace wb {
 
 	/** @brief Preprocessing kernel.
 	 *
-	 * GPU kernel doing preprocessing - converts image to black and white and integer
+	 * @details GPU kernel doing preprocessing - converts image to black and white and integer
 	 * values to float.	FP values are then stored as a texture.
 	 *
 	 * @param outData	Output data.
@@ -120,7 +120,7 @@ namespace wb {
 
 	/** @brief Pyramidal image kernel.
 	*
-	* GPU kernel, which creates a pyramidal image from a texture. Uses texture unit
+	* @details GPU kernel, which creates a pyramidal image from a texture. Uses texture unit
 	* bilinear interpolation.
 	*
 	* @param outData	Output data.
@@ -175,7 +175,7 @@ namespace wb {
 		public:
 			/** @brief Initializes the detector.
 			 *
-			 * Initializes the detector based on given image parameters. It's stuff, 
+			 * @details Initializes the detector based on given image parameters. It's stuff, 
 			 * which is called only once for a video or an image, such as gpu memory
 			 * allocation
 			 *
@@ -186,7 +186,7 @@ namespace wb {
 
 			/** @brief Passes an image to the detector. 
 			 *
-			 * Passes image to the detector and does the preprocessing. This means, it
+			 * @details Passes image to the detector and does the preprocessing. This means, it
 			 * feeds the image data to the gpu, converts it to float/black and white and 
 			 * generates a pyramid image.
 			 *
@@ -197,7 +197,7 @@ namespace wb {
 
 			/** @brief Processes detections. 
 			 *
-			 * Runs the detector, that means processes detections on a pyramid image
+			 * @details Runs the detector, that means processes detections on a pyramid image
 			 * saved in texture memory.
 			 *
 			 * @return Void.
@@ -220,15 +220,17 @@ namespace wb {
 			void setBlockSize(uint32 const& x = 32, uint32 const& y = 32, uint32 const& z = 1){ _block = dim3(x, y, z); }
 
 			/** @brief Passes run parameters to the detector. */
-			void setRunParameters(uint32 const& param) { _opt = param; }
+			void setRunOptions(uint32 const& options) { _opt = options; }
 
 			/** @brief Sets a file for output. */
 			void setOutputFile(std::string const& output) { _outputFilename = output; }
 
+			uint32 getFrameCount() const { return _frame; }
+
 		private:
 			/** @brief Precalculates image sizes and offsets horizontally.
 			 *
-			 * Precalculates pyramids in a horizontal manner, that means every pyramid next to each other.
+			 * @details Precalculates pyramids in a horizontal manner, that means every pyramid next to each other.
 			 *
 			 * @return Void.
 			 * @todo fix crash
@@ -237,7 +239,7 @@ namespace wb {
 
 			/** @brief Precalculates image sizes and offsets in a user defined manner.
 			 *
-			 * Precalculates pyramids in a user defined manner. Currently 1st octave is on the left, 2nd
+			 * @details Precalculates pyramids in a user defined manner. Currently 1st octave is on the left, 2nd
 			 * top-right, 3rd bottom-left (right from 1st), 4th bottom-right.
 			 *
 			 * @return Void.
@@ -252,7 +254,7 @@ namespace wb {
 
 			/** @brief Single texture pyramid generation.
 			 *
-			 * Pyramid is generated by creating a single texture canvas, generating the first octave from 
+			 * @details Pyramid is generated by creating a single texture canvas, generating the first octave from 
 			 * the original preprocessed image and then creating downsapled pyramids from the same texture, 
 			 * which leads reads and writes from the same texture. Every octave needs only its width x height
 			 * number of threads, that means, that every octave several threads (and blocks) return.
@@ -263,7 +265,7 @@ namespace wb {
 
 			/** @brief Bindless texture pyramid generation. 
 			 *
-			 * Pyramid is generated using multiple textures, always downsampling from a previously generated textury.
+			 * @details Pyramid is generated using multiple textures, always downsampling from a previously generated textury.
 			 * This leads to reads only from textures. While a new texture is generated, the result is simultaneously
 			 * copied to the final texture. Disadvantage of this method is initialization for every texture and
 			 * kernel run per octave.
@@ -280,7 +282,7 @@ namespace wb {
 
 			/** @brief Recalcs detections. 
 			 *
-			 * Detections are detected on an image containing lots of downsampled images (pyramids). Here we map detected
+			 * @details Detections are detected on an image containing lots of downsampled images (pyramids). Here we map detected
 			 * positions to the original image.
 			 *
 			 * @return Void.

@@ -15,12 +15,12 @@
 #include "wb_structures.h"
 
 /**
-* @brief Processes an image dataset - a text file with a list of images.
-*
-* @param filename	filename
-* @param param		run parameters
-*/
-bool processImageDataset(std::string filename, uint32 param)
+ * @brief Processes an image dataset - a text file with a list of images.
+ *
+ * @param filename	filename
+ * @param opts		run optseters
+ */
+bool processImageDataset(std::string filename, uint32 opts)
 {	
 	std::ifstream in;
 	in.open(filename);
@@ -41,27 +41,27 @@ bool processImageDataset(std::string filename, uint32 param)
 		}
 
 		detector.init(&image);
-		if (param & wb::OPT_VERBOSE)
+		if (opts & wb::OPT_VERBOSE)
 			std::cout << LIBHEADER << "Initialized detector." << std::endl;
 
 		detector.setImage(&image);
-		if (param & wb::OPT_VERBOSE)
+		if (opts & wb::OPT_VERBOSE)
 			std::cout << LIBHEADER << "Image set." << std::endl;
 
-		if (param & wb::OPT_VERBOSE)
+		if (opts & wb::OPT_VERBOSE)
 			std::cout << LIBHEADER << "Running detections ..." << std::endl;
 		detector.run();
-		if (param & wb::OPT_VERBOSE)
+		if (opts & wb::OPT_VERBOSE)
 			std::cout << LIBHEADER << "Detection finished." << std::endl;
 
-		if (param & wb::OPT_VISUAL_OUTPUT)
+		if (opts & wb::OPT_VISUAL_OUTPUT)
 		{
 			cv::imshow(LIBNAME, image);
 			cv::waitKey(WB_WAIT_DELAY);
 		}
 
 		detector.free();
-		if (param & wb::OPT_VERBOSE)
+		if (opts & wb::OPT_VERBOSE)
 			std::cout << LIBHEADER << "Memory free." << std::endl;		
 	}
 
@@ -69,13 +69,13 @@ bool processImageDataset(std::string filename, uint32 param)
 }
 
 /**
-* @brief Processes a video.
-*
-* @param filename	filename
-* @param param		run parameters
-* @todo implement pyType
-*/
-bool processVideo(std::string const& filename, uint32 const& param, std::string const& output, wb::PyramidGenModes const& pyGenMode)
+ * @brief Processes a video.
+ *
+ * @param filename	filename
+ * @param opts		run optseters
+ * @todo implement pyType
+ */
+bool processVideo(std::string const& filename, wb::RunSettings const& settings, uint32 const& opts)
 {
 	cv::VideoCapture video;
 	cv::Mat image;
@@ -87,18 +87,24 @@ bool processVideo(std::string const& filename, uint32 const& param, std::string 
 		return false;
 
 	wb::WaldboostDetector detector;	
-	detector.setBlockSize(32, 32);
-	detector.setPyGenMode(pyGenMode);
-	detector.setPyType(wb::PYTYPE_OPTIMIZED);
-	detector.setRunParameters(param);
-	detector.setOutputFile(output);
+	detector.setBlockSize(settings.blockSize, settings.blockSize);
+	detector.setPyGenMode(settings.pyGenMode);
+	detector.setPyType(settings.pyType);	
+	detector.setRunOptions(opts);
+	detector.setOutputFile(settings.outputFilename);
 	detector.init(&image);
 
-	if (param & wb::OPT_VERBOSE)	
+	if (opts & wb::OPT_VERBOSE)	
 		std::cout << LIBHEADER << "Initialized detector." << std::endl;			
 
 	while (true)
 	{		
+		if (opts & wb::OPT_LIMIT_FRAMES)
+		{
+			if (settings.maxFrames < detector.getFrameCount())
+				break;
+		}
+
 		auto start_time = std::chrono::high_resolution_clock::now();
 		video >> image;
 
@@ -107,7 +113,7 @@ bool processVideo(std::string const& filename, uint32 const& param, std::string 
 
 		// load detector with an image
 		detector.setImage(&image);
-		if (param & wb::OPT_VERBOSE)
+		if (opts & wb::OPT_VERBOSE)
 		{ 
 			std::cout << LIBHEADER << "Image set." << std::endl;
 			std::cout << LIBHEADER << "Running detections ..." << std::endl;
@@ -116,10 +122,10 @@ bool processVideo(std::string const& filename, uint32 const& param, std::string 
 		// run detection
 		detector.run();
 
-		if (param & wb::OPT_VERBOSE)
+		if (opts & wb::OPT_VERBOSE)
 			std::cout << LIBHEADER << "Detection finished." << std::endl;
 		
-		if (param & wb::OPT_VISUAL_OUTPUT)
+		if (opts & (wb::OPT_VISUAL_OUTPUT|wb::OPT_VISUAL_DEBUG))
 		{
 			cv::imshow(LIBNAME, image);
 			cv::waitKey(WB_WAIT_DELAY);
@@ -128,31 +134,31 @@ bool processVideo(std::string const& filename, uint32 const& param, std::string 
 	detector.free();
 	video.release();
 
-	if (param & wb::OPT_VERBOSE)
+	if (opts & wb::OPT_VERBOSE)
 		std::cout << LIBHEADER << "Memory free." << std::endl;
 
 	return true;
 }
 
 /**
-* @brief Chooses whether to process video or an image dataset.
-*
-* @param filename	filename
-* @param inputType	type of input
-* @param param		run parameters
-*/
-bool process(std::string input, wb::InputTypes inputType, uint32 param = 0, std::string output = std::string(""), wb::PyramidGenModes pyGenMode = wb::PYGEN_BINDLESS_TEXTURE)
+ * @brief Chooses whether to process video or an image dataset.
+ *
+ * @param filename	filename
+ * @param inputType	type of input
+ * @param opts		run optseters
+ */
+bool process(std::string input, wb::InputTypes inputType, wb::RunSettings settings, uint32 opts = 0)
 {	
 	switch (inputType)
 	{
 		case wb::INPUT_IMAGE_DATASET:
 		{
-			processImageDataset(input, param);
+			processImageDataset(input, opts);
 			break;
 		}
 		case wb::INPUT_VIDEO:
 		{
-			processVideo(input, param, output, pyGenMode);
+			processVideo(input, settings, opts);
 			break;
 		}
 		default:
@@ -163,18 +169,20 @@ bool process(std::string input, wb::InputTypes inputType, uint32 param = 0, std:
 }
 
 /**
-* @brief Basic program to test the detector.
-*
-* @param argc	number of arguments
-* @param argv	argument values
-* @return exit code
-*/
+ * @brief Basic program to test the detector.
+ *
+ * @param argc	number of arguments
+ * @param argv	argument values
+ * @return exit code
+ *
+ * @todo improve argument error handling
+ */
 int main(int argc, char** argv)
 {
-	std::string input, output;
+	std::string input;
 	wb::InputTypes mode;
-	uint32 param = 0;
-	wb::PyramidGenModes pyGenMode = wb::MAX_PYGEN_MODES;
+	uint32 opts = 0;
+	wb::RunSettings settings;	
 	for (int i = 1; i < argc; ++i)
 	{
 		// input dataset
@@ -189,38 +197,55 @@ int main(int argc, char** argv)
 		}
 		// output csv
 		else if (std::string(argv[i]) == "-oc" && i + 1 < argc) {
-			output = argv[++i];
-			param |= wb::OPT_OUTPUT_CSV;
+			settings.outputFilename = argv[++i];
+			opts |= wb::OPT_OUTPUT_CSV;
 		}
 		// verbose
-		else if (std::string(argv[i]) == "-v") {			
-			param |= wb::OPT_VERBOSE;
-		}
+		else if (std::string(argv[i]) == "-v")			
+			opts |= wb::OPT_VERBOSE;
 		// visual output
-		else if (std::string(argv[i]) == "-t") {			
-			param |= wb::OPT_TIMER;
-		}
+		else if (std::string(argv[i]) == "-t")		
+			opts |= wb::OPT_TIMER;
 		// visual output
-		else if (std::string(argv[i]) == "-vo") {
-			param |= wb::OPT_VISUAL_OUTPUT;
-		}
+		else if (std::string(argv[i]) == "-vo")
+			opts |= wb::OPT_VISUAL_OUTPUT;
 		// visual debug
-		else if (std::string(argv[i]) == "-vd") {
-			param |= wb::OPT_VISUAL_DEBUG | wb::OPT_TIMER;
+		else if (std::string(argv[i]) == "-vd")
+			opts |= (wb::OPT_VISUAL_DEBUG|wb::OPT_TIMER);
+		// block size
+		else if (std::string(argv[i]) == "-bs" && i + 1 < argc)
+			settings.blockSize = atoi(argv[++i]);
+		// max frames processed
+		else if (std::string(argv[i]) == "-lf" && i + 1 < argc)
+		{ 
+			settings.maxFrames = atoi(argv[++i]);
+			opts |= wb::OPT_LIMIT_FRAMES;
 		}
+		// pyramid generation
 		else if (std::string(argv[i]) == "-pg" && i + 1 < argc)
 		{
 			std::string str = argv[++i];
-			if (str == "single") {
-				pyGenMode = wb::PYGEN_SINGLE_TEXTURE;
-			}
+			if (str == "single") 
+				settings.pyGenMode = wb::PYGEN_SINGLE_TEXTURE;
 			else if (str == "bindless")
-			{
-				pyGenMode = wb::PYGEN_BINDLESS_TEXTURE;
-			}
+				settings.pyGenMode = wb::PYGEN_BINDLESS_TEXTURE;
 			else 
 			{
 				std::cerr << LIBHEADER << "Option -pg (pyramid generation) has two options available: 'bindless' and 'single'." << std::endl;
+				return EXIT_FAILURE;
+			}
+		}
+		// pyramid type
+		else if (std::string(argv[i]) == "-pt" && i + 1 < argc)
+		{
+			std::string str = argv[++i];
+			if (str == "horizontal")
+				settings.pyType = wb::PYTYPE_HORIZONAL;
+			else if (str == "optimized")
+				settings.pyType = wb::PYTYPE_OPTIMIZED;
+			else
+			{
+				std::cerr << LIBHEADER << "Option -pt (pyramid type) has two options available: 'horizontal' and 'optimized'." << std::endl;
 				return EXIT_FAILURE;
 			}
 		}
@@ -230,7 +255,7 @@ int main(int argc, char** argv)
 		}
 	}
 	
-	if (process(input, mode, param, output, pyGenMode))
+	if (process(input, mode, settings, opts))
 		return EXIT_SUCCESS;
 
 	return EXIT_FAILURE;

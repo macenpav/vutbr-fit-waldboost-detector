@@ -83,6 +83,20 @@ namespace wb {
 		uint32 x, y;
 		float response;
 	};
+
+	/** @brief Functional detector settings. 
+	 *
+	 * Structure to hold settings, which change the behaviour of the detector. Default parameters
+	 * are also set here. Should be the most effective settings.
+	 */
+	struct RunSettings
+	{
+		std::string outputFilename;
+		uint32 blockSize			= 32;
+		PyramidGenModes pyGenMode	= PYGEN_BINDLESS_TEXTURE;
+		PyramidTypes pyType			= PYTYPE_OPTIMIZED;
+		uint32 maxFrames			= 0;
+	};
 }
 
 #endif

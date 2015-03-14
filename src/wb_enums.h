@@ -2,7 +2,7 @@
 * @file	wb_enums.h
 * @brief	Waldboost detector enums.
 *
-* All enums are held hear. That means run parameters, pyramid generation modes and
+* @details All enums are held hear. That means run parameters, pyramid generation modes and
 * other such options. When implementing a way how to generate a pyramid a new mode
 * should be defined here.
 *
@@ -34,6 +34,9 @@ namespace wb {
 		OPT_VISUAL_DEBUG	= 0x00000008,
 		/** @brief Output measurements to a CSV file. */
 		OPT_OUTPUT_CSV		= 0x00000010|OPT_TIMER,
+		
+		/** @brief Max. number of frames processed limited. */
+		OPT_LIMIT_FRAMES	= 0x00000020,
 
 		/** @brief All options are switched on. */
 		OPT_ALL				= 0xFFFFFFFF
