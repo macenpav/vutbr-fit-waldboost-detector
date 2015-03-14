@@ -1,0 +1,13 @@
+13/03/2015; version 7f0295a82d9a18a002bb5ab489cb8b1b52887cf9
+
+- bindless texture version is generally faster than the single texture version
+possibly due to the fact, that texture is read-optimized and single texture version
+uses both reads and writes
+
+- pyramid generation is faster on gtx780ti, whereas detection is faster on gtx980
+gtx800 has higher frequency, but less streaming processors (compute cores)
+
+- 8x8 blocks are the fastest for pyramid image generation, where as 16x16 blocks are the fastest for detection
+
+- detection for gtx580 and 32x32 blocks (fermi architecture) is dramatically slower then with other block sizes or GPUs
+it has only 512 streaming processors, 32x32 block size is optimal for GPUs with 1024+ SMs
