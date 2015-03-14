@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['waldboostdetector',['WaldboostDetector',['../classwb_1_1_waldboost_detector.html',1,'wb']]]
+  ['stage',['Stage',['../structwb_1_1_stage.html',1,'wb']]],
+  ['survivordata',['SurvivorData',['../structwb_1_1_survivor_data.html',1,'wb']]]
 ];
