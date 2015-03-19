@@ -311,6 +311,7 @@ namespace wb {
 			Detection*			_devDetections;			///< pointer to the detections in device memory
 			uint32*				_devDetectionCount;		///< pointer to the number of detections in device memory
 			SurvivorData*		_devSurvivors;			///< pointer to device survivor memory			
+			uint32*				_devSurvivorCount;
 			cv::Mat*			_myImage;				///< pointer to the original processed image
 			std::string			_outputFilename;		///< filename for csv output
 

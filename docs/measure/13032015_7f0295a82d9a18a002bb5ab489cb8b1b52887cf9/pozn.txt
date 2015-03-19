@@ -1,0 +1,4 @@
+- verze pro zpracovani datasetu
+- srovnani s opencv
+- srovnani se skolni implementaci (medusa)
+- zacait psat
