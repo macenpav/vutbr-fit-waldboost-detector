@@ -92,6 +92,7 @@ bool processVideo(std::string const& filename, wb::RunSettings const& settings, 
 	detector.setPyType(settings.pyType);	
 	detector.setRunOptions(opts);
 	detector.setOutputFile(settings.outputFilename);
+	detector.setDetectionMode(settings.detectionMode);
 	detector.init(&image);
 
 	if (opts & wb::OPT_VERBOSE)	
@@ -232,6 +233,21 @@ int main(int argc, char** argv)
 			else 
 			{
 				std::cerr << LIBHEADER << "Option -pg (pyramid generation) has two options available: 'bindless' and 'single'." << std::endl;
+				return EXIT_FAILURE;
+			}
+		}
+		else if (std::string(argv[i]) == "-dm" && i + 1 < argc)
+		{
+			std::string str = argv[++i];
+			if (str == "aglobal")
+				settings.detectionMode = wb::DET_ATOMIC_GLOBAL;
+			else if (str == "ashared")
+				settings.detectionMode = wb::DET_ATOMIC_SHARED;
+			else if (str == "prefixsum")
+				settings.detectionMode = wb::DET_PREFIXSUM;
+			else
+			{
+				std::cerr << LIBHEADER << "Option -dm (detection mode) has only the following options available: 'aglobal', 'ashared' and 'prefixsum'." << std::endl;
 				return EXIT_FAILURE;
 			}
 		}

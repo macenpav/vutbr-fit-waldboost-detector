@@ -13,54 +13,40 @@
 namespace wb {
 		
 	__device__ 
-	void detectDetections(		
+		void detectDetections_prefixsum(
+		uint32 const& threadId,
+		uint32 const&	globalOffset,
 		SurvivorData*	survivors,
 		Detection*		detections,
 		uint32*			detectionCount,
 		uint16			startStage)
-	{
-		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
-		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;		
-		const uint32 globalId = y * PYRAMID.canvasWidth + x;
+	{				
+		float response = survivors[globalOffset + threadId].response;
+		const uint32 x = survivors[globalOffset + threadId].x;
+		const uint32 y = survivors[globalOffset + threadId].y;
 
-		if (x < (PYRAMID.canvasWidth - WB_CLASSIFIER_WIDTH) && y < (PYRAMID.canvasHeight - WB_CLASSIFIER_HEIGHT))
-		{
-			float response = survivors[globalId].response;
-
-			if (response < FINAL_THRESHOLD)
-				return;
-
-			const uint32 x = survivors[globalId].x;
-			const uint32 y = survivors[globalId].y;
-
-			__syncthreads();
-
-			bool survived = eval(x, y, &response, startStage, STAGE_COUNT);
-			if (survived) {
-				uint32 pos = atomicInc(detectionCount, WB_MAX_DETECTIONS);
-				detections[pos].x = x;
-				detections[pos].y = y;
-				detections[pos].width = WB_CLASSIFIER_WIDTH;
-				detections[pos].height = WB_CLASSIFIER_HEIGHT;
-				detections[pos].response = response;
-			}
-		}
+		bool survived = eval(x, y, &response, startStage, STAGE_COUNT);
+		if (survived) {
+			uint32 pos = atomicInc(detectionCount, WB_MAX_DETECTIONS);
+			detections[pos].x = x;
+			detections[pos].y = y;
+			detections[pos].width = WB_CLASSIFIER_WIDTH;
+			detections[pos].height = WB_CLASSIFIER_HEIGHT;
+			detections[pos].response = response;
+		}		
 	}
 
 	__device__
 		void detectDetections_atomicShared(
+		uint32 const&	threadId,
 		SurvivorData*	localSurvivors,		
 		Detection*		detections,
 		uint32*			detectionCount,
 		uint16			startStage)
-	{
-		const uint32 blockId = threadIdx.y * blockDim.x + threadIdx.x;
-		
-		float response = localSurvivors[blockId].response;
-		const uint32 x = localSurvivors[blockId].x;
-		const uint32 y = localSurvivors[blockId].y;
-
-		__syncthreads();
+	{				
+		float response = localSurvivors[threadId].response;
+		const uint32 x = localSurvivors[threadId].x;
+		const uint32 y = localSurvivors[threadId].y;		
 
 		bool survived = eval(x, y, &response, startStage, STAGE_COUNT);
 		if (survived) 
@@ -102,108 +88,96 @@ namespace wb {
 	}
 
 	__device__ 
-	void detectSurvivorsInit(		
+	void detectSurvivorsInit_prefixsum(
+		uint32 const&	x,
+		uint32 const&	y,		
+		uint32 const&	threadId,
+		uint32 const&	globalOffset,
+		uint32 const&	blockSize,		
 		SurvivorData*	survivors,
+		uint32&			survivorCount,
+		uint32*			survivorScanArray,
 		uint16			endStage)
-	{
-		__shared__ uint32 localSurvivors[BLOCK_SIZE];
+	{				
+			
+		float response = 0.0f;
+		bool survived = eval(x, y, &response, 0, endStage);
 
-		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
-		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
-		const uint32 blockId = threadIdx.y * blockDim.x + threadIdx.x;
-		const uint32 globalId = y * PYRAMID.canvasWidth + x;
+		survivorScanArray[threadId] = survived ? 1 : 0;			
 
-		localSurvivors[blockId] = 0;
+		__syncthreads();
 
-		if (x < (PYRAMID.canvasWidth - WB_CLASSIFIER_WIDTH) && y < (PYRAMID.canvasHeight - WB_CLASSIFIER_HEIGHT))
+		// up-sweep
+		uint32 offset = 1;
+		for (uint32 d = blockSize >> 1; d > 0; d >>= 1, offset <<= 1) 
 		{
-			float response = 0.0f;
-			bool survived = eval(x, y, &response, 0, endStage);
+			__syncthreads();
 
-			localSurvivors[blockId] = static_cast<uint32>(survived);
-
-			const uint32 blockSize = blockDim.x * blockDim.y;
-
-			// up-sweep
-			uint32 offset = 1;
-			for (uint32 d = blockSize >> 1; d > 0; d >>= 1, offset <<= 1) {
-				__syncthreads();
-
-				if (blockId < d)
-				{
-					uint32 ai = offset * (2 * blockId + 1) - 1;
-					uint32 bi = offset * (2 * blockId + 2) - 1;
-					localSurvivors[bi] += localSurvivors[ai];
-				}
+			if (threadId < d)
+			{
+				const uint32 ai = offset * (2 * threadId + 1) - 1;
+				const uint32 bi = offset * (2 * threadId + 2) - 1;
+				survivorScanArray[bi] += survivorScanArray[ai];
 			}
+		}
 
-			// down-sweep
-			if (blockId == 0) {
-				localSurvivors[blockSize - 1] = 0;
-			}
+		// down-sweep
+		if (threadId == 0) {
+			survivorScanArray[blockSize - 1] = 0;
+		}
 
-			for (uint32 d = 1; d < blockSize; d <<= 1) {
-				offset >>= 1;
-
-				__syncthreads();
-
-				if (blockId < d) 
-				{
-					uint32 ai = offset * (2 * blockId + 1) - 1;
-					uint32 bi = offset * (2 * blockId + 2) - 1;
-
-					uint32 t = localSurvivors[ai];
-					localSurvivors[ai] = localSurvivors[bi];
-					localSurvivors[bi] += t;
-				}
-			}
-
-			survivors[globalId].response = WB_BAD_RESPONSE;
+		for (uint32 d = 1; d < blockSize; d <<= 1) 
+		{
+			offset >>= 1;
 
 			__syncthreads();
 
-			if (survived) {				
-				uint32 blockOffset = (blockIdx.y*blockDim.y) * PYRAMID.canvasWidth + (blockIdx.x*blockDim.x);
-				uint32 newThreadId = blockOffset + localSurvivors[blockId];
-				// save position and current response
-				survivors[newThreadId].x = x;
-				survivors[newThreadId].y = y;
-				survivors[newThreadId].response = response;
+			if (threadId < d)
+			{
+				const uint32 ai = offset * (2 * threadId + 1) - 1;
+				const uint32 bi = offset * (2 * threadId + 2) - 1;
+
+				const uint32 t = survivorScanArray[ai];
+				survivorScanArray[ai] = survivorScanArray[bi];
+				survivorScanArray[bi] += t;
 			}
 		}
+			
+		__syncthreads();		
+
+		if (threadId == 0)
+			survivorCount = survivorScanArray[blockSize - 1];
+	
+		if (survived)
+		{			
+			uint32 newThreadId = survivorScanArray[threadId];
+
+			// save position and current response
+			survivors[newThreadId].x = x;
+			survivors[newThreadId].y = y;
+			survivors[newThreadId].response = response;
+		}				
 	}
 
 	__device__
 		void detectSurvivorsInit_atomicShared(
+		uint32 const&	x,
+		uint32 const&	y,
+		uint32 const&	threadId,
 		SurvivorData*	localSurvivors,
 		uint32*			localSurvivorCount,
 		uint16			endStage)
 	{				
-		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
-		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
-		const uint32 blockId = threadIdx.y * blockDim.x + threadIdx.x;		
-
-		if (blockId == 0)
-			*localSurvivorCount = 0;
-
-		__syncthreads();
-
-		if (x < (PYRAMID.canvasWidth - WB_CLASSIFIER_WIDTH) && y < (PYRAMID.canvasHeight - WB_CLASSIFIER_HEIGHT))
-		{
-			float response = 0.0f;
-			bool survived = eval(x, y, &response, 0, endStage);						
-
-			if (survived)
-			{				
-				uint32 newThreadId = atomicInc(localSurvivorCount, blockDim.x * blockDim.y);
-				// save position and current response
-				localSurvivors[newThreadId].x = x;
-				localSurvivors[newThreadId].y = y;
-				localSurvivors[newThreadId].response = response;
-			}
-		}
-
-		__syncthreads();
+		float response = 0.0f;
+		bool survived = eval(x, y, &response, 0, endStage);						
+		if (survived)
+		{				
+			uint32 newThreadId = atomicInc(localSurvivorCount, blockDim.x * blockDim.y);
+			// save position and current response
+			localSurvivors[newThreadId].x = x;
+			localSurvivors[newThreadId].y = y;
+			localSurvivors[newThreadId].response = response;
+		}	
 	}
 
 	__device__
@@ -230,101 +204,79 @@ namespace wb {
 		}	
 	}
 
-	__device__ void detectSurvivors(
-		SurvivorData*	survivors,
-		uint16			startStage,
-		uint16			endStage)
-	{
-		__shared__ uint32 localSurvivors[BLOCK_SIZE];
-		
-		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
-		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
-		const uint32 blockId = threadIdx.y * blockDim.x + threadIdx.x;
-		const uint32 globalId = y * PYRAMID.canvasWidth + x;
+	__device__ void detectSurvivors_prefixsum(
+		uint32 const&		threadId,
+		uint32 const&		globalOffset,
+		uint32 const&		blockSize,
+		SurvivorData*		survivors,
+		uint32&				survivorCount,
+		uint32*				survivorScanArray,		
+		uint16				startStage,
+		uint16				endStage)
+	{					
+		float response = survivors[globalOffset + threadId].response;			
+		const uint32 x = survivors[globalOffset + threadId].x;
+		const uint32 y = survivors[globalOffset + threadId].y;
 
-		localSurvivors[blockId] = 0;
+		bool survived = eval(x, y, &response, startStage, endStage);		
+		survivorScanArray[threadId] = survived ? 1 : 0;
 
-		if (x < (PYRAMID.canvasWidth - WB_CLASSIFIER_WIDTH) && y < (PYRAMID.canvasHeight - WB_CLASSIFIER_HEIGHT))
-		{
-			float response = survivors[globalId].response;
-
-			// kill the detection if its below threshold
-			if (response < FINAL_THRESHOLD)
-				return;
-			
-			const uint32 x = survivors[globalId].x;
-			const uint32 y = survivors[globalId].y;
-
+		// up-sweep
+		int offset = 1;
+		for (uint32 d = blockSize >> 1; d > 0; d >>= 1, offset <<= 1) {
 			__syncthreads();
 
-			bool survived = eval(x, y, &response, startStage, endStage);
-
-			localSurvivors[blockId] = static_cast<uint32>(survived);
-
-			const uint32 blockSize = blockDim.x * blockDim.y;
-
-			// up-sweep
-			int offset = 1;
-			for (uint32 d = blockSize >> 1; d > 0; d >>= 1, offset <<= 1) {
-				__syncthreads();
-
-				if (blockId < d) {
-					uint32 ai = offset * (2 * blockId + 1) - 1;
-					uint32 bi = offset * (2 * blockId + 2) - 1;
-					localSurvivors[bi] += localSurvivors[ai];
-				}
-			}
-
-			// down-sweep
-			if (blockId == 0) {
-				localSurvivors[blockSize - 1] = 0;
-			}
-
-			for (uint32 d = 1; d < blockSize; d <<= 1) {
-				offset >>= 1;
-
-				__syncthreads();
-
-				if (blockId < d) {
-					uint32 ai = offset * (2 * blockId + 1) - 1;
-					uint32 bi = offset * (2 * blockId + 2) - 1;
-
-					uint32 t = localSurvivors[ai];
-					localSurvivors[ai] = localSurvivors[bi];
-					localSurvivors[bi] += t;
-				}
-			}
-
-			survivors[globalId].response = WB_BAD_RESPONSE;
-
-			__syncthreads();
-
-			if (survived) {
-				uint32 newThreadId = (blockIdx.y*blockDim.y) * PYRAMID.canvasWidth + (blockIdx.x*blockDim.x) + localSurvivors[blockId];
-				// save position and current response
-				survivors[newThreadId].x = x;
-				survivors[newThreadId].y = y;
-				survivors[newThreadId].response = response;
+			if (threadId < d) {
+				uint32 ai = offset * (2 * threadId + 1) - 1;
+				uint32 bi = offset * (2 * threadId + 2) - 1;
+				survivorScanArray[bi] += survivorScanArray[ai];
 			}
 		}
+
+		// down-sweep
+		if (threadId == 0) {
+			survivorScanArray[blockSize - 1] = 0;
+		}
+
+		for (uint32 d = 1; d < blockSize; d <<= 1) {
+			offset >>= 1;
+
+			__syncthreads();
+
+			if (threadId < d) {
+				uint32 ai = offset * (2 * threadId + 1) - 1;
+				uint32 bi = offset * (2 * threadId + 2) - 1;
+
+				uint32 t = survivorScanArray[ai];
+				survivorScanArray[ai] = survivorScanArray[bi];
+				survivorScanArray[bi] += t;
+			}
+		}		
+
+		__syncthreads();
+
+		if (threadId == 0)
+			survivorCount = survivorScanArray[blockSize - 1];
+
+		if (survived) {
+			uint32 newThreadId = globalOffset + survivorScanArray[threadId];
+			// save position and current response
+			survivors[newThreadId].x = x;
+			survivors[newThreadId].y = y;
+			survivors[newThreadId].response = response;
+		}	
 	}
 
 	__device__ void detectSurvivors_atomicShared(
+		uint32 const&	threadId,
 		SurvivorData*	localSurvivors,
 		uint32*			localSurvivorCount,
 		uint16			startStage,
 		uint16			endStage)
-	{				
-		const uint32 blockId = threadIdx.y * blockDim.x + threadIdx.x;
-				
-		float response = localSurvivors[blockId].response;
-		const uint32 x = localSurvivors[blockId].x;
-		const uint32 y = localSurvivors[blockId].y;
-
-		if (blockId == 0)
-			*localSurvivorCount = 0;
-
-		__syncthreads();
+	{										
+		float response = localSurvivors[threadId].response;
+		const uint32 x = localSurvivors[threadId].x;
+		const uint32 y = localSurvivors[threadId].y;
 
 		bool survived = eval(x, y, &response, startStage, endStage);
 		if (survived)
@@ -334,8 +286,6 @@ namespace wb {
 			localSurvivors[newThreadId].y = y;
 			localSurvivors[newThreadId].response = response;
 		}	
-
-		__syncthreads();
 	}
 
 	__device__ void detectSurvivors_global(
@@ -366,56 +316,90 @@ namespace wb {
 	__global__ void detectionKernel_atomicShared(
 		Detection*			detections,
 		uint32*				detectionCount)
-	{
-		const uint32 blockId = threadIdx.y * blockDim.x + threadIdx.x;
-
-		__shared__ SurvivorData survivors[BLOCK_SIZE];
+	{		
+		extern __shared__ SurvivorData survivors[];
 		__shared__ uint32 survivorCount;
+				
+		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
+		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
 
-		detectSurvivorsInit_atomicShared(survivors, &survivorCount, 1);
+		if (x < PYRAMID.canvasWidth - WB_CLASSIFIER_WIDTH && y < PYRAMID.canvasHeight - WB_CLASSIFIER_HEIGHT)
+		{	
+			const uint32 threadId = threadIdx.y * blockDim.x + threadIdx.x;
 
-		if (blockId >= survivorCount)
-			return;
+			if (threadId == 0)
+				survivorCount = 0;
+			__syncthreads();
 
-		detectSurvivors_atomicShared(survivors, &survivorCount, 1, 8);
+			detectSurvivorsInit_atomicShared(x, y, threadId, survivors, &survivorCount, 1);
 
-		if (blockId >= survivorCount)
-			return;
+			__syncthreads();
+			if (threadId >= survivorCount)
+				return;
+			__syncthreads();
+			if (threadId == 0)
+				survivorCount = 0;
+			__syncthreads();
 
-		detectSurvivors_atomicShared(survivors, &survivorCount, 8, 64);
+			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 1, 8);
 
-		if (blockId >= survivorCount)
-			return;
+			__syncthreads();
+			if (threadId >= survivorCount)
+				return;
+			__syncthreads();
+			if (threadId == 0)
+				survivorCount = 0;
+			__syncthreads();
 
-		detectSurvivors_atomicShared(survivors, &survivorCount, 64, 256);
+			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 8, 64);
 
-		if (blockId >= survivorCount)
-			return;
+			__syncthreads();
+			if (threadId >= survivorCount)
+				return;
+			__syncthreads();
+			if (threadId == 0)
+				survivorCount = 0;
+			__syncthreads();
 
-		detectSurvivors_atomicShared(survivors, &survivorCount, 256, 512);
+			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 64, 256);
 
-		if (blockId >= survivorCount)
-			return;
+			__syncthreads();
+			if (threadId >= survivorCount)
+				return;
+			__syncthreads();
+			if (threadId == 0)
+				survivorCount = 0;
+			__syncthreads();
 
-		detectDetections_atomicShared(survivors, detections, detectionCount, 512);
+			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 256, 512);
+
+			__syncthreads();
+			if (threadId >= survivorCount)
+				return;		
+			__syncthreads();
+
+			detectDetections_atomicShared(threadId, survivors, detections, detectionCount, 512);
+		}
 	}
 
 	__global__ void detectionKernel_global(
 		SurvivorData*		survivors,		
 		Detection*			detections,
 		uint32*				detectionCount)
-	{
-		__shared__ uint32 blockSurvivors;
-
+	{		
 		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
 		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
 
 		if (x < PYRAMID.canvasWidth - WB_CLASSIFIER_WIDTH && y < PYRAMID.canvasHeight - WB_CLASSIFIER_HEIGHT)
 		{
+			__shared__ uint32 blockSurvivors;
+
 			const uint32 blockSize = blockDim.x * blockDim.y;
 			const uint32 blockPitch = gridDim.x * blockSize;
 
+			// every block has a reserved space in global mem.
 			const uint32 blockOffset = blockIdx.y * blockPitch + blockIdx.x * blockSize;
+			// thread id inside a block
 			const uint32 threadId = threadIdx.y * blockDim.x + threadIdx.x;
 			
 			if (threadId == 0)
@@ -487,17 +471,76 @@ namespace wb {
 		}
 	}
 
-	__global__ void detectionKernel(
+	__global__ void detectionKernel_prefixsum(		
 		Detection*			detections,
-		uint32*				detectionCount,
-		SurvivorData*		survivors)
-	{
-		detectSurvivorsInit(survivors, 1);
-		detectSurvivors(survivors, 1, 8);
-		detectSurvivors(survivors, 8, 64);
-		detectSurvivors(survivors, 64, 256);
-		detectSurvivors(survivors, 256, 512);
-		detectDetections(survivors, detections, detectionCount, 512);
+		uint32*				detectionCount)
+	{										
+		extern __shared__ SurvivorData survivors[];
+		uint32* survivorScanArray = (uint32*)&survivors[blockDim.x * blockDim.y];
+
+		__shared__ uint32 survivorCount;
+
+		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
+		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;	
+	
+		const uint32 blockSize = blockDim.x * blockDim.y;			
+		const uint32 blockPitch = gridDim.x * blockSize;			
+		const uint32 blockOffset = blockIdx.y * blockPitch + blockIdx.x * blockSize;
+		const uint32 threadId = threadIdx.y * blockDim.x + threadIdx.x;
+
+		if (threadId == 0)
+			survivorCount = 0;
+
+		__syncthreads();
+
+			detectSurvivorsInit_prefixsum(x, y, threadId, blockOffset, blockSize, survivors, survivorCount, survivorScanArray, 1);
+			
+			__syncthreads();			
+			if (threadId >= survivorCount)
+				return;
+			__syncthreads();			
+			if (threadId == 0)
+				survivorCount = 0;
+			__syncthreads();
+
+			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 1, 8);
+			
+			__syncthreads();
+			if (threadId >= survivorCount)
+				return;
+			__syncthreads();
+			if (threadId == 0)
+				survivorCount = 0;
+			__syncthreads();
+			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 8, 64);
+			
+			
+			__syncthreads();
+			if (threadId >= survivorCount)
+				return;
+			__syncthreads();
+			if (threadId == 0)
+				survivorCount = 0;
+			__syncthreads();
+			
+			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 64, 256);
+			
+			__syncthreads();
+			if (threadId >= survivorCount)
+				return;
+			__syncthreads();
+			if (threadId == 0)
+				survivorCount = 0;
+			__syncthreads();
+
+			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 256, 512);
+			
+			__syncthreads();
+			if (threadId >= survivorCount)
+				return;
+
+			detectDetections_atomicShared(threadId, survivors, detections, detectionCount, 512);
+		
 	}
 
 	__device__ void sumRegions(float* values, float x, float y, Stage* stage)
@@ -1160,23 +1203,63 @@ namespace wb {
 		
 		dim3 grid(_pyramid.canvasWidth / _block.x + 1, _pyramid.canvasHeight / _block.y + 1, 1);
 		cudaMemset(_devDetectionCount, 0, sizeof(uint32));
-		
-		cudaEvent_t start_detection, stop_detection;
-		if (_opt & OPT_TIMER)
-		{			
-			cudaEventCreate(&start_detection);
-			cudaEventCreate(&stop_detection);
-			cudaEventRecord(start_detection);
-		}
-
-		detectionKernel_global <<<grid, _block>>>(_devSurvivors, _devDetections, _devDetectionCount);
-		
-		if (_opt & OPT_TIMER)
+			
+		cudaEvent_t start_detection, stop_detection;		
+		switch (_detectionMode)
 		{
-			cudaEventRecord(stop_detection);
-			cudaEventSynchronize(stop_detection);
-			cudaEventElapsedTime(&_timers[TIMER_DETECTION], start_detection, stop_detection);
-		}						
+			case DET_ATOMIC_GLOBAL:
+				if (_opt & OPT_TIMER)
+				{
+					cudaEventCreate(&start_detection);
+					cudaEventCreate(&stop_detection);
+					cudaEventRecord(start_detection);
+				}
+				detectionKernel_global<<<grid, _block>>>(_devSurvivors, _devDetections, _devDetectionCount);
+				if (_opt & OPT_TIMER)
+				{
+					cudaEventRecord(stop_detection);
+					cudaEventSynchronize(stop_detection);
+					cudaEventElapsedTime(&_timers[TIMER_DETECTION], start_detection, stop_detection);
+				}
+				break;
+
+			case DET_ATOMIC_SHARED:
+			{
+				if (_opt & OPT_TIMER)
+				{
+					cudaEventCreate(&start_detection);
+					cudaEventCreate(&stop_detection);
+					cudaEventRecord(start_detection);
+				}
+				uint32 sharedMemsize = _block.x * _block.y * sizeof(SurvivorData);
+				detectionKernel_atomicShared<<<grid, _block, sharedMemsize>>>(_devDetections, _devDetectionCount);
+				if (_opt & OPT_TIMER)
+				{
+					cudaEventRecord(stop_detection);
+					cudaEventSynchronize(stop_detection);
+					cudaEventElapsedTime(&_timers[TIMER_DETECTION], start_detection, stop_detection);
+				}
+				break;
+			}
+			case DET_PREFIXSUM:
+			{
+				if (_opt & OPT_TIMER)
+				{
+					cudaEventCreate(&start_detection);
+					cudaEventCreate(&stop_detection);
+					cudaEventRecord(start_detection);
+				}
+				uint32 sharedMemsize = (_block.x * _block.y * sizeof(SurvivorData)) + (_block.x * _block.y * sizeof(uint32));
+				detectionKernel_prefixsum <<<grid, _block, sharedMemsize>>>(_devDetections, _devDetectionCount);
+				if (_opt & OPT_TIMER)
+				{
+					cudaEventRecord(stop_detection);
+					cudaEventSynchronize(stop_detection);
+					cudaEventElapsedTime(&_timers[TIMER_DETECTION], start_detection, stop_detection);
+				}
+				break;
+			}
+		}												
 
 		_processDetections();	
 

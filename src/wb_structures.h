@@ -92,10 +92,11 @@ namespace wb {
 	struct RunSettings
 	{
 		std::string outputFilename;
-		uint32 blockSize			= 32;
-		PyramidGenModes pyGenMode	= PYGEN_BINDLESS_TEXTURE;
-		PyramidTypes pyType			= PYTYPE_OPTIMIZED;
-		uint32 maxFrames			= 0;
+		uint32 blockSize				= 32;
+		PyramidGenModes pyGenMode		= PYGEN_BINDLESS_TEXTURE;
+		PyramidTypes pyType				= PYTYPE_OPTIMIZED;
+		DetectionModes detectionMode	= DET_ATOMIC_GLOBAL;
+		uint32 maxFrames				= 0;
 	};
 }
 

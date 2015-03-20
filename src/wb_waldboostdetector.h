@@ -34,7 +34,17 @@ namespace wb {
 	 * @return					Void.
 	 */
 	__device__
-	void detectSurvivorsInit(SurvivorData* survivors, uint16 endStage);
+	void detectSurvivorsInit_prefixsum(
+		uint32 const&	x,
+		uint32 const&	y,
+		uint32 const&	threadId,
+		uint32 const&	globalOffset,
+		uint32 const&	blockSize,
+		SurvivorData*	survivors,
+		uint32&			survivorCount,
+		uint32*			survivorScanArray,
+		uint16			endStage
+	);
 
 	/** @brief Survivor detection processing
 	 *
@@ -48,7 +58,16 @@ namespace wb {
 	 * @return					Void.
 	 */
 	__device__
-	void detectSurvivors(SurvivorData* survivors,uint16 startStage, uint16 endStage);
+	void detectSurvivors_prefixsum(
+		uint32 const&		threadId,
+		uint32 const&		globalOffset,
+		uint32 const&		blockSize,
+		SurvivorData*		survivors,
+		uint32&				survivorCount,
+		uint32*				survivorScanArray,
+		uint16				startStage,
+		uint16				endStage
+	);
 
 	/** @brief Final detection processing
 	 *
@@ -63,7 +82,14 @@ namespace wb {
 	 * @return					Void.
 	 */
 	__device__
-	void detectDetections(SurvivorData* survivors, Detection* detections, uint32* detectionCount, uint16 startStage);
+	void detectDetections_prefixsum(
+		uint32 const& threadId, 
+		uint32 const&	globalOffset,
+		SurvivorData* survivors, 
+		Detection* detections, 
+		uint32* detectionCount, 
+		uint16 startStage
+	);
 
 	/** @brief Evaluates stages for a given coordinate
 	 *
@@ -216,6 +242,9 @@ namespace wb {
 			/** @brief Sets pyramid type. */
 			void setPyType(PyramidTypes const& type) { _pyType = type; }
 
+			/** @brief Sets detection mode. */
+			void setDetectionMode(DetectionModes const& mode) { _detectionMode = mode; }
+
 			/** @brief Sets the kernel block size. */
 			void setBlockSize(uint32 const& x = 32, uint32 const& y = 32, uint32 const& z = 1){ _block = dim3(x, y, z); }
 
@@ -223,7 +252,7 @@ namespace wb {
 			void setRunOptions(uint32 const& options) { _opt = options; }
 
 			/** @brief Sets a file for output. */
-			void setOutputFile(std::string const& output) { _outputFilename = output; }
+			void setOutputFile(std::string const& output) { _outputFilename = output; }			
 
 			uint32 getFrameCount() const { return _frame; }
 
@@ -295,6 +324,7 @@ namespace wb {
 			Pyramid				_pyramid;			///< pyramid image information
 			PyramidGenModes		_pyGenMode;			///< pyramid generation mode
 			PyramidTypes		_pyType;			///< pyramid type (look)
+			DetectionModes		_detectionMode;		///< detection mode
 			uint32				_opt;				///< run options/parameters
 			float				_timers[MAX_TIMERS];///< timers
 			dim3				_block;				///< kernel block size

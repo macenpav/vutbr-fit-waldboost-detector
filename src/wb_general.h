@@ -35,12 +35,6 @@ typedef std::chrono::system_clock::time_point ClockPoint;
 /** @brief Number of stages of the detector. */
 #define STAGE_COUNT 2048
 
-/** @brief GPU block size (used as shared memory size). */
-#define BLOCK_SIZE 1024
-
-/** @brief Discarded sample. */
-#define WB_BAD_RESPONSE -5000.f
-
 /** @brief Delay in ms between displaying frames */
 #define WB_WAIT_DELAY 1
 

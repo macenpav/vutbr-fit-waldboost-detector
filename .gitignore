@@ -221,3 +221,4 @@ doc.pdf
 
 # cuda
 *.cu.deps
+*.nvuser

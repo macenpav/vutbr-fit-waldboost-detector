@@ -52,6 +52,18 @@ namespace wb {
 		MAX_PYGEN_MODES
 	};
 
+	/** @brief Object detection modes. */
+	enum DetectionModes {
+		/** @brief Atomic shared counter with the use of global memory. */
+		DET_ATOMIC_GLOBAL,
+		/** @brief Atomic shared counter with the use of shared memory for survivors. */
+		DET_ATOMIC_SHARED,
+		/** @brief Prefix sum used to count surviving threads. */
+		DET_PREFIXSUM,
+
+		MAX_DET_MODES
+	};
+
 	/** @brief How the pyramid image will look like. */
 	enum PyramidTypes {
 		/** @brief Pyramids positioned in a programmer-defined way */
