@@ -142,13 +142,15 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00092"></a><span class="lineno"><a class="line" href="structwb_1_1_run_settings.html">   92</a></span>&#160;    <span class="keyword">struct </span><a class="code" href="structwb_1_1_run_settings.html">RunSettings</a></div>
 <div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    {</div>
 <div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;        std::string outputFilename;</div>
-<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        uint32 blockSize            = 32;</div>
-<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        PyramidGenModes pyGenMode   = PYGEN_BINDLESS_TEXTURE;</div>
-<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        PyramidTypes pyType         = PYTYPE_OPTIMIZED;</div>
-<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;    };</div>
-<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;}</div>
-<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;</div>
-<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="line"><a name="l00095"></a><span class="lineno">   95</span>&#160;        uint32 blockSize                = 32;</div>
+<div class="line"><a name="l00096"></a><span class="lineno">   96</span>&#160;        PyramidGenModes pyGenMode       = PYGEN_BINDLESS_TEXTURE;</div>
+<div class="line"><a name="l00097"></a><span class="lineno">   97</span>&#160;        PyramidTypes pyType             = PYTYPE_OPTIMIZED;</div>
+<div class="line"><a name="l00098"></a><span class="lineno">   98</span>&#160;        DetectionModes detectionMode    = DET_ATOMIC_GLOBAL;</div>
+<div class="line"><a name="l00099"></a><span class="lineno">   99</span>&#160;        uint32 maxFrames                = 0;</div>
+<div class="line"><a name="l00100"></a><span class="lineno">  100</span>&#160;    };</div>
+<div class="line"><a name="l00101"></a><span class="lineno">  101</span>&#160;}</div>
+<div class="line"><a name="l00102"></a><span class="lineno">  102</span>&#160;</div>
+<div class="line"><a name="l00103"></a><span class="lineno">  103</span>&#160;<span class="preprocessor">#endif</span></div>
 <div class="ttc" id="structwb_1_1_stage_html_af56278d9aea7d089dabc36cf728b7a21"><div class="ttname"><a href="structwb_1_1_stage.html#af56278d9aea7d089dabc36cf728b7a21">wb::Stage::x</a></div><div class="ttdeci">uint8 x</div><div class="ttdoc">position </div><div class="ttdef"><b>Definition:</b> wb_structures.h:21</div></div>
 <div class="ttc" id="structwb_1_1_detection_html"><div class="ttname"><a href="structwb_1_1_detection.html">wb::Detection</a></div><div class="ttdoc">Allowed input types for a sample program. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:31</div></div>
 <div class="ttc" id="structwb_1_1_stage_html"><div class="ttname"><a href="structwb_1_1_stage.html">wb::Stage</a></div><div class="ttdoc">A waldboost detection stage. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:19</div></div>
@@ -161,8 +163,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="ttc" id="structwb_1_1_pyramid_image_html"><div class="ttname"><a href="structwb_1_1_pyramid_image.html">wb::PyramidImage</a></div><div class="ttdoc">Info about an image inside a pyramid. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:50</div></div>
 <div class="ttc" id="structwb_1_1_stage_html_aadc51276d2281146c172125c310b6c98"><div class="ttname"><a href="structwb_1_1_stage.html#aadc51276d2281146c172125c310b6c98">wb::Stage::width</a></div><div class="ttdeci">uint8 width</div><div class="ttdoc">size </div><div class="ttdef"><b>Definition:</b> wb_structures.h:23</div></div>
 <div class="ttc" id="structwb_1_1_pyramid_html"><div class="ttname"><a href="structwb_1_1_pyramid.html">wb::Pyramid</a></div><div class="ttdoc">Info about a pyramid. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:72</div></div>
-<div class="ttc" id="wb__general_8h_html_a3ee0080df2ddeddbb7502ae4e47c5101"><div class="ttname"><a href="wb__general_8h.html#a3ee0080df2ddeddbb7502ae4e47c5101">WB_OCTAVES</a></div><div class="ttdeci">#define WB_OCTAVES</div><div class="ttdoc">Number of image sets sampled from 1:1 to 1:0.5 scale. </div><div class="ttdef"><b>Definition:</b> wb_general.h:73</div></div>
-<div class="ttc" id="wb__general_8h_html_a030a247d769d3e676108d35add058810"><div class="ttname"><a href="wb__general_8h.html#a030a247d769d3e676108d35add058810">WB_LEVELS_PER_OCTAVE</a></div><div class="ttdeci">#define WB_LEVELS_PER_OCTAVE</div><div class="ttdoc">Number of downsampled images before the original image is 1/2 the width/height. </div><div class="ttdef"><b>Definition:</b> wb_general.h:70</div></div>
+<div class="ttc" id="wb__general_8h_html_a3ee0080df2ddeddbb7502ae4e47c5101"><div class="ttname"><a href="wb__general_8h.html#a3ee0080df2ddeddbb7502ae4e47c5101">WB_OCTAVES</a></div><div class="ttdeci">#define WB_OCTAVES</div><div class="ttdoc">Number of image sets sampled from 1:1 to 1:0.5 scale. </div><div class="ttdef"><b>Definition:</b> wb_general.h:68</div></div>
+<div class="ttc" id="wb__general_8h_html_a030a247d769d3e676108d35add058810"><div class="ttname"><a href="wb__general_8h.html#a030a247d769d3e676108d35add058810">WB_LEVELS_PER_OCTAVE</a></div><div class="ttdeci">#define WB_LEVELS_PER_OCTAVE</div><div class="ttdoc">Number of downsampled images before the original image is 1/2 the width/height. </div><div class="ttdef"><b>Definition:</b> wb_general.h:65</div></div>
 <div class="ttc" id="structwb_1_1_run_settings_html"><div class="ttname"><a href="structwb_1_1_run_settings.html">wb::RunSettings</a></div><div class="ttdoc">Functional detector settings. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:92</div></div>
 <div class="ttc" id="structwb_1_1_detection_html_a0908dbf2256d884d5605752e20eb2d7a"><div class="ttname"><a href="structwb_1_1_detection.html#a0908dbf2256d884d5605752e20eb2d7a">wb::Detection::width</a></div><div class="ttdeci">uint32 width</div><div class="ttdoc">size </div><div class="ttdef"><b>Definition:</b> wb_structures.h:35</div></div>
 <div class="ttc" id="structwb_1_1_stage_html_a31da72c77e291c77751a5d457ca4a434"><div class="ttname"><a href="structwb_1_1_stage.html#a31da72c77e291c77751a5d457ca4a434">wb::Stage::alphaOffset</a></div><div class="ttdeci">uint32 alphaOffset</div><div class="ttdoc">alpha offset in alpha array </div><div class="ttdef"><b>Definition:</b> wb_structures.h:27</div></div>
@@ -172,7 +174,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Mar 13 2015 12:10:45 for Waldboost detector using LBP by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Mar 21 2015 00:57:51 for Waldboost detector using LBP by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

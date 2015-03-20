@@ -112,6 +112,7 @@ Enumerations</h2></td></tr>
 <b>wb::OPT_VISUAL_DEBUG</b> = 0x00000008, 
 <br />
 &#160;&#160;<b>wb::OPT_OUTPUT_CSV</b> = 0x00000010|OPT_TIMER, 
+<b>wb::OPT_LIMIT_FRAMES</b> = 0x00000020, 
 <b>wb::OPT_ALL</b> = 0xFFFFFFFF
 <br />
  }</td></tr>
@@ -123,6 +124,17 @@ Enumerations</h2></td></tr>
  }</td></tr>
 <tr class="memdesc:a55869d8e9f5aac025baefd239f4810c9"><td class="mdescLeft">&#160;</td><td class="mdescRight">How the pyramid is generated. <br /></td></tr>
 <tr class="separator:a55869d8e9f5aac025baefd239f4810c9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab9525074cd15f5eabeffe38e6c216d46"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab9525074cd15f5eabeffe38e6c216d46"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>DetectionModes</b> { <br />
+&#160;&#160;<b>wb::DET_ATOMIC_GLOBAL</b>, 
+<b>wb::DET_ATOMIC_SHARED</b>, 
+<b>wb::DET_PREFIXSUM</b>, 
+<b>wb::DET_CPU</b>, 
+<br />
+&#160;&#160;<b>MAX_DET_MODES</b>
+<br />
+ }</td></tr>
+<tr class="memdesc:ab9525074cd15f5eabeffe38e6c216d46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Object detection modes. <br /></td></tr>
+<tr class="separator:ab9525074cd15f5eabeffe38e6c216d46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abe36a0d83dbbeb2f42996558b7e30e21"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="abe36a0d83dbbeb2f42996558b7e30e21"></a>enum &#160;</td><td class="memItemRight" valign="bottom"><b>PyramidTypes</b> { <b>wb::PYTYPE_OPTIMIZED</b>, 
 <b>wb::PYTYPE_HORIZONAL</b>, 
 <b>MAX_PYTYPES</b>
@@ -152,7 +164,7 @@ Enumerations</h2></td></tr>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Mar 13 2015 12:10:45 for Waldboost detector using LBP by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Mar 21 2015 00:57:51 for Waldboost detector using LBP by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

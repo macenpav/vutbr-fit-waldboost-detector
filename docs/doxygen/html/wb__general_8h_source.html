@@ -107,44 +107,41 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00023"></a><span class="lineno">   23</span>&#160;</div>
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keyword">typedef</span> std::chrono::high_resolution_clock Clock;</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;<span class="keyword">typedef</span> std::chrono::milliseconds Milliseconds;</div>
-<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="keyword">typedef</span> std::chrono::duration&lt;float&gt; FPDuration;</div>
-<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="keyword">typedef</span> std::chrono::system_clock::time_point ClockPoint;</div>
-<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;</div>
-<div class="line"><a name="l00030"></a><span class="lineno"><a class="line" href="wb__general_8h.html#aa1e48d2cb1557fe5f8b00c60294e818e">   30</a></span>&#160;<span class="preprocessor">#define FINAL_THRESHOLD 0.f</span></div>
-<div class="line"><a name="l00031"></a><span class="lineno">   31</span>&#160;</div>
-<div class="line"><a name="l00033"></a><span class="lineno"><a class="line" href="wb__general_8h.html#aeb0136b3ced60283f607f9070ae26009">   33</a></span>&#160;<span class="preprocessor">#define ALPHA_COUNT 256</span></div>
-<div class="line"><a name="l00034"></a><span class="lineno">   34</span>&#160;</div>
-<div class="line"><a name="l00036"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a61a0193997f8bfbffdf7594a5396ff46">   36</a></span>&#160;<span class="preprocessor">#define STAGE_COUNT 2048</span></div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;</div>
-<div class="line"><a name="l00039"></a><span class="lineno"><a class="line" href="wb__general_8h.html#ad51ded0bbd705f02f73fc60c0b721ced">   39</a></span>&#160;<span class="preprocessor">#define BLOCK_SIZE 1024</span></div>
-<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;</div>
-<div class="line"><a name="l00042"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a06a2f322c75631cf4d7263a51b24b64b">   42</a></span>&#160;<span class="preprocessor">#define WB_BAD_RESPONSE -5000.f</span></div>
-<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;</div>
-<div class="line"><a name="l00045"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a35989c8ec8c938577e9c125daec197b6">   45</a></span>&#160;<span class="preprocessor">#define WB_WAIT_DELAY 1</span></div>
-<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;</div>
-<div class="line"><a name="l00051"></a><span class="lineno"><a class="line" href="wb__general_8h.html#ab255b63e82dd0a59244beb4372429c38">   51</a></span>&#160;<span class="preprocessor">#define WB_MAX_DETECTIONS 512</span></div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
-<div class="line"><a name="l00054"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a5dc8476e7d2c62d8f74272f36a5e4a7c">   54</a></span>&#160;<span class="preprocessor">#define WB_CLASSIFIER_WIDTH 26</span></div>
-<div class="line"><a name="l00055"></a><span class="lineno">   55</span>&#160;</div>
-<div class="line"><a name="l00057"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a71b60fa3d98d70df1f08f0376ab1ac28">   57</a></span>&#160;<span class="preprocessor">#define WB_CLASSIFIER_HEIGHT 26</span></div>
-<div class="line"><a name="l00058"></a><span class="lineno">   58</span>&#160;</div>
-<div class="line"><a name="l00067"></a><span class="lineno"><a class="line" href="wb__general_8h.html#ab34281faeff6cbd4bc45dc26c9c7b9ed">   67</a></span>&#160;<span class="preprocessor">#define WB_SCALING_FACTOR 1.09050773f</span></div>
-<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;</div>
-<div class="line"><a name="l00070"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a030a247d769d3e676108d35add058810">   70</a></span>&#160;<span class="preprocessor">#define WB_LEVELS_PER_OCTAVE 8</span></div>
-<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;</div>
-<div class="line"><a name="l00073"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a3ee0080df2ddeddbb7502ae4e47c5101">   73</a></span>&#160;<span class="preprocessor">#define WB_OCTAVES 4</span></div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;</div>
-<div class="line"><a name="l00076"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a3bbb216380a5140edccfab78f41e5aef">   76</a></span>&#160;<span class="keyword">const</span> std::string <a class="code" href="wb__general_8h.html#a3bbb216380a5140edccfab78f41e5aef">LIBNAME</a> = <span class="stringliteral">&quot;waldboost-detector&quot;</span>;</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;</div>
-<div class="line"><a name="l00079"></a><span class="lineno"><a class="line" href="wb__general_8h.html#ac059212137df82d64704fbd47f84a1da">   79</a></span>&#160;<span class="keyword">const</span> std::string <a class="code" href="wb__general_8h.html#ac059212137df82d64704fbd47f84a1da">LIBHEADER</a> = <span class="stringliteral">&quot;[&quot;</span> + <a class="code" href="wb__general_8h.html#a3bbb216380a5140edccfab78f41e5aef">LIBNAME</a> + <span class="stringliteral">&quot;]: &quot;</span>;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="wb__general_8h_html_ac059212137df82d64704fbd47f84a1da"><div class="ttname"><a href="wb__general_8h.html#ac059212137df82d64704fbd47f84a1da">LIBHEADER</a></div><div class="ttdeci">const std::string LIBHEADER</div><div class="ttdoc">Just a helper so we don&#39;t have to write the whole thing in debug output. </div><div class="ttdef"><b>Definition:</b> wb_general.h:79</div></div>
-<div class="ttc" id="wb__general_8h_html_a3bbb216380a5140edccfab78f41e5aef"><div class="ttname"><a href="wb__general_8h.html#a3bbb216380a5140edccfab78f41e5aef">LIBNAME</a></div><div class="ttdeci">const std::string LIBNAME</div><div class="ttdoc">Library name. </div><div class="ttdef"><b>Definition:</b> wb_general.h:76</div></div>
+<div class="line"><a name="l00026"></a><span class="lineno">   26</span>&#160;<span class="keyword">typedef</span> std::chrono::nanoseconds Nanoseconds;</div>
+<div class="line"><a name="l00027"></a><span class="lineno">   27</span>&#160;<span class="keyword">typedef</span> std::chrono::duration&lt;float&gt; FPDuration;</div>
+<div class="line"><a name="l00028"></a><span class="lineno">   28</span>&#160;<span class="keyword">typedef</span> std::chrono::system_clock::time_point ClockPoint;</div>
+<div class="line"><a name="l00029"></a><span class="lineno">   29</span>&#160;</div>
+<div class="line"><a name="l00031"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a32c6409b75a5c4cde7f98123e35db412">   31</a></span>&#160;<span class="preprocessor">#define WB_FINAL_THRESHOLD 0.f</span></div>
+<div class="line"><a name="l00032"></a><span class="lineno">   32</span>&#160;</div>
+<div class="line"><a name="l00034"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a9fdba8708a1e8b04583e01b12e42ece2">   34</a></span>&#160;<span class="preprocessor">#define WB_ALPHA_COUNT 256</span></div>
+<div class="line"><a name="l00035"></a><span class="lineno">   35</span>&#160;</div>
+<div class="line"><a name="l00037"></a><span class="lineno"><a class="line" href="wb__general_8h.html#af3524548a6be3a7d2c82bd26c487be15">   37</a></span>&#160;<span class="preprocessor">#define WB_STAGE_COUNT 2048</span></div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;</div>
+<div class="line"><a name="l00040"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a35989c8ec8c938577e9c125daec197b6">   40</a></span>&#160;<span class="preprocessor">#define WB_WAIT_DELAY 1</span></div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;</div>
+<div class="line"><a name="l00046"></a><span class="lineno"><a class="line" href="wb__general_8h.html#ab255b63e82dd0a59244beb4372429c38">   46</a></span>&#160;<span class="preprocessor">#define WB_MAX_DETECTIONS 4096</span></div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;</div>
+<div class="line"><a name="l00049"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a5dc8476e7d2c62d8f74272f36a5e4a7c">   49</a></span>&#160;<span class="preprocessor">#define WB_CLASSIFIER_WIDTH 26</span></div>
+<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;</div>
+<div class="line"><a name="l00052"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a71b60fa3d98d70df1f08f0376ab1ac28">   52</a></span>&#160;<span class="preprocessor">#define WB_CLASSIFIER_HEIGHT 26</span></div>
+<div class="line"><a name="l00053"></a><span class="lineno">   53</span>&#160;</div>
+<div class="line"><a name="l00062"></a><span class="lineno"><a class="line" href="wb__general_8h.html#ab34281faeff6cbd4bc45dc26c9c7b9ed">   62</a></span>&#160;<span class="preprocessor">#define WB_SCALING_FACTOR 1.09050773f</span></div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;</div>
+<div class="line"><a name="l00065"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a030a247d769d3e676108d35add058810">   65</a></span>&#160;<span class="preprocessor">#define WB_LEVELS_PER_OCTAVE 8</span></div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;</div>
+<div class="line"><a name="l00068"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a3ee0080df2ddeddbb7502ae4e47c5101">   68</a></span>&#160;<span class="preprocessor">#define WB_OCTAVES 4</span></div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;</div>
+<div class="line"><a name="l00071"></a><span class="lineno"><a class="line" href="wb__general_8h.html#a3bbb216380a5140edccfab78f41e5aef">   71</a></span>&#160;<span class="keyword">const</span> std::string <a class="code" href="wb__general_8h.html#a3bbb216380a5140edccfab78f41e5aef">LIBNAME</a> = <span class="stringliteral">&quot;waldboost-detector&quot;</span>;</div>
+<div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;</div>
+<div class="line"><a name="l00074"></a><span class="lineno"><a class="line" href="wb__general_8h.html#ac059212137df82d64704fbd47f84a1da">   74</a></span>&#160;<span class="keyword">const</span> std::string <a class="code" href="wb__general_8h.html#ac059212137df82d64704fbd47f84a1da">LIBHEADER</a> = <span class="stringliteral">&quot;[&quot;</span> + <a class="code" href="wb__general_8h.html#a3bbb216380a5140edccfab78f41e5aef">LIBNAME</a> + <span class="stringliteral">&quot;]: &quot;</span>;</div>
+<div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;</div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="ttc" id="wb__general_8h_html_ac059212137df82d64704fbd47f84a1da"><div class="ttname"><a href="wb__general_8h.html#ac059212137df82d64704fbd47f84a1da">LIBHEADER</a></div><div class="ttdeci">const std::string LIBHEADER</div><div class="ttdoc">Just a helper so we don&#39;t have to write the whole thing in debug output. </div><div class="ttdef"><b>Definition:</b> wb_general.h:74</div></div>
+<div class="ttc" id="wb__general_8h_html_a3bbb216380a5140edccfab78f41e5aef"><div class="ttname"><a href="wb__general_8h.html#a3bbb216380a5140edccfab78f41e5aef">LIBNAME</a></div><div class="ttdeci">const std::string LIBNAME</div><div class="ttdoc">Library name. </div><div class="ttdef"><b>Definition:</b> wb_general.h:71</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Mar 13 2015 12:10:45 for Waldboost detector using LBP by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Mar 21 2015 00:57:51 for Waldboost detector using LBP by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

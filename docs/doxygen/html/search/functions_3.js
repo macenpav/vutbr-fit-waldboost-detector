@@ -1,6 +1,7 @@
 var searchData=
 [
   ['setblocksize',['setBlockSize',['../classwb_1_1_waldboost_detector.html#a613ce8204eb00ab500545cd1771f63d7',1,'wb::WaldboostDetector']]],
+  ['setdetectionmode',['setDetectionMode',['../classwb_1_1_waldboost_detector.html#a684b792e9d7ba36867ac1af96114fec2',1,'wb::WaldboostDetector']]],
   ['setimage',['setImage',['../classwb_1_1_waldboost_detector.html#a56111c56b061abd651d51a8f886482f2',1,'wb::WaldboostDetector']]],
   ['setoutputfile',['setOutputFile',['../classwb_1_1_waldboost_detector.html#ad009ff31d6d57fe04f04d3c5641a6c55',1,'wb::WaldboostDetector']]],
   ['setpygenmode',['setPyGenMode',['../classwb_1_1_waldboost_detector.html#a59f7b691d794aa02726a03a2bf8141e1',1,'wb::WaldboostDetector']]],

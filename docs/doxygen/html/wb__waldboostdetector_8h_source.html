@@ -106,146 +106,176 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00024"></a><span class="lineno">   24</span>&#160;<span class="keyword">namespace </span><a class="code" href="namespacewb.html">wb</a> {</div>
 <div class="line"><a name="l00025"></a><span class="lineno">   25</span>&#160;</div>
 <div class="line"><a name="l00036"></a><span class="lineno">   36</span>&#160;    __device__</div>
-<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordtype">void</span> detectSurvivorsInit(SurvivorData* survivors, uint16 endStage);</div>
-<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;</div>
-<div class="line"><a name="l00050"></a><span class="lineno">   50</span>&#160;    __device__</div>
-<div class="line"><a name="l00051"></a><span class="lineno">   51</span>&#160;    <span class="keywordtype">void</span> detectSurvivors(SurvivorData* survivors,uint16 startStage, uint16 endStage);</div>
-<div class="line"><a name="l00052"></a><span class="lineno">   52</span>&#160;</div>
-<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;    __device__</div>
-<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;    <span class="keywordtype">void</span> detectDetections(SurvivorData* survivors, Detection* detections, uint32* detectionCount, uint16 startStage);</div>
-<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;</div>
-<div class="line"><a name="l00080"></a><span class="lineno">   80</span>&#160;    __device__</div>
-<div class="line"><a name="l00081"></a><span class="lineno">   81</span>&#160;    <span class="keywordtype">bool</span> eval(uint32 x, uint32 y, <span class="keywordtype">float</span>* response, uint16 startStage, uint16 endStage);</div>
-<div class="line"><a name="l00082"></a><span class="lineno">   82</span>&#160;</div>
-<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    __device__</div>
-<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;    <span class="keywordtype">float</span> evalLBP(uint32 x, uint32 y, Stage* stage);</div>
-<div class="line"><a name="l00094"></a><span class="lineno">   94</span>&#160;</div>
+<div class="line"><a name="l00037"></a><span class="lineno">   37</span>&#160;    <span class="keywordtype">void</span> detectSurvivorsInit_prefixsum(</div>
+<div class="line"><a name="l00038"></a><span class="lineno">   38</span>&#160;        uint32 <span class="keyword">const</span>&amp;   x,</div>
+<div class="line"><a name="l00039"></a><span class="lineno">   39</span>&#160;        uint32 <span class="keyword">const</span>&amp;   y,</div>
+<div class="line"><a name="l00040"></a><span class="lineno">   40</span>&#160;        uint32 <span class="keyword">const</span>&amp;   threadId,</div>
+<div class="line"><a name="l00041"></a><span class="lineno">   41</span>&#160;        uint32 <span class="keyword">const</span>&amp;   globalOffset,</div>
+<div class="line"><a name="l00042"></a><span class="lineno">   42</span>&#160;        uint32 <span class="keyword">const</span>&amp;   blockSize,</div>
+<div class="line"><a name="l00043"></a><span class="lineno">   43</span>&#160;        SurvivorData*   survivors,</div>
+<div class="line"><a name="l00044"></a><span class="lineno">   44</span>&#160;        uint32&amp;         survivorCount,</div>
+<div class="line"><a name="l00045"></a><span class="lineno">   45</span>&#160;        uint32*         survivorScanArray,</div>
+<div class="line"><a name="l00046"></a><span class="lineno">   46</span>&#160;        uint16          endStage</div>
+<div class="line"><a name="l00047"></a><span class="lineno">   47</span>&#160;    );</div>
+<div class="line"><a name="l00048"></a><span class="lineno">   48</span>&#160;</div>
+<div class="line"><a name="l00060"></a><span class="lineno">   60</span>&#160;    __device__</div>
+<div class="line"><a name="l00061"></a><span class="lineno">   61</span>&#160;    <span class="keywordtype">void</span> detectSurvivors_prefixsum(</div>
+<div class="line"><a name="l00062"></a><span class="lineno">   62</span>&#160;        uint32 <span class="keyword">const</span>&amp;       threadId,</div>
+<div class="line"><a name="l00063"></a><span class="lineno">   63</span>&#160;        uint32 <span class="keyword">const</span>&amp;       globalOffset,</div>
+<div class="line"><a name="l00064"></a><span class="lineno">   64</span>&#160;        uint32 <span class="keyword">const</span>&amp;       blockSize,</div>
+<div class="line"><a name="l00065"></a><span class="lineno">   65</span>&#160;        SurvivorData*       survivors,</div>
+<div class="line"><a name="l00066"></a><span class="lineno">   66</span>&#160;        uint32&amp;             survivorCount,</div>
+<div class="line"><a name="l00067"></a><span class="lineno">   67</span>&#160;        uint32*             survivorScanArray,</div>
+<div class="line"><a name="l00068"></a><span class="lineno">   68</span>&#160;        uint16              startStage,</div>
+<div class="line"><a name="l00069"></a><span class="lineno">   69</span>&#160;        uint16              endStage</div>
+<div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;    );</div>
+<div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;</div>
+<div class="line"><a name="l00084"></a><span class="lineno">   84</span>&#160;    __device__</div>
+<div class="line"><a name="l00085"></a><span class="lineno">   85</span>&#160;    <span class="keywordtype">void</span> detectDetections_prefixsum(</div>
+<div class="line"><a name="l00086"></a><span class="lineno">   86</span>&#160;        uint32 <span class="keyword">const</span>&amp; threadId, </div>
+<div class="line"><a name="l00087"></a><span class="lineno">   87</span>&#160;        uint32 <span class="keyword">const</span>&amp;   globalOffset,</div>
+<div class="line"><a name="l00088"></a><span class="lineno">   88</span>&#160;        SurvivorData* survivors, </div>
+<div class="line"><a name="l00089"></a><span class="lineno">   89</span>&#160;        Detection* detections, </div>
+<div class="line"><a name="l00090"></a><span class="lineno">   90</span>&#160;        uint32* detectionCount, </div>
+<div class="line"><a name="l00091"></a><span class="lineno">   91</span>&#160;        uint16 startStage</div>
+<div class="line"><a name="l00092"></a><span class="lineno">   92</span>&#160;    );</div>
+<div class="line"><a name="l00093"></a><span class="lineno">   93</span>&#160;</div>
 <div class="line"><a name="l00106"></a><span class="lineno">  106</span>&#160;    __device__</div>
-<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    <span class="keywordtype">void</span> sumRegions(<span class="keywordtype">float</span>* values, uint32 x, uint32 y, Stage* stage);</div>
+<div class="line"><a name="l00107"></a><span class="lineno">  107</span>&#160;    <span class="keywordtype">bool</span> eval(uint32 x, uint32 y, <span class="keywordtype">float</span>* response, uint16 startStage, uint16 endStage);</div>
 <div class="line"><a name="l00108"></a><span class="lineno">  108</span>&#160;</div>
-<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    __global__</div>
-<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    <span class="keywordtype">void</span> preprocessKernel(<span class="keywordtype">float</span>* outData, uint8* inData);</div>
+<div class="line"><a name="l00118"></a><span class="lineno">  118</span>&#160;    __device__</div>
+<div class="line"><a name="l00119"></a><span class="lineno">  119</span>&#160;    <span class="keywordtype">float</span> evalLBP(uint32 x, uint32 y, Stage* stage);</div>
 <div class="line"><a name="l00120"></a><span class="lineno">  120</span>&#160;</div>
-<div class="line"><a name="l00129"></a><span class="lineno">  129</span>&#160;    __global__</div>
-<div class="line"><a name="l00130"></a><span class="lineno">  130</span>&#160;    <span class="keywordtype">void</span> pyramidKernel(<span class="keywordtype">float</span>* outData);</div>
-<div class="line"><a name="l00131"></a><span class="lineno">  131</span>&#160;</div>
-<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    __global__ </div>
-<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;    <span class="keywordtype">void</span> firstPyramidKernel(<span class="keywordtype">float</span>* outData, <span class="keywordtype">float</span>* finalData);</div>
+<div class="line"><a name="l00132"></a><span class="lineno">  132</span>&#160;    __device__</div>
+<div class="line"><a name="l00133"></a><span class="lineno">  133</span>&#160;    <span class="keywordtype">void</span> sumRegions(<span class="keywordtype">float</span>* values, uint32 x, uint32 y, Stage* stage);</div>
 <div class="line"><a name="l00134"></a><span class="lineno">  134</span>&#160;</div>
-<div class="line"><a name="l00135"></a><span class="lineno">  135</span>&#160;    __global__ </div>
-<div class="line"><a name="l00136"></a><span class="lineno">  136</span>&#160;    <span class="keywordtype">void</span> pyramidFromPyramidKernel(<span class="keywordtype">float</span>* outData, <span class="keywordtype">float</span>* finalData, cudaTextureObject_t inData, uint8 level);</div>
-<div class="line"><a name="l00137"></a><span class="lineno">  137</span>&#160;</div>
-<div class="line"><a name="l00139"></a><span class="lineno">  139</span>&#160;    __global__</div>
-<div class="line"><a name="l00140"></a><span class="lineno">  140</span>&#160;    <span class="keywordtype">void</span> copyKernel(<span class="keywordtype">float</span>* out, uint32 width, uint32 height);</div>
-<div class="line"><a name="l00141"></a><span class="lineno">  141</span>&#160;</div>
-<div class="line"><a name="l00143"></a><span class="lineno">  143</span>&#160;    __global__</div>
-<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;    <span class="keywordtype">void</span> copyKernel(<span class="keywordtype">float</span>* out, cudaTextureObject_t obj, uint32 width, uint32 height);</div>
-<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;</div>
-<div class="line"><a name="l00150"></a><span class="lineno">  150</span>&#160;    __global__</div>
-<div class="line"><a name="l00151"></a><span class="lineno">  151</span>&#160;    <span class="keywordtype">void</span> clearKernel(<span class="keywordtype">float</span>* data, uint32 width, uint32 height);</div>
-<div class="line"><a name="l00152"></a><span class="lineno">  152</span>&#160;</div>
-<div class="line"><a name="l00154"></a><span class="lineno">  154</span>&#160;    texture&lt;float, 2&gt; textureWorkingImage;</div>
-<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;</div>
-<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;    texture&lt;float, 2&gt; texturePyramidImage;</div>
-<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;</div>
-<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;    texture&lt;float&gt; textureAlphas;</div>
-<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;</div>
-<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;    __constant__ ImageInfo devInfo[1];</div>
-<div class="line"><a name="l00164"></a><span class="lineno">  164</span>&#160;<span class="preprocessor">    #define DEV_INFO devInfo[0]</span></div>
-<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;</div>
-<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;    __constant__ Pyramid devPyramid[1];</div>
-<div class="line"><a name="l00168"></a><span class="lineno">  168</span>&#160;<span class="preprocessor">    #define PYRAMID devPyramid[0]</span></div>
-<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;</div>
-<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;    __constant__ Stage stages[<a class="code" href="wb__general_8h.html#a61a0193997f8bfbffdf7594a5396ff46">STAGE_COUNT</a>];</div>
-<div class="line"><a name="l00172"></a><span class="lineno">  172</span>&#160;</div>
-<div class="line"><a name="l00173"></a><span class="lineno"><a class="line" href="classwb_1_1_waldboost_detector.html">  173</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classwb_1_1_waldboost_detector.html">WaldboostDetector</a> </div>
-<div class="line"><a name="l00174"></a><span class="lineno">  174</span>&#160;    {</div>
-<div class="line"><a name="l00175"></a><span class="lineno">  175</span>&#160;        <span class="keyword">public</span>:</div>
-<div class="line"><a name="l00185"></a><span class="lineno">  185</span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#ab6cc8c1421a2b6fd514c8cb42f1f0ed4">init</a>(cv::Mat* image);</div>
-<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;</div>
-<div class="line"><a name="l00196"></a><span class="lineno">  196</span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#a56111c56b061abd651d51a8f886482f2">setImage</a>(cv::Mat* image);</div>
-<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;</div>
-<div class="line"><a name="l00205"></a><span class="lineno">  205</span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#adcd37445b984e3e48182d45eec76bb66">run</a>();</div>
-<div class="line"><a name="l00206"></a><span class="lineno">  206</span>&#160;</div>
-<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#a6e723e3d0e56b74aaa607c3fd7cc6064">free</a>();    </div>
+<div class="line"><a name="l00144"></a><span class="lineno">  144</span>&#160;    __global__</div>
+<div class="line"><a name="l00145"></a><span class="lineno">  145</span>&#160;    <span class="keywordtype">void</span> preprocessKernel(<span class="keywordtype">float</span>* outData, uint8* inData);</div>
+<div class="line"><a name="l00146"></a><span class="lineno">  146</span>&#160;</div>
+<div class="line"><a name="l00155"></a><span class="lineno">  155</span>&#160;    __global__</div>
+<div class="line"><a name="l00156"></a><span class="lineno">  156</span>&#160;    <span class="keywordtype">void</span> pyramidKernel(<span class="keywordtype">float</span>* outData);</div>
+<div class="line"><a name="l00157"></a><span class="lineno">  157</span>&#160;</div>
+<div class="line"><a name="l00158"></a><span class="lineno">  158</span>&#160;    __global__ </div>
+<div class="line"><a name="l00159"></a><span class="lineno">  159</span>&#160;    <span class="keywordtype">void</span> firstPyramidKernel(<span class="keywordtype">float</span>* outData, <span class="keywordtype">float</span>* finalData);</div>
+<div class="line"><a name="l00160"></a><span class="lineno">  160</span>&#160;</div>
+<div class="line"><a name="l00161"></a><span class="lineno">  161</span>&#160;    __global__ </div>
+<div class="line"><a name="l00162"></a><span class="lineno">  162</span>&#160;    <span class="keywordtype">void</span> pyramidFromPyramidKernel(<span class="keywordtype">float</span>* outData, <span class="keywordtype">float</span>* finalData, cudaTextureObject_t inData, uint8 level);</div>
+<div class="line"><a name="l00163"></a><span class="lineno">  163</span>&#160;</div>
+<div class="line"><a name="l00165"></a><span class="lineno">  165</span>&#160;    __global__</div>
+<div class="line"><a name="l00166"></a><span class="lineno">  166</span>&#160;    <span class="keywordtype">void</span> copyKernel(<span class="keywordtype">float</span>* out, uint32 width, uint32 height);</div>
+<div class="line"><a name="l00167"></a><span class="lineno">  167</span>&#160;</div>
+<div class="line"><a name="l00169"></a><span class="lineno">  169</span>&#160;    __global__</div>
+<div class="line"><a name="l00170"></a><span class="lineno">  170</span>&#160;    <span class="keywordtype">void</span> copyKernel(<span class="keywordtype">float</span>* out, cudaTextureObject_t obj, uint32 width, uint32 height);</div>
+<div class="line"><a name="l00171"></a><span class="lineno">  171</span>&#160;</div>
+<div class="line"><a name="l00176"></a><span class="lineno">  176</span>&#160;    __global__</div>
+<div class="line"><a name="l00177"></a><span class="lineno">  177</span>&#160;    <span class="keywordtype">void</span> clearKernel(<span class="keywordtype">float</span>* data, uint32 width, uint32 height);</div>
+<div class="line"><a name="l00178"></a><span class="lineno">  178</span>&#160;</div>
+<div class="line"><a name="l00180"></a><span class="lineno">  180</span>&#160;    texture&lt;float, 2&gt; textureWorkingImage;</div>
+<div class="line"><a name="l00181"></a><span class="lineno">  181</span>&#160;</div>
+<div class="line"><a name="l00183"></a><span class="lineno">  183</span>&#160;    texture&lt;float, 2&gt; texturePyramidImage;</div>
+<div class="line"><a name="l00184"></a><span class="lineno">  184</span>&#160;</div>
+<div class="line"><a name="l00186"></a><span class="lineno">  186</span>&#160;    texture&lt;float&gt; textureAlphas;</div>
+<div class="line"><a name="l00187"></a><span class="lineno">  187</span>&#160;</div>
+<div class="line"><a name="l00189"></a><span class="lineno">  189</span>&#160;    __constant__ ImageInfo devInfo[1];</div>
+<div class="line"><a name="l00190"></a><span class="lineno">  190</span>&#160;<span class="preprocessor">    #define DEV_INFO devInfo[0]</span></div>
+<div class="line"><a name="l00191"></a><span class="lineno">  191</span>&#160;</div>
+<div class="line"><a name="l00193"></a><span class="lineno">  193</span>&#160;    __constant__ Pyramid devPyramid[1];</div>
+<div class="line"><a name="l00194"></a><span class="lineno">  194</span>&#160;<span class="preprocessor">    #define PYRAMID devPyramid[0]</span></div>
+<div class="line"><a name="l00195"></a><span class="lineno">  195</span>&#160;</div>
+<div class="line"><a name="l00197"></a><span class="lineno">  197</span>&#160;    __constant__ Stage stages[<a class="code" href="wb__general_8h.html#af3524548a6be3a7d2c82bd26c487be15">WB_STAGE_COUNT</a>];</div>
+<div class="line"><a name="l00198"></a><span class="lineno">  198</span>&#160;</div>
+<div class="line"><a name="l00199"></a><span class="lineno"><a class="line" href="classwb_1_1_waldboost_detector.html">  199</a></span>&#160;    <span class="keyword">class </span><a class="code" href="classwb_1_1_waldboost_detector.html">WaldboostDetector</a> </div>
+<div class="line"><a name="l00200"></a><span class="lineno">  200</span>&#160;    {</div>
+<div class="line"><a name="l00201"></a><span class="lineno">  201</span>&#160;        <span class="keyword">public</span>:</div>
+<div class="line"><a name="l00211"></a><span class="lineno">  211</span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#ab6cc8c1421a2b6fd514c8cb42f1f0ed4">init</a>(cv::Mat* image);</div>
 <div class="line"><a name="l00212"></a><span class="lineno">  212</span>&#160;</div>
-<div class="line"><a name="l00214"></a><span class="lineno"><a class="line" href="classwb_1_1_waldboost_detector.html#a59f7b691d794aa02726a03a2bf8141e1">  214</a></span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#a59f7b691d794aa02726a03a2bf8141e1">setPyGenMode</a>(PyramidGenModes <span class="keyword">const</span>&amp; mode) { _pyGenMode = mode; } </div>
-<div class="line"><a name="l00215"></a><span class="lineno">  215</span>&#160;</div>
-<div class="line"><a name="l00217"></a><span class="lineno"><a class="line" href="classwb_1_1_waldboost_detector.html#acb94ff72991663cd181757adc5e8a954">  217</a></span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#acb94ff72991663cd181757adc5e8a954">setPyType</a>(PyramidTypes <span class="keyword">const</span>&amp; type) { _pyType = type; }</div>
-<div class="line"><a name="l00218"></a><span class="lineno">  218</span>&#160;</div>
-<div class="line"><a name="l00220"></a><span class="lineno"><a class="line" href="classwb_1_1_waldboost_detector.html#a613ce8204eb00ab500545cd1771f63d7">  220</a></span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#a613ce8204eb00ab500545cd1771f63d7">setBlockSize</a>(uint32 <span class="keyword">const</span>&amp; x = 32, uint32 <span class="keyword">const</span>&amp; y = 32, uint32 <span class="keyword">const</span>&amp; z = 1){ _block = dim3(x, y, z); }</div>
-<div class="line"><a name="l00221"></a><span class="lineno">  221</span>&#160;</div>
-<div class="line"><a name="l00223"></a><span class="lineno"><a class="line" href="classwb_1_1_waldboost_detector.html#abccec68ecd5ddf0e87573f6416adbdc6">  223</a></span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#abccec68ecd5ddf0e87573f6416adbdc6">setRunOptions</a>(uint32 <span class="keyword">const</span>&amp; options) { _opt = options; }</div>
-<div class="line"><a name="l00224"></a><span class="lineno">  224</span>&#160;</div>
-<div class="line"><a name="l00226"></a><span class="lineno"><a class="line" href="classwb_1_1_waldboost_detector.html#ad009ff31d6d57fe04f04d3c5641a6c55">  226</a></span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#ad009ff31d6d57fe04f04d3c5641a6c55">setOutputFile</a>(std::string <span class="keyword">const</span>&amp; output) { _outputFilename = output; }</div>
-<div class="line"><a name="l00227"></a><span class="lineno">  227</span>&#160;</div>
-<div class="line"><a name="l00228"></a><span class="lineno">  228</span>&#160;        <span class="keyword">private</span>:</div>
-<div class="line"><a name="l00236"></a><span class="lineno">  236</span>&#160;            <span class="keywordtype">void</span> _precalcHorizontalPyramid();</div>
-<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;</div>
-<div class="line"><a name="l00245"></a><span class="lineno">  245</span>&#160;            <span class="keywordtype">void</span> _precalc4x8Pyramid();</div>
-<div class="line"><a name="l00246"></a><span class="lineno">  246</span>&#160;</div>
-<div class="line"><a name="l00251"></a><span class="lineno">  251</span>&#160;            <span class="keywordtype">void</span> _pyramidKernelWrapper();</div>
-<div class="line"><a name="l00252"></a><span class="lineno">  252</span>&#160;</div>
-<div class="line"><a name="l00262"></a><span class="lineno">  262</span>&#160;            <span class="keywordtype">void</span> _pyramidGenSingleTexture();</div>
-<div class="line"><a name="l00263"></a><span class="lineno">  263</span>&#160;</div>
-<div class="line"><a name="l00273"></a><span class="lineno">  273</span>&#160;            <span class="keywordtype">void</span> _pyramidGenBindlessTexture();</div>
-<div class="line"><a name="l00274"></a><span class="lineno">  274</span>&#160;            </div>
-<div class="line"><a name="l00279"></a><span class="lineno">  279</span>&#160;            <span class="keywordtype">void</span> _initTimers();</div>
-<div class="line"><a name="l00280"></a><span class="lineno">  280</span>&#160;</div>
-<div class="line"><a name="l00288"></a><span class="lineno">  288</span>&#160;            <span class="keywordtype">void</span> _processDetections();</div>
-<div class="line"><a name="l00289"></a><span class="lineno">  289</span>&#160;</div>
-<div class="line"><a name="l00290"></a><span class="lineno">  290</span>&#160;</div>
-<div class="line"><a name="l00291"></a><span class="lineno">  291</span>&#160;            <a class="code" href="structwb_1_1_image_info.html">ImageInfo</a>           _info;              </div>
-<div class="line"><a name="l00292"></a><span class="lineno">  292</span>&#160;</div>
-<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;            <a class="code" href="structwb_1_1_pyramid.html">Pyramid</a>             _pyramid;           </div>
-<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;            PyramidGenModes     _pyGenMode;         </div>
-<div class="line"><a name="l00295"></a><span class="lineno">  295</span>&#160;            PyramidTypes        _pyType;            </div>
-<div class="line"><a name="l00296"></a><span class="lineno">  296</span>&#160;            uint32              _opt;               </div>
-<div class="line"><a name="l00297"></a><span class="lineno">  297</span>&#160;            <span class="keywordtype">float</span>               _timers[MAX_TIMERS];</div>
-<div class="line"><a name="l00298"></a><span class="lineno">  298</span>&#160;            dim3                _block;             </div>
-<div class="line"><a name="l00299"></a><span class="lineno">  299</span>&#160;</div>
-<div class="line"><a name="l00300"></a><span class="lineno">  300</span>&#160;            uint8*              _devOriginalImage;                  </div>
-<div class="line"><a name="l00301"></a><span class="lineno">  301</span>&#160;            <span class="keywordtype">float</span>*              _devWorkingImage;                   </div>
-<div class="line"><a name="l00302"></a><span class="lineno">  302</span>&#160;</div>
-<div class="line"><a name="l00303"></a><span class="lineno">  303</span>&#160;            <span class="keywordtype">float</span>*              _devPyramidData;                    </div>
-<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;</div>
-<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;            <span class="keywordtype">float</span>*              _devPyramidImage[<a class="code" href="wb__general_8h.html#a3ee0080df2ddeddbb7502ae4e47c5101">WB_OCTAVES</a>];       </div>
-<div class="line"><a name="l00306"></a><span class="lineno">  306</span>&#160;            cudaTextureObject_t _texturePyramidObjects[<a class="code" href="wb__general_8h.html#a3ee0080df2ddeddbb7502ae4e47c5101">WB_OCTAVES</a>]; </div>
-<div class="line"><a name="l00307"></a><span class="lineno">  307</span>&#160;</div>
-<div class="line"><a name="l00308"></a><span class="lineno">  308</span>&#160;            <span class="keywordtype">float</span>*              _devAlphaBuffer;        </div>
-<div class="line"><a name="l00309"></a><span class="lineno">  309</span>&#160;            <a class="code" href="structwb_1_1_detection.html">Detection</a>*          _devDetections;         </div>
-<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;            uint32*             _devDetectionCount;     </div>
-<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;            <a class="code" href="structwb_1_1_survivor_data.html">SurvivorData</a>*       _devSurvivors;          </div>
-<div class="line"><a name="l00312"></a><span class="lineno">  312</span>&#160;            cv::Mat*            _myImage;               </div>
-<div class="line"><a name="l00313"></a><span class="lineno">  313</span>&#160;            std::string         _outputFilename;        </div>
-<div class="line"><a name="l00314"></a><span class="lineno">  314</span>&#160;</div>
-<div class="line"><a name="l00315"></a><span class="lineno">  315</span>&#160;            uint32              _frame;                 </div>
-<div class="line"><a name="l00316"></a><span class="lineno">  316</span>&#160;    };</div>
-<div class="line"><a name="l00317"></a><span class="lineno">  317</span>&#160;}</div>
-<div class="line"><a name="l00318"></a><span class="lineno">  318</span>&#160;</div>
-<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;<span class="preprocessor">#endif</span></div>
-<div class="ttc" id="structwb_1_1_detection_html"><div class="ttname"><a href="structwb_1_1_detection.html">wb::Detection</a></div><div class="ttdoc">Allowed input types for a sample program. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:31</div></div>
-<div class="ttc" id="classwb_1_1_waldboost_detector_html_a613ce8204eb00ab500545cd1771f63d7"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html#a613ce8204eb00ab500545cd1771f63d7">wb::WaldboostDetector::setBlockSize</a></div><div class="ttdeci">void setBlockSize(uint32 const &amp;x=32, uint32 const &amp;y=32, uint32 const &amp;z=1)</div><div class="ttdoc">Sets the kernel block size. </div><div class="ttdef"><b>Definition:</b> wb_waldboostdetector.h:220</div></div>
-<div class="ttc" id="structwb_1_1_survivor_data_html"><div class="ttname"><a href="structwb_1_1_survivor_data.html">wb::SurvivorData</a></div><div class="ttdoc">Info about a still running detection. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:82</div></div>
-<div class="ttc" id="structwb_1_1_image_info_html"><div class="ttname"><a href="structwb_1_1_image_info.html">wb::ImageInfo</a></div><div class="ttdoc">Info about an image. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:44</div></div>
+<div class="line"><a name="l00222"></a><span class="lineno">  222</span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#a56111c56b061abd651d51a8f886482f2">setImage</a>(cv::Mat* image);</div>
+<div class="line"><a name="l00223"></a><span class="lineno">  223</span>&#160;</div>
+<div class="line"><a name="l00231"></a><span class="lineno">  231</span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#adcd37445b984e3e48182d45eec76bb66">run</a>();</div>
+<div class="line"><a name="l00232"></a><span class="lineno">  232</span>&#160;</div>
+<div class="line"><a name="l00237"></a><span class="lineno">  237</span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#a6e723e3d0e56b74aaa607c3fd7cc6064">free</a>();    </div>
+<div class="line"><a name="l00238"></a><span class="lineno">  238</span>&#160;</div>
+<div class="line"><a name="l00240"></a><span class="lineno"><a class="line" href="classwb_1_1_waldboost_detector.html#a59f7b691d794aa02726a03a2bf8141e1">  240</a></span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#a59f7b691d794aa02726a03a2bf8141e1">setPyGenMode</a>(PyramidGenModes <span class="keyword">const</span>&amp; mode) { _pyGenMode = mode; } </div>
+<div class="line"><a name="l00241"></a><span class="lineno">  241</span>&#160;</div>
+<div class="line"><a name="l00243"></a><span class="lineno"><a class="line" href="classwb_1_1_waldboost_detector.html#acb94ff72991663cd181757adc5e8a954">  243</a></span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#acb94ff72991663cd181757adc5e8a954">setPyType</a>(PyramidTypes <span class="keyword">const</span>&amp; type) { _pyType = type; }</div>
+<div class="line"><a name="l00244"></a><span class="lineno">  244</span>&#160;</div>
+<div class="line"><a name="l00246"></a><span class="lineno"><a class="line" href="classwb_1_1_waldboost_detector.html#a684b792e9d7ba36867ac1af96114fec2">  246</a></span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#a684b792e9d7ba36867ac1af96114fec2">setDetectionMode</a>(DetectionModes <span class="keyword">const</span>&amp; mode) { _detectionMode = mode; }</div>
+<div class="line"><a name="l00247"></a><span class="lineno">  247</span>&#160;</div>
+<div class="line"><a name="l00249"></a><span class="lineno"><a class="line" href="classwb_1_1_waldboost_detector.html#a613ce8204eb00ab500545cd1771f63d7">  249</a></span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#a613ce8204eb00ab500545cd1771f63d7">setBlockSize</a>(uint32 <span class="keyword">const</span>&amp; x = 32, uint32 <span class="keyword">const</span>&amp; y = 32, uint32 <span class="keyword">const</span>&amp; z = 1){ _block = dim3(x, y, z); }</div>
+<div class="line"><a name="l00250"></a><span class="lineno">  250</span>&#160;</div>
+<div class="line"><a name="l00252"></a><span class="lineno"><a class="line" href="classwb_1_1_waldboost_detector.html#abccec68ecd5ddf0e87573f6416adbdc6">  252</a></span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#abccec68ecd5ddf0e87573f6416adbdc6">setRunOptions</a>(uint32 <span class="keyword">const</span>&amp; options) { _opt = options; }</div>
+<div class="line"><a name="l00253"></a><span class="lineno">  253</span>&#160;</div>
+<div class="line"><a name="l00255"></a><span class="lineno"><a class="line" href="classwb_1_1_waldboost_detector.html#ad009ff31d6d57fe04f04d3c5641a6c55">  255</a></span>&#160;            <span class="keywordtype">void</span> <a class="code" href="classwb_1_1_waldboost_detector.html#ad009ff31d6d57fe04f04d3c5641a6c55">setOutputFile</a>(std::string <span class="keyword">const</span>&amp; output) { _outputFilename = output; }         </div>
+<div class="line"><a name="l00256"></a><span class="lineno">  256</span>&#160;</div>
+<div class="line"><a name="l00257"></a><span class="lineno">  257</span>&#160;            uint32 getFrameCount()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _frame; }</div>
+<div class="line"><a name="l00258"></a><span class="lineno">  258</span>&#160;</div>
+<div class="line"><a name="l00259"></a><span class="lineno">  259</span>&#160;        <span class="keyword">private</span>:</div>
+<div class="line"><a name="l00267"></a><span class="lineno">  267</span>&#160;            <span class="keywordtype">void</span> _precalcHorizontalPyramid();</div>
+<div class="line"><a name="l00268"></a><span class="lineno">  268</span>&#160;</div>
+<div class="line"><a name="l00276"></a><span class="lineno">  276</span>&#160;            <span class="keywordtype">void</span> _precalc4x8Pyramid();</div>
+<div class="line"><a name="l00277"></a><span class="lineno">  277</span>&#160;</div>
+<div class="line"><a name="l00282"></a><span class="lineno">  282</span>&#160;            <span class="keywordtype">void</span> _pyramidKernelWrapper();</div>
+<div class="line"><a name="l00283"></a><span class="lineno">  283</span>&#160;</div>
+<div class="line"><a name="l00293"></a><span class="lineno">  293</span>&#160;            <span class="keywordtype">void</span> _pyramidGenSingleTexture();</div>
+<div class="line"><a name="l00294"></a><span class="lineno">  294</span>&#160;</div>
+<div class="line"><a name="l00304"></a><span class="lineno">  304</span>&#160;            <span class="keywordtype">void</span> _pyramidGenBindlessTexture();</div>
+<div class="line"><a name="l00305"></a><span class="lineno">  305</span>&#160;            </div>
+<div class="line"><a name="l00310"></a><span class="lineno">  310</span>&#160;            <span class="keywordtype">void</span> _initTimers();</div>
+<div class="line"><a name="l00311"></a><span class="lineno">  311</span>&#160;</div>
+<div class="line"><a name="l00319"></a><span class="lineno">  319</span>&#160;            <span class="keywordtype">void</span> _processDetections();          </div>
+<div class="line"><a name="l00320"></a><span class="lineno">  320</span>&#160;            <span class="keywordtype">void</span> _processDetections(Detection* detections, uint32 <span class="keyword">const</span>&amp; detectionCount);</div>
+<div class="line"><a name="l00321"></a><span class="lineno">  321</span>&#160;</div>
+<div class="line"><a name="l00322"></a><span class="lineno">  322</span>&#160;</div>
+<div class="line"><a name="l00323"></a><span class="lineno">  323</span>&#160;            ImageInfo           _info;              </div>
+<div class="line"><a name="l00324"></a><span class="lineno">  324</span>&#160;</div>
+<div class="line"><a name="l00325"></a><span class="lineno">  325</span>&#160;            Pyramid             _pyramid;           </div>
+<div class="line"><a name="l00326"></a><span class="lineno">  326</span>&#160;            PyramidGenModes     _pyGenMode;         </div>
+<div class="line"><a name="l00327"></a><span class="lineno">  327</span>&#160;            PyramidTypes        _pyType;            </div>
+<div class="line"><a name="l00328"></a><span class="lineno">  328</span>&#160;            DetectionModes      _detectionMode;     </div>
+<div class="line"><a name="l00329"></a><span class="lineno">  329</span>&#160;            uint32              _opt;               </div>
+<div class="line"><a name="l00330"></a><span class="lineno">  330</span>&#160;            <span class="keywordtype">float</span>               _timers[MAX_TIMERS];</div>
+<div class="line"><a name="l00331"></a><span class="lineno">  331</span>&#160;            dim3                _block;             </div>
+<div class="line"><a name="l00332"></a><span class="lineno">  332</span>&#160;</div>
+<div class="line"><a name="l00333"></a><span class="lineno">  333</span>&#160;            uint8*              _devOriginalImage;                  </div>
+<div class="line"><a name="l00334"></a><span class="lineno">  334</span>&#160;            <span class="keywordtype">float</span>*              _devWorkingImage;                   </div>
+<div class="line"><a name="l00335"></a><span class="lineno">  335</span>&#160;</div>
+<div class="line"><a name="l00336"></a><span class="lineno">  336</span>&#160;            <span class="keywordtype">float</span>*              _devPyramidData;                    </div>
+<div class="line"><a name="l00337"></a><span class="lineno">  337</span>&#160;</div>
+<div class="line"><a name="l00338"></a><span class="lineno">  338</span>&#160;            <span class="keywordtype">float</span>*              _devPyramidImage[<a class="code" href="wb__general_8h.html#a3ee0080df2ddeddbb7502ae4e47c5101">WB_OCTAVES</a>];       </div>
+<div class="line"><a name="l00339"></a><span class="lineno">  339</span>&#160;            cudaTextureObject_t _texturePyramidObjects[<a class="code" href="wb__general_8h.html#a3ee0080df2ddeddbb7502ae4e47c5101">WB_OCTAVES</a>]; </div>
+<div class="line"><a name="l00340"></a><span class="lineno">  340</span>&#160;</div>
+<div class="line"><a name="l00341"></a><span class="lineno">  341</span>&#160;            <span class="keywordtype">float</span>*              _devAlphaBuffer;        </div>
+<div class="line"><a name="l00342"></a><span class="lineno">  342</span>&#160;            Detection*          _devDetections;         </div>
+<div class="line"><a name="l00343"></a><span class="lineno">  343</span>&#160;            uint32*             _devDetectionCount;     </div>
+<div class="line"><a name="l00344"></a><span class="lineno">  344</span>&#160;            SurvivorData*       _devSurvivors;          </div>
+<div class="line"><a name="l00345"></a><span class="lineno">  345</span>&#160;            uint32*             _devSurvivorCount;</div>
+<div class="line"><a name="l00346"></a><span class="lineno">  346</span>&#160;            cv::Mat*            _myImage;               </div>
+<div class="line"><a name="l00347"></a><span class="lineno">  347</span>&#160;            std::string         _outputFilename;        </div>
+<div class="line"><a name="l00348"></a><span class="lineno">  348</span>&#160;</div>
+<div class="line"><a name="l00349"></a><span class="lineno">  349</span>&#160;            uint32              _frame;                 </div>
+<div class="line"><a name="l00350"></a><span class="lineno">  350</span>&#160;    };</div>
+<div class="line"><a name="l00351"></a><span class="lineno">  351</span>&#160;}</div>
+<div class="line"><a name="l00352"></a><span class="lineno">  352</span>&#160;</div>
+<div class="line"><a name="l00353"></a><span class="lineno">  353</span>&#160;<span class="preprocessor">#endif</span></div>
+<div class="ttc" id="classwb_1_1_waldboost_detector_html_a684b792e9d7ba36867ac1af96114fec2"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html#a684b792e9d7ba36867ac1af96114fec2">wb::WaldboostDetector::setDetectionMode</a></div><div class="ttdeci">void setDetectionMode(DetectionModes const &amp;mode)</div><div class="ttdoc">Sets detection mode. </div><div class="ttdef"><b>Definition:</b> wb_waldboostdetector.h:246</div></div>
+<div class="ttc" id="classwb_1_1_waldboost_detector_html_a613ce8204eb00ab500545cd1771f63d7"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html#a613ce8204eb00ab500545cd1771f63d7">wb::WaldboostDetector::setBlockSize</a></div><div class="ttdeci">void setBlockSize(uint32 const &amp;x=32, uint32 const &amp;y=32, uint32 const &amp;z=1)</div><div class="ttdoc">Sets the kernel block size. </div><div class="ttdef"><b>Definition:</b> wb_waldboostdetector.h:249</div></div>
 <div class="ttc" id="wb__general_8h_html"><div class="ttname"><a href="wb__general_8h.html">wb_general.h</a></div><div class="ttdoc">Waldboost detector general settings. </div></div>
-<div class="ttc" id="structwb_1_1_pyramid_html"><div class="ttname"><a href="structwb_1_1_pyramid.html">wb::Pyramid</a></div><div class="ttdoc">Info about a pyramid. </div><div class="ttdef"><b>Definition:</b> wb_structures.h:72</div></div>
-<div class="ttc" id="classwb_1_1_waldboost_detector_html_ad009ff31d6d57fe04f04d3c5641a6c55"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html#ad009ff31d6d57fe04f04d3c5641a6c55">wb::WaldboostDetector::setOutputFile</a></div><div class="ttdeci">void setOutputFile(std::string const &amp;output)</div><div class="ttdoc">Sets a file for output. </div><div class="ttdef"><b>Definition:</b> wb_waldboostdetector.h:226</div></div>
-<div class="ttc" id="wb__general_8h_html_a3ee0080df2ddeddbb7502ae4e47c5101"><div class="ttname"><a href="wb__general_8h.html#a3ee0080df2ddeddbb7502ae4e47c5101">WB_OCTAVES</a></div><div class="ttdeci">#define WB_OCTAVES</div><div class="ttdoc">Number of image sets sampled from 1:1 to 1:0.5 scale. </div><div class="ttdef"><b>Definition:</b> wb_general.h:73</div></div>
-<div class="ttc" id="classwb_1_1_waldboost_detector_html_abccec68ecd5ddf0e87573f6416adbdc6"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html#abccec68ecd5ddf0e87573f6416adbdc6">wb::WaldboostDetector::setRunOptions</a></div><div class="ttdeci">void setRunOptions(uint32 const &amp;options)</div><div class="ttdoc">Passes run parameters to the detector. </div><div class="ttdef"><b>Definition:</b> wb_waldboostdetector.h:223</div></div>
-<div class="ttc" id="classwb_1_1_waldboost_detector_html_acb94ff72991663cd181757adc5e8a954"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html#acb94ff72991663cd181757adc5e8a954">wb::WaldboostDetector::setPyType</a></div><div class="ttdeci">void setPyType(PyramidTypes const &amp;type)</div><div class="ttdoc">Sets pyramid type. </div><div class="ttdef"><b>Definition:</b> wb_waldboostdetector.h:217</div></div>
+<div class="ttc" id="classwb_1_1_waldboost_detector_html_ad009ff31d6d57fe04f04d3c5641a6c55"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html#ad009ff31d6d57fe04f04d3c5641a6c55">wb::WaldboostDetector::setOutputFile</a></div><div class="ttdeci">void setOutputFile(std::string const &amp;output)</div><div class="ttdoc">Sets a file for output. </div><div class="ttdef"><b>Definition:</b> wb_waldboostdetector.h:255</div></div>
+<div class="ttc" id="wb__general_8h_html_a3ee0080df2ddeddbb7502ae4e47c5101"><div class="ttname"><a href="wb__general_8h.html#a3ee0080df2ddeddbb7502ae4e47c5101">WB_OCTAVES</a></div><div class="ttdeci">#define WB_OCTAVES</div><div class="ttdoc">Number of image sets sampled from 1:1 to 1:0.5 scale. </div><div class="ttdef"><b>Definition:</b> wb_general.h:68</div></div>
+<div class="ttc" id="classwb_1_1_waldboost_detector_html_abccec68ecd5ddf0e87573f6416adbdc6"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html#abccec68ecd5ddf0e87573f6416adbdc6">wb::WaldboostDetector::setRunOptions</a></div><div class="ttdeci">void setRunOptions(uint32 const &amp;options)</div><div class="ttdoc">Passes run parameters to the detector. </div><div class="ttdef"><b>Definition:</b> wb_waldboostdetector.h:252</div></div>
+<div class="ttc" id="classwb_1_1_waldboost_detector_html_acb94ff72991663cd181757adc5e8a954"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html#acb94ff72991663cd181757adc5e8a954">wb::WaldboostDetector::setPyType</a></div><div class="ttdeci">void setPyType(PyramidTypes const &amp;type)</div><div class="ttdoc">Sets pyramid type. </div><div class="ttdef"><b>Definition:</b> wb_waldboostdetector.h:243</div></div>
 <div class="ttc" id="classwb_1_1_waldboost_detector_html_adcd37445b984e3e48182d45eec76bb66"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html#adcd37445b984e3e48182d45eec76bb66">wb::WaldboostDetector::run</a></div><div class="ttdeci">void run()</div><div class="ttdoc">Processes detections. </div></div>
-<div class="ttc" id="classwb_1_1_waldboost_detector_html_a59f7b691d794aa02726a03a2bf8141e1"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html#a59f7b691d794aa02726a03a2bf8141e1">wb::WaldboostDetector::setPyGenMode</a></div><div class="ttdeci">void setPyGenMode(PyramidGenModes const &amp;mode)</div><div class="ttdoc">Sets pyramid generation mode. </div><div class="ttdef"><b>Definition:</b> wb_waldboostdetector.h:214</div></div>
+<div class="ttc" id="classwb_1_1_waldboost_detector_html_a59f7b691d794aa02726a03a2bf8141e1"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html#a59f7b691d794aa02726a03a2bf8141e1">wb::WaldboostDetector::setPyGenMode</a></div><div class="ttdeci">void setPyGenMode(PyramidGenModes const &amp;mode)</div><div class="ttdoc">Sets pyramid generation mode. </div><div class="ttdef"><b>Definition:</b> wb_waldboostdetector.h:240</div></div>
 <div class="ttc" id="classwb_1_1_waldboost_detector_html_ab6cc8c1421a2b6fd514c8cb42f1f0ed4"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html#ab6cc8c1421a2b6fd514c8cb42f1f0ed4">wb::WaldboostDetector::init</a></div><div class="ttdeci">void init(cv::Mat *image)</div><div class="ttdoc">Initializes the detector. </div></div>
+<div class="ttc" id="wb__general_8h_html_af3524548a6be3a7d2c82bd26c487be15"><div class="ttname"><a href="wb__general_8h.html#af3524548a6be3a7d2c82bd26c487be15">WB_STAGE_COUNT</a></div><div class="ttdeci">#define WB_STAGE_COUNT</div><div class="ttdoc">Number of stages of the detector. </div><div class="ttdef"><b>Definition:</b> wb_general.h:37</div></div>
 <div class="ttc" id="classwb_1_1_waldboost_detector_html_a6e723e3d0e56b74aaa607c3fd7cc6064"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html#a6e723e3d0e56b74aaa607c3fd7cc6064">wb::WaldboostDetector::free</a></div><div class="ttdeci">void free()</div><div class="ttdoc">Cleans up memory. </div></div>
 <div class="ttc" id="classwb_1_1_waldboost_detector_html_a56111c56b061abd651d51a8f886482f2"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html#a56111c56b061abd651d51a8f886482f2">wb::WaldboostDetector::setImage</a></div><div class="ttdeci">void setImage(cv::Mat *image)</div><div class="ttdoc">Passes an image to the detector. </div></div>
-<div class="ttc" id="classwb_1_1_waldboost_detector_html"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html">wb::WaldboostDetector</a></div><div class="ttdef"><b>Definition:</b> wb_waldboostdetector.h:173</div></div>
+<div class="ttc" id="classwb_1_1_waldboost_detector_html"><div class="ttname"><a href="classwb_1_1_waldboost_detector.html">wb::WaldboostDetector</a></div><div class="ttdef"><b>Definition:</b> wb_waldboostdetector.h:199</div></div>
 <div class="ttc" id="namespacewb_html"><div class="ttname"><a href="namespacewb.html">wb</a></div><div class="ttdef"><b>Definition:</b> wb_enums.h:15</div></div>
-<div class="ttc" id="wb__general_8h_html_a61a0193997f8bfbffdf7594a5396ff46"><div class="ttname"><a href="wb__general_8h.html#a61a0193997f8bfbffdf7594a5396ff46">STAGE_COUNT</a></div><div class="ttdeci">#define STAGE_COUNT</div><div class="ttdoc">Number of stages of the detector. </div><div class="ttdef"><b>Definition:</b> wb_general.h:36</div></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Fri Mar 13 2015 12:10:45 for Waldboost detector using LBP by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sat Mar 21 2015 00:57:51 for Waldboost detector using LBP by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.9.1
 </small></address>

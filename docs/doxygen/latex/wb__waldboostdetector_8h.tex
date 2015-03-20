@@ -29,11 +29,11 @@ class \hyperlink{classwb_1_1_waldboost_detector}{wb\+::\+Waldboost\+Detector}
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
 \item 
-\+\_\+\+\_\+device\+\_\+\+\_\+ void {\bfseries wb\+::detect\+Survivors\+Init} (Survivor\+Data $\ast$survivors, uint16 end\+Stage)
+\+\_\+\+\_\+device\+\_\+\+\_\+ void {\bfseries wb\+::detect\+Survivors\+Init\+\_\+prefixsum} (uint32 const \&x, uint32 const \&y, uint32 const \&thread\+Id, uint32 const \&global\+Offset, uint32 const \&block\+Size, Survivor\+Data $\ast$survivors, uint32 \&survivor\+Count, uint32 $\ast$survivor\+Scan\+Array, uint16 end\+Stage)
 \begin{DoxyCompactList}\small\item\em Initial survivor detection processing. \end{DoxyCompactList}\item 
-\+\_\+\+\_\+device\+\_\+\+\_\+ void {\bfseries wb\+::detect\+Survivors} (Survivor\+Data $\ast$survivors, uint16 start\+Stage, uint16 end\+Stage)
+\+\_\+\+\_\+device\+\_\+\+\_\+ void {\bfseries wb\+::detect\+Survivors\+\_\+prefixsum} (uint32 const \&thread\+Id, uint32 const \&global\+Offset, uint32 const \&block\+Size, Survivor\+Data $\ast$survivors, uint32 \&survivor\+Count, uint32 $\ast$survivor\+Scan\+Array, uint16 start\+Stage, uint16 end\+Stage)
 \begin{DoxyCompactList}\small\item\em Survivor detection processing. \end{DoxyCompactList}\item 
-\+\_\+\+\_\+device\+\_\+\+\_\+ void {\bfseries wb\+::detect\+Detections} (Survivor\+Data $\ast$survivors, Detection $\ast$detections, uint32 $\ast$detection\+Count, uint16 start\+Stage)
+\+\_\+\+\_\+device\+\_\+\+\_\+ void {\bfseries wb\+::detect\+Detections\+\_\+prefixsum} (uint32 const \&thread\+Id, uint32 const \&global\+Offset, Survivor\+Data $\ast$survivors, Detection $\ast$detections, uint32 $\ast$detection\+Count, uint16 start\+Stage)
 \begin{DoxyCompactList}\small\item\em Final detection processing. \end{DoxyCompactList}\item 
 \+\_\+\+\_\+device\+\_\+\+\_\+ bool {\bfseries wb\+::eval} (uint32 x, uint32 y, float $\ast$response, uint16 start\+Stage, uint16 end\+Stage)
 \begin{DoxyCompactList}\small\item\em Evaluates stages for a given coordinate. \end{DoxyCompactList}\item 
@@ -77,7 +77,7 @@ class \hyperlink{classwb_1_1_waldboost_detector}{wb\+::\+Waldboost\+Detector}
 \hypertarget{namespacewb_ac3659109fe528d3324b8472ca62f4939}{}\+\_\+\+\_\+constant\+\_\+\+\_\+ Pyramid {\bfseries wb\+::dev\+Pyramid} \mbox{[}1\mbox{]}\label{namespacewb_ac3659109fe528d3324b8472ca62f4939}
 
 \begin{DoxyCompactList}\small\item\em \hyperlink{structwb_1_1_pyramid}{Pyramid} image information. \end{DoxyCompactList}\item 
-\hypertarget{namespacewb_a93f05643124bc1064fb6ca6e369c0cfa}{}\+\_\+\+\_\+constant\+\_\+\+\_\+ Stage {\bfseries wb\+::stages} \mbox{[}\hyperlink{wb__general_8h_a61a0193997f8bfbffdf7594a5396ff46}{S\+T\+A\+G\+E\+\_\+\+C\+O\+U\+N\+T}\mbox{]}\label{namespacewb_a93f05643124bc1064fb6ca6e369c0cfa}
+\hypertarget{namespacewb_a332894284b47125fc6e6cf0969876275}{}\+\_\+\+\_\+constant\+\_\+\+\_\+ Stage {\bfseries wb\+::stages} \mbox{[}\hyperlink{wb__general_8h_af3524548a6be3a7d2c82bd26c487be15}{W\+B\+\_\+\+S\+T\+A\+G\+E\+\_\+\+C\+O\+U\+N\+T}\mbox{]}\label{namespacewb_a332894284b47125fc6e6cf0969876275}
 
 \begin{DoxyCompactList}\small\item\em Detector stages. \end{DoxyCompactList}\end{DoxyCompactItemize}
 

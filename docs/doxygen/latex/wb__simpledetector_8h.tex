@@ -1,0 +1,30 @@
+\hypertarget{wb__simpledetector_8h}{}\section{C\+:/dev/repositories/vutbr-\/fit-\/waldboost-\/detector/src/wb\+\_\+simpledetector.h File Reference}
+\label{wb__simpledetector_8h}\index{C\+:/dev/repositories/vutbr-\/fit-\/waldboost-\/detector/src/wb\+\_\+simpledetector.\+h@{C\+:/dev/repositories/vutbr-\/fit-\/waldboost-\/detector/src/wb\+\_\+simpledetector.\+h}}
+
+
+Simple c++ waldboost detector.  
+
+
+{\ttfamily \#include $<$vector$>$}\\*
+{\ttfamily \#include \char`\"{}wb\+\_\+general.\+h\char`\"{}}\\*
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void {\bfseries wb\+::simple\+::detect} (std\+::vector$<$ Detection $>$ \&detections, uint8 $\ast$image, uint32 const \&width, uint32 const \&height, uint32 const \&pitch)
+\begin{DoxyCompactList}\small\item\em Runs object detection. \end{DoxyCompactList}\item 
+bool {\bfseries wb\+::simple\+::eval} (uint8 $\ast$image, uint32 const \&x, uint32 const \&y, uint32 const \&pitch, float $\ast$response)
+\begin{DoxyCompactList}\small\item\em Classifies an object. \end{DoxyCompactList}\item 
+float {\bfseries wb\+::simple\+::eval\+L\+B\+P} (uint8 $\ast$image, uint32 const \&x, uint32 const \&y, uint32 const \&pitch, Stage $\ast$stage)
+\begin{DoxyCompactList}\small\item\em Evaluates L\+B\+P for a given X-\/\+Y coordinate. \end{DoxyCompactList}\item 
+void {\bfseries wb\+::simple\+::sum\+Regions} (uint8 $\ast$image, uint32 const \&x, uint32 const \&y, uint32 pitch, uint32 $\ast$values, Stage $\ast$stage)
+\begin{DoxyCompactList}\small\item\em Sums regions for L\+B\+P calculation. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Simple c++ waldboost detector. 
+
+A simple c++ implementation of a waldboost detector mainly for comparison measurements.
+
+\begin{DoxyAuthor}{Author}
+Pavel Macenauer \href{mailto:macenauer.p@gmail.com}{\tt macenauer.\+p@gmail.\+com} 
+\end{DoxyAuthor}

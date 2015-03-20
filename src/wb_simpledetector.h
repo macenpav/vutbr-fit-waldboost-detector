@@ -1,33 +1,57 @@
 /**
-* @file wb_simpledetector.h
-* @brief Simple c++ waldboost detector.
-* 		 
-* @details A simple c++ implementation of a waldboost
-* 		   mainly for comparison measurements.
-*
-* @author Pavel Macenauer <macenauer.p@gmail.com>
-*/
+ * @file wb_simpledetector.h
+ * @brief Simple c++ waldboost detector.
+ * 		 
+ * @details A simple c++ implementation of a waldboost detector
+ * 			mainly for comparison measurements.
+ *
+ * @author Pavel Macenauer <macenauer.p@gmail.com>
+ */
 
 #ifndef H_WB_SIMPLEDETECTOR
 #define H_WB_SIMPLEDETECTOR
 
-#include "wb_structures.h"
-#include "wb_general.h"
-
 #include <vector>
+#include "wb_general.h"
 
 namespace wb
 {
+	struct Stage;
+	struct Detection;
+
 	namespace simple
 	{		
+		/** @brief Runs object detection.
+		 *
+		 * @details Runs object detector for a given image.
+		 *
+		 * @param detections	A vector with detections.
+		 * @param image			Image data.
+		 * @param width			Image width.
+		 * @param height		Image height.
+		 * @param pitch			Image pitch (row width).
+		 * @return				A void.
+		 */
 		void detect(
 			std::vector<Detection>& detections,
-			uint8* image,
-			uint32 const& width,
-			uint32 const& height,
-			uint32 const& pitch
+			uint8*					image,
+			uint32 const&			width,
+			uint32 const&			height,
+			uint32 const&			pitch
 		);
 
+		/** @brief Classifies an object.
+		 *
+		 * @details Goes through all the stages of the classifier, evaluates weak classifiers
+		 *			and returns a strong classifier.
+		 *
+		 * @param image		Image data.
+		 * @param x			X-coordinate.
+		 * @param y			Y-coordinate.
+		 * @param pitch		Image pitch (row width).
+		 * @param stage		LBP classifier stage.
+		 * @return			Object found or not.
+		 */
 		bool eval(
 			uint8*			image, 
 			uint32 const&	x, 
@@ -36,15 +60,17 @@ namespace wb
 			float*			response
 		);
 
-		/** @brief Evaluates LBP for a given coordinate
-		*
-		* @details Evaluates LBP for a given coordinate with a given stage and returns a response.
-		*
-		* @param x				X-coordinate.
-		* @param y				Y-coordinate.
-		* @param stage			Classifier stage.
-		* @return				A response.
-		*/
+		/** @brief Evaluates LBP for a given X-Y coordinate.
+		 *
+		 * @details Evaluates LBP for a given coordinate and a stage, returning a response.
+		 *
+		 * @param image		Image data.
+		 * @param x			X-coordinate.
+		 * @param y			Y-coordinate.
+		 * @param pitch		Image pitch (row width).
+		 * @param stage		LBP classifier stage.
+		 * @return			A response.
+		 */
 		float evalLBP(
 			uint8*			image, 
 			uint32 const&	x, 
@@ -54,16 +80,18 @@ namespace wb
 		);
 
 		/** @brief Sums regions for LBP calculation.
-		*
-		* @details Interpolates image regions (1x1, 2x1, 1x2, 2x2) for LBP calculation. Uses
-		* texture unit bilinear interpolation capabilities.
-		*
-		* @param values	Values used for LBP calculation.
-		* @param x			X-coordinate.
-		* @param y			Y-coordinate.
-		* @param stage		Classifier stage.
-		* @return			Void.
-		*/
+		 *
+		 * @details Sums up image regions based on stage width and height (1x1 to 2x2) mostly.
+		 * 			This is later on used in LBP code calculation.		
+		 *
+		 * @param image		Image data.
+		 * @param x			X-coordinate.
+		 * @param y			Y-coordinate.
+		 * @param pitch		Image pitch (row width).
+		 * @param values	Accumulated values.
+		 * @param stage		LBP classifier stage.
+		 * @return			Void.
+		 */
 		void sumRegions(
 			uint8*			image, 
 			uint32 const&	x, 

@@ -1,11 +1,11 @@
 /**
-* @file	wb_enums.h
-* @brief Waldboost detector structures.
-*
-* Used structures are held here.
-*
-* @author Pavel Macenauer <macenauer.p@gmail.com>
-*/
+ * @file	wb_enums.h
+ * @brief Waldboost detector structures.
+ *
+ * Used structures are held here.
+ *
+ * @author Pavel Macenauer <macenauer.p@gmail.com>
+ */
 
 #ifndef H_WB_STRUCTURES
 #define H_WB_STRUCTURES

@@ -41,7 +41,7 @@ typedef std::chrono::system_clock::time_point ClockPoint;
 
 /** @brief Max. number of detections per frame. 
  *
- * Allocates memory and cannot overflow, but can be kept lower to save GPU memory.
+ * @details Allocates memory and cannot overflow, but can be kept lower to save GPU memory.
  */
 #define WB_MAX_DETECTIONS 4096
 

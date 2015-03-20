@@ -37,7 +37,7 @@ namespace wb
 			image += y * pitch + x;
 			uint32 blockStep = stage->height * pitch;
 			pitch -= stage->width;			
-			// Prepare pointer array
+
 			uint8 * base[9] = {
 				image, image + stage->width, image + 2 * stage->width,
 				image + blockStep, image + blockStep + stage->width, image + blockStep + 2 * stage->width,
@@ -46,7 +46,6 @@ namespace wb
 
 			for (uint8 y = 0; y < stage->height; ++y)
 			{
-				// go through all pixels in row and accumulate
 				uint8 x = 0;
 				while (x < stage->width)
 				{
@@ -56,8 +55,7 @@ namespace wb
 						++base[i];
 					}
 					++x;
-				}
-				// set pointers to next line 
+				} 
 				for (uint8 i = 0; i < 9; ++i)
 					base[i] += pitch;
 			}
@@ -79,9 +77,8 @@ namespace wb
 		}
 
 		bool eval(uint8* image, uint32 const& x, uint32 const& y, uint32 const& pitch, float* response)
-		{
-			uint16 i = 0;
-			for (; i < WB_STAGE_COUNT; ++i)
+		{			
+			for (uint16 i = 0; i < WB_STAGE_COUNT; ++i)
 			{
 				Stage stage = hostStages[i];
 				*response += evalLBP(image, x, y, pitch, &stage);
@@ -90,7 +87,6 @@ namespace wb
 				}
 			}			
 
-			// final waldboost threshold
 			return *response > WB_FINAL_THRESHOLD;
 		}
 	}
