@@ -27,12 +27,16 @@
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\wb_simpledetector.h" />
     <ClInclude Include="..\src\wb_structures.h" />
     <ClInclude Include="..\src\wb_alphas.h" />
     <ClInclude Include="..\src\wb_detector.h" />
     <ClInclude Include="..\src\wb_general.h" />
     <ClInclude Include="..\src\wb_waldboostdetector.h" />
     <ClInclude Include="..\src\wb_enums.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\wb_simpledetector.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5D967ABB-3C7A-4E42-86AB-F8494BE40915}</ProjectGuid>
@@ -157,6 +161,7 @@ copy "$(CudaToolkitBinDir)\cudart*.dll" "$(OutDir)"</Command>
       <Include>$(OPENCV_BUILD)\install\include\;$(OPENCV_DIR)\dep\tbb\include\;%(Include)</Include>
       <Defines>
       </Defines>
+      <CodeGeneration>compute_30,sm_30</CodeGeneration>
     </CudaCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

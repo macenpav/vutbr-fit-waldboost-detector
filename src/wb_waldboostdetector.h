@@ -194,7 +194,7 @@ namespace wb {
 	#define PYRAMID devPyramid[0]
 
 	/** @brief Detector stages. */
-	__constant__ Stage stages[STAGE_COUNT];
+	__constant__ Stage stages[WB_STAGE_COUNT];
 
 	class WaldboostDetector 
 	{
@@ -316,7 +316,8 @@ namespace wb {
 			 *
 			 * @return Void.
 			 */
-			void _processDetections();
+			void _processDetections();			
+			void _processDetections(Detection* detections, uint32 const& detectionCount);
 
 
 			ImageInfo			_info;				///< image information

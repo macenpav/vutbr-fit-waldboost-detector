@@ -3,7 +3,7 @@
 
 #include "wb_general.h"
 
-wb::Stage hostStages[STAGE_COUNT] = {
+static wb::Stage hostStages[WB_STAGE_COUNT] = {
 { 12, 6, 2, 2, -0.71673900, 0},
 { 8, 7, 2, 2, -0.92894799, 256},
 { 2, 0, 2, 1, -1.23673999, 512},

@@ -23,17 +23,18 @@ typedef int int32;
 
 typedef std::chrono::high_resolution_clock Clock;
 typedef std::chrono::milliseconds Milliseconds;
+typedef std::chrono::nanoseconds Nanoseconds;
 typedef std::chrono::duration<float> FPDuration;
 typedef std::chrono::system_clock::time_point ClockPoint;
 
 /** @brief Final detector threshold. */
-#define FINAL_THRESHOLD 0.f
+#define WB_FINAL_THRESHOLD 0.f
 
 /** @brief Number of alphas in the detector. */
-#define ALPHA_COUNT 256
+#define WB_ALPHA_COUNT 256
 
 /** @brief Number of stages of the detector. */
-#define STAGE_COUNT 2048
+#define WB_STAGE_COUNT 2048
 
 /** @brief Delay in ms between displaying frames */
 #define WB_WAIT_DELAY 1
@@ -42,7 +43,7 @@ typedef std::chrono::system_clock::time_point ClockPoint;
  *
  * Allocates memory and cannot overflow, but can be kept lower to save GPU memory.
  */
-#define WB_MAX_DETECTIONS 512
+#define WB_MAX_DETECTIONS 4096
 
 /** @brief Classifier window width. */
 #define WB_CLASSIFIER_WIDTH 26

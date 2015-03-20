@@ -3,12 +3,14 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <vector>
 #include "cuda_runtime.h"
 
 #include "wb_general.h"
 #include "wb_structures.h"
 #include "wb_detector.h"
 #include "wb_alphas.h"
+#include "wb_simpledetector.h"
 
 namespace wb {
 		
@@ -25,7 +27,7 @@ namespace wb {
 		const uint32 x = survivors[globalOffset + threadId].x;
 		const uint32 y = survivors[globalOffset + threadId].y;
 
-		bool survived = eval(x, y, &response, startStage, STAGE_COUNT);
+		bool survived = eval(x, y, &response, startStage, WB_STAGE_COUNT);
 		if (survived) {
 			uint32 pos = atomicInc(detectionCount, WB_MAX_DETECTIONS);
 			detections[pos].x = x;
@@ -48,7 +50,7 @@ namespace wb {
 		const uint32 x = localSurvivors[threadId].x;
 		const uint32 y = localSurvivors[threadId].y;		
 
-		bool survived = eval(x, y, &response, startStage, STAGE_COUNT);
+		bool survived = eval(x, y, &response, startStage, WB_STAGE_COUNT);
 		if (survived) 
 		{
 			uint32 pos = atomicInc(detectionCount, WB_MAX_DETECTIONS);
@@ -75,7 +77,7 @@ namespace wb {
 		const uint32 x = globalSurvivors[id].x;
 		const uint32 y = globalSurvivors[id].y;		
 
-		bool survived = eval(x, y, &response, startStage, STAGE_COUNT);
+		bool survived = eval(x, y, &response, startStage, WB_STAGE_COUNT);
 		if (survived)
 		{
 			uint32 pos = atomicInc(detectionCount, WB_MAX_DETECTIONS);
@@ -590,7 +592,7 @@ namespace wb {
 		}
 
 		// final waldboost threshold
-		return *response > FINAL_THRESHOLD;
+		return *response > WB_FINAL_THRESHOLD;
 	}
 
 
@@ -940,7 +942,7 @@ namespace wb {
 		{
 			init_time_end = Clock::now();
 			FPDuration duration = init_time_end - init_time_start;
-			_timers[TIMER_INIT] += static_cast<float>(std::chrono::duration_cast<Milliseconds>(duration).count()) / 1000.f;
+			_timers[TIMER_INIT] += static_cast<float>(std::chrono::duration_cast<Nanoseconds>(duration).count()) / 1000000.f;
 		}
 		
 		if (_opt & OPT_VERBOSE)
@@ -976,7 +978,7 @@ namespace wb {
 
 		cudaMemcpyToSymbol(devPyramid, &_pyramid, sizeof(Pyramid));
 		cudaMemcpyToSymbol(devInfo, &_info, sizeof(ImageInfo));
-		cudaMemcpyToSymbol(stages, hostStages, sizeof(Stage) * STAGE_COUNT);
+		cudaMemcpyToSymbol(stages, hostStages, sizeof(Stage) * WB_STAGE_COUNT);
 
 		cudaMalloc((void**)&_devOriginalImage, sizeof(uint8) * _info.imageSize * _info.channels);
 		cudaMalloc((void**)&_devWorkingImage, sizeof(float) * _info.imageSize);
@@ -993,11 +995,11 @@ namespace wb {
 		cudaMalloc((void**)&_devSurvivorCount, sizeof(uint32));
 		cudaMemset((void**)&_devSurvivorCount, 0, sizeof(uint32));
 				
-		cudaMalloc(&_devAlphaBuffer, STAGE_COUNT * ALPHA_COUNT * sizeof(float));
-		cudaMemcpy(_devAlphaBuffer, alphas, STAGE_COUNT * ALPHA_COUNT * sizeof(float), cudaMemcpyHostToDevice);
+		cudaMalloc(&_devAlphaBuffer, WB_STAGE_COUNT * WB_ALPHA_COUNT * sizeof(float));
+		cudaMemcpy(_devAlphaBuffer, alphas, WB_STAGE_COUNT * WB_ALPHA_COUNT * sizeof(float), cudaMemcpyHostToDevice);
 		
 		cudaChannelFormatDesc alphaDesc = cudaCreateChannelDesc<float>();
-		cudaBindTexture(nullptr, &textureAlphas, _devAlphaBuffer, &alphaDesc, STAGE_COUNT * ALPHA_COUNT * sizeof(float));
+		cudaBindTexture(nullptr, &textureAlphas, _devAlphaBuffer, &alphaDesc, WB_STAGE_COUNT * WB_ALPHA_COUNT * sizeof(float));
 
 		cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<float>();
 		cudaBindTexture2D(nullptr, &textureWorkingImage, _devWorkingImage, &channelDesc, _info.width, _info.height, sizeof(float) * _info.width);
@@ -1011,7 +1013,7 @@ namespace wb {
 		{
 			init_time_end = Clock::now();
 			FPDuration duration = init_time_end - init_time_start;
-			_timers[TIMER_INIT] += static_cast<float>(std::chrono::duration_cast<Milliseconds>(duration).count()) / 1000.f;
+			_timers[TIMER_INIT] += static_cast<float>(std::chrono::duration_cast<Nanoseconds>(duration).count()) / 1000000.f;
 		}
 
 		if (_opt & OPT_OUTPUT_CSV)
@@ -1149,6 +1151,11 @@ namespace wb {
 		cudaMemcpy(&detectionCount, _devDetectionCount, sizeof(uint32), cudaMemcpyDeviceToHost);
 		cudaMemcpy(&detections, _devDetections, detectionCount * sizeof(Detection), cudaMemcpyDeviceToHost);
 
+		_processDetections(detections, detectionCount);
+	}
+
+	void WaldboostDetector::_processDetections(Detection* detections, uint32 const& detectionCount)
+	{		
 		if (_opt & OPT_VERBOSE)	
 			std::cout << LIBHEADER << "Detection count: " << detectionCount << std::endl;		
 
@@ -1221,6 +1228,7 @@ namespace wb {
 					cudaEventSynchronize(stop_detection);
 					cudaEventElapsedTime(&_timers[TIMER_DETECTION], start_detection, stop_detection);
 				}
+				_processDetections();
 				break;
 
 			case DET_ATOMIC_SHARED:
@@ -1239,6 +1247,7 @@ namespace wb {
 					cudaEventSynchronize(stop_detection);
 					cudaEventElapsedTime(&_timers[TIMER_DETECTION], start_detection, stop_detection);
 				}
+				_processDetections();
 				break;
 			}
 			case DET_PREFIXSUM:
@@ -1257,11 +1266,46 @@ namespace wb {
 					cudaEventSynchronize(stop_detection);
 					cudaEventElapsedTime(&_timers[TIMER_DETECTION], start_detection, stop_detection);
 				}
+				_processDetections();
 				break;
 			}
-		}												
+			case DET_CPU:
+			{
+				// copy image from texture to GPU mem and then to CPU mem
+				float* pyramidImage;
+				dim3 grid(_pyramid.canvasWidth / _block.x + 1, _pyramid.canvasHeight / _block.y + 1, 1);
+				cudaMalloc((void**)&pyramidImage, _pyramid.canvasImageSize * sizeof(float));
+				copyKernel <<<grid, _block>>>(pyramidImage, _pyramid.canvasWidth, _pyramid.canvasHeight);
 
-		_processDetections();	
+				// float representation is used inside GPU
+				// we need to convert it to uint8
+				cv::Mat tmp(cv::Size(_pyramid.canvasWidth, _pyramid.canvasHeight), CV_32FC1);	
+				uint8* bw = (uint8*)malloc(_pyramid.canvasWidth * _pyramid.canvasHeight);
+				
+				cudaMemcpy(tmp.data, pyramidImage, _pyramid.canvasImageSize * sizeof(float), cudaMemcpyDeviceToHost);					
+				for (int i = 0; i < tmp.rows; i++)
+					for (int j = 0; j < tmp.cols; j++)						
+						bw[i * tmp.cols + j] = static_cast<uint8>(tmp.at<float>(i, j) * 255.f);				
+				cudaFree(pyramidImage);
+
+				ClockPoint det_time_start, det_time_end;
+				if (_opt & OPT_TIMER)
+					det_time_start = Clock::now();
+
+				std::vector<Detection> detections;
+				simple::detect(detections, bw, _pyramid.canvasWidth, _pyramid.canvasHeight, _pyramid.canvasWidth);
+				::free(bw);
+
+				if (_opt & OPT_TIMER)
+				{
+					det_time_end = Clock::now();
+					FPDuration duration = det_time_end - det_time_start;
+					_timers[TIMER_DETECTION] += static_cast<float>(std::chrono::duration_cast<Nanoseconds>(duration).count()) / 1000000.f;
+				}
+				_processDetections(&(detections[0]), detections.size());
+			}
+			break;
+		}														
 
 		if (_opt & OPT_TIMER)
 		{			
