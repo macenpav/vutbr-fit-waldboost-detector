@@ -35,5 +35,13 @@
     <ClInclude Include="..\src\wb_general.h">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\wb_simpledetector.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\wb_simpledetector.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

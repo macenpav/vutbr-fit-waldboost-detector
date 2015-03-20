@@ -60,6 +60,8 @@ namespace wb {
 		DET_ATOMIC_SHARED,
 		/** @brief Prefix sum used to count surviving threads. */
 		DET_PREFIXSUM,
+		/** @brief Detection done on CPU. */
+		DET_CPU,
 
 		MAX_DET_MODES
 	};

@@ -245,6 +245,8 @@ int main(int argc, char** argv)
 				settings.detectionMode = wb::DET_ATOMIC_SHARED;
 			else if (str == "prefixsum")
 				settings.detectionMode = wb::DET_PREFIXSUM;
+			else if (str == "cpu")
+				settings.detectionMode = wb::DET_CPU;
 			else
 			{
 				std::cerr << LIBHEADER << "Option -dm (detection mode) has only the following options available: 'aglobal', 'ashared' and 'prefixsum'." << std::endl;
