@@ -12,35 +12,41 @@
     <CudaCompile Include="..\src\main.cu">
       <Filter>sources</Filter>
     </CudaCompile>
-    <CudaCompile Include="..\src\wb_waldboostdetector.cu">
+    <CudaCompile Include="..\src\wbd_gpu.cu">
+      <Filter>sources</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\wbd_waldboostdetector.cu">
       <Filter>sources</Filter>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\wb_waldboostdetector.h">
+    <ClInclude Include="..\src\wbd_alphas.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\wb_enums.h">
+    <ClInclude Include="..\src\wbd_detector.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\wb_detector.h">
+    <ClInclude Include="..\src\wbd_enums.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\wb_structures.h">
+    <ClInclude Include="..\src\wbd_general.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\wb_alphas.h">
+    <ClInclude Include="..\src\wbd_gpu.cuh">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\wb_general.h">
+    <ClInclude Include="..\src\wbd_simple.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\wb_simpledetector.h">
+    <ClInclude Include="..\src\wbd_structures.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\wbd_waldboostdetector.cuh">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\wb_simpledetector.cpp">
+    <ClCompile Include="..\src\wbd_simple.cpp">
       <Filter>sources</Filter>
     </ClCompile>
   </ItemGroup>

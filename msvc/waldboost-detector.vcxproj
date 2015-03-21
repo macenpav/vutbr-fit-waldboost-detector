@@ -22,21 +22,23 @@
     <CudaCompile Include="..\src\main.cu" />
   </ItemGroup>
   <ItemGroup>
-    <CudaCompile Include="..\src\wb_waldboostdetector.cu">
+    <CudaCompile Include="..\src\wbd_gpu.cu" />
+    <CudaCompile Include="..\src\wbd_waldboostdetector.cu">
       <FileType>CppCode</FileType>
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\wb_simpledetector.h" />
-    <ClInclude Include="..\src\wb_structures.h" />
-    <ClInclude Include="..\src\wb_alphas.h" />
-    <ClInclude Include="..\src\wb_detector.h" />
-    <ClInclude Include="..\src\wb_general.h" />
-    <ClInclude Include="..\src\wb_waldboostdetector.h" />
-    <ClInclude Include="..\src\wb_enums.h" />
+    <ClInclude Include="..\src\wbd_gpu.cuh" />
+    <ClInclude Include="..\src\wbd_simple.h" />
+    <ClInclude Include="..\src\wbd_structures.h" />
+    <ClInclude Include="..\src\wbd_alphas.h" />
+    <ClInclude Include="..\src\wbd_detector.h" />
+    <ClInclude Include="..\src\wbd_general.h" />
+    <ClInclude Include="..\src\wbd_waldboostdetector.cuh" />
+    <ClInclude Include="..\src\wbd_enums.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\wb_simpledetector.cpp" />
+    <ClCompile Include="..\src\wbd_simple.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5D967ABB-3C7A-4E42-86AB-F8494BE40915}</ProjectGuid>
