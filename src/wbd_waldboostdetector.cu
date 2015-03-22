@@ -11,12 +11,15 @@
 #include "wbd_detector.h"
 #include "wbd_alphas.h"
 #include "wbd_simple.h"
+#include "wbd_func.h"
 
 namespace wbd 
 {
 		
 	__device__ 
 		void detectDetections_prefixsum(
+		cudaTextureObject_t texture,
+		cudaTextureObject_t alphas,
 		uint32 const& threadId,
 		uint32 const&	globalOffset,
 		SurvivorData*	survivors,
@@ -28,7 +31,7 @@ namespace wbd
 		const uint32 x = survivors[globalOffset + threadId].x;
 		const uint32 y = survivors[globalOffset + threadId].y;
 
-		bool survived = eval(x, y, &response, startStage, WB_STAGE_COUNT);
+		bool survived = eval(texture, alphas, x, y, &response, startStage, WB_STAGE_COUNT);
 		if (survived) {
 			uint32 pos = atomicInc(detectionCount, WB_MAX_DETECTIONS);
 			detections[pos].x = x;
@@ -41,6 +44,8 @@ namespace wbd
 
 	__device__
 		void detectDetections_atomicShared(
+		cudaTextureObject_t texture,
+		cudaTextureObject_t alphas,
 		uint32 const&	threadId,
 		SurvivorData*	localSurvivors,		
 		Detection*		detections,
@@ -51,7 +56,7 @@ namespace wbd
 		const uint32 x = localSurvivors[threadId].x;
 		const uint32 y = localSurvivors[threadId].y;		
 
-		bool survived = eval(x, y, &response, startStage, WB_STAGE_COUNT);
+		bool survived = eval(texture, alphas, x, y, &response, startStage, WB_STAGE_COUNT);
 		if (survived) 
 		{
 			uint32 pos = atomicInc(detectionCount, WB_MAX_DETECTIONS);
@@ -65,6 +70,8 @@ namespace wbd
 
 	__device__
 		void detectDetections_global(
+		cudaTextureObject_t texture,
+		cudaTextureObject_t alphas,
 		uint32 const&	threadId,
 		uint32 const&	globalOffset,
 		SurvivorData*	globalSurvivors,		
@@ -78,7 +85,7 @@ namespace wbd
 		const uint32 x = globalSurvivors[id].x;
 		const uint32 y = globalSurvivors[id].y;		
 
-		bool survived = eval(x, y, &response, startStage, WB_STAGE_COUNT);
+		bool survived = eval(texture, alphas, x, y, &response, startStage, WB_STAGE_COUNT);
 		if (survived)
 		{
 			uint32 pos = atomicInc(detectionCount, WB_MAX_DETECTIONS);
@@ -92,6 +99,8 @@ namespace wbd
 
 	__device__ 
 	void detectSurvivorsInit_prefixsum(
+	cudaTextureObject_t texture,
+	cudaTextureObject_t alphas,
 		uint32 const&	x,
 		uint32 const&	y,		
 		uint32 const&	threadId,
@@ -104,7 +113,7 @@ namespace wbd
 	{				
 			
 		float response = 0.0f;
-		bool survived = eval(x, y, &response, 0, endStage);
+		bool survived = eval(texture, alphas, x, y, &response, 0, endStage);
 
 		survivorScanArray[threadId] = survived ? 1 : 0;			
 
@@ -164,6 +173,8 @@ namespace wbd
 
 	__device__
 		void detectSurvivorsInit_atomicShared(
+		cudaTextureObject_t texture,
+		cudaTextureObject_t alphas,
 		uint32 const&	x,
 		uint32 const&	y,
 		uint32 const&	threadId,
@@ -172,7 +183,7 @@ namespace wbd
 		uint16			endStage)
 	{				
 		float response = 0.0f;
-		bool survived = eval(x, y, &response, 0, endStage);						
+		bool survived = eval(texture, alphas, x, y, &response, 0, endStage);						
 		if (survived)
 		{				
 			uint32 newThreadId = atomicInc(localSurvivorCount, blockDim.x * blockDim.y);
@@ -185,6 +196,8 @@ namespace wbd
 
 	__device__
 		void detectSurvivorsInit_global(	
+		cudaTextureObject_t texture,
+		cudaTextureObject_t alphas,
 		uint32 const&	x,
 		uint32 const&	y,
 		uint32 const&	threadId,
@@ -194,7 +207,7 @@ namespace wbd
 		uint16			endStage)
 	{						
 		float response = 0.0f;
-		bool survived = eval(x, y, &response, 0, endStage);
+		bool survived = eval(texture, alphas, x, y, &response, 0, endStage);
 
 		if (survived)
 		{			
@@ -208,6 +221,8 @@ namespace wbd
 	}
 
 	__device__ void detectSurvivors_prefixsum(
+		cudaTextureObject_t texture,
+		cudaTextureObject_t alphas,
 		uint32 const&		threadId,
 		uint32 const&		globalOffset,
 		uint32 const&		blockSize,
@@ -221,7 +236,7 @@ namespace wbd
 		const uint32 x = survivors[globalOffset + threadId].x;
 		const uint32 y = survivors[globalOffset + threadId].y;
 
-		bool survived = eval(x, y, &response, startStage, endStage);		
+		bool survived = eval(texture, alphas, x, y, &response, startStage, endStage);		
 		survivorScanArray[threadId] = survived ? 1 : 0;
 
 		// up-sweep
@@ -271,6 +286,8 @@ namespace wbd
 	}
 
 	__device__ void detectSurvivors_atomicShared(
+		cudaTextureObject_t texture,
+		cudaTextureObject_t alphas,
 		uint32 const&	threadId,
 		SurvivorData*	localSurvivors,
 		uint32*			localSurvivorCount,
@@ -281,7 +298,7 @@ namespace wbd
 		const uint32 x = localSurvivors[threadId].x;
 		const uint32 y = localSurvivors[threadId].y;
 
-		bool survived = eval(x, y, &response, startStage, endStage);
+		bool survived = eval(texture, alphas, x, y, &response, startStage, endStage);
 		if (survived)
 		{
 			uint32 newThreadId = atomicInc(localSurvivorCount, blockDim.x * blockDim.y);
@@ -292,6 +309,8 @@ namespace wbd
 	}
 
 	__device__ void detectSurvivors_global(
+		cudaTextureObject_t texture,
+		cudaTextureObject_t alphas,
 		uint32 const&	threadId,
 		uint32 const&	globalOffset,
 		SurvivorData*	globalSurvivors,
@@ -305,7 +324,7 @@ namespace wbd
 		const uint32 x = globalSurvivors[id].x;
 		const uint32 y = globalSurvivors[id].y;
 		
-		bool survived = eval(x, y, &response, startStage, endStage);
+		bool survived = eval(texture, alphas, x, y, &response, startStage, endStage);
 		if (survived)
 		{
 			uint32 threadOffset = atomicInc(survivorCount, blockDim.x * blockDim.y); // there can be max. block size survivors
@@ -317,6 +336,8 @@ namespace wbd
 	}
 
 	__global__ void detectionKernel_atomicShared(
+		cudaTextureObject_t texture,
+		cudaTextureObject_t alphas,
 		Detection*			detections,
 		uint32*				detectionCount)
 	{		
@@ -334,7 +355,7 @@ namespace wbd
 				survivorCount = 0;
 			__syncthreads();
 
-			detectSurvivorsInit_atomicShared(x, y, threadId, survivors, &survivorCount, 1);
+			detectSurvivorsInit_atomicShared(texture, alphas, x, y, threadId, survivors, &survivorCount, 1);
 
 			__syncthreads();
 			if (threadId >= survivorCount)
@@ -344,7 +365,7 @@ namespace wbd
 				survivorCount = 0;
 			__syncthreads();
 
-			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 1, 8);
+			detectSurvivors_atomicShared(texture, alphas, threadId, survivors, &survivorCount, 1, 8);
 
 			__syncthreads();
 			if (threadId >= survivorCount)
@@ -354,7 +375,7 @@ namespace wbd
 				survivorCount = 0;
 			__syncthreads();
 
-			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 8, 64);
+			detectSurvivors_atomicShared(texture, alphas, threadId, survivors, &survivorCount, 8, 64);
 
 			__syncthreads();
 			if (threadId >= survivorCount)
@@ -364,7 +385,7 @@ namespace wbd
 				survivorCount = 0;
 			__syncthreads();
 
-			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 64, 256);
+			detectSurvivors_atomicShared(texture, alphas, threadId, survivors, &survivorCount, 64, 256);
 
 			__syncthreads();
 			if (threadId >= survivorCount)
@@ -374,18 +395,20 @@ namespace wbd
 				survivorCount = 0;
 			__syncthreads();
 
-			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 256, 512);
+			detectSurvivors_atomicShared(texture, alphas, threadId, survivors, &survivorCount, 256, 512);
 
 			__syncthreads();
 			if (threadId >= survivorCount)
 				return;		
 			__syncthreads();
 
-			detectDetections_atomicShared(threadId, survivors, detections, detectionCount, 512);
+			detectDetections_atomicShared(texture, alphas, threadId, survivors, detections, detectionCount, 512);
 		}
 	}
 
 	__global__ void detectionKernel_global(
+		cudaTextureObject_t texture,
+		cudaTextureObject_t alphas,
 		SurvivorData*		survivors,		
 		Detection*			detections,
 		uint32*				detectionCount)
@@ -410,7 +433,7 @@ namespace wbd
 
 			__syncthreads();
 
-			detectSurvivorsInit_global(x, y, threadId, blockOffset, survivors, &blockSurvivors, 1);
+			detectSurvivorsInit_global(texture, alphas, x, y, threadId, blockOffset, survivors, &blockSurvivors, 1);
 
 			// finish all the detections within a block
 			__syncthreads();
@@ -424,7 +447,7 @@ namespace wbd
 			// reset the counter
 			__syncthreads();
 
-			detectSurvivors_global(threadId, blockOffset, survivors, &blockSurvivors, 1, 8);
+			detectSurvivors_global(texture, alphas, threadId, blockOffset, survivors, &blockSurvivors, 1, 8);
 
 			// finish all the detections within a block
 			__syncthreads();
@@ -437,7 +460,7 @@ namespace wbd
 			// reset the counter
 			__syncthreads();
 
-			detectSurvivors_global(threadId, blockOffset, survivors, &blockSurvivors, 8, 64);
+			detectSurvivors_global(texture, alphas, threadId, blockOffset, survivors, &blockSurvivors, 8, 64);
 
 			// finish all the detections within a block
 			__syncthreads();
@@ -450,7 +473,7 @@ namespace wbd
 			// reset the counter
 			__syncthreads();
 
-			detectSurvivors_global(threadId, blockOffset, survivors, &blockSurvivors, 64, 256);
+			detectSurvivors_global(texture, alphas, threadId, blockOffset, survivors, &blockSurvivors, 64, 256);
 
 			// finish all the detections within a block
 			__syncthreads();
@@ -463,18 +486,20 @@ namespace wbd
 			// reset the counter
 			__syncthreads();
 
-			detectSurvivors_global(threadId, blockOffset, survivors, &blockSurvivors, 256, 512);
+			detectSurvivors_global(texture, alphas, threadId, blockOffset, survivors, &blockSurvivors, 256, 512);
 
 			// finish all the detections within a block
 			__syncthreads();
 			if (threadId >= blockSurvivors)
 				return;
 
-			detectDetections_global(threadId, blockOffset, survivors, detections, detectionCount, 512);
+			detectDetections_global(texture, alphas, threadId, blockOffset, survivors, detections, detectionCount, 512);
 		}
 	}
 
-	__global__ void detectionKernel_prefixsum(		
+	__global__ void detectionKernel_prefixsum(	
+		cudaTextureObject_t texture,
+		cudaTextureObject_t alphas,
 		Detection*			detections,
 		uint32*				detectionCount)
 	{										
@@ -496,7 +521,7 @@ namespace wbd
 
 		__syncthreads();
 
-			detectSurvivorsInit_prefixsum(x, y, threadId, blockOffset, blockSize, survivors, survivorCount, survivorScanArray, 1);
+		detectSurvivorsInit_prefixsum(texture, alphas, x, y, threadId, blockOffset, blockSize, survivors, survivorCount, survivorScanArray, 1);
 			
 			__syncthreads();			
 			if (threadId >= survivorCount)
@@ -506,7 +531,7 @@ namespace wbd
 				survivorCount = 0;
 			__syncthreads();
 
-			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 1, 8);
+			detectSurvivors_atomicShared(texture, alphas, threadId, survivors, &survivorCount, 1, 8);
 			
 			__syncthreads();
 			if (threadId >= survivorCount)
@@ -515,7 +540,7 @@ namespace wbd
 			if (threadId == 0)
 				survivorCount = 0;
 			__syncthreads();
-			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 8, 64);
+			detectSurvivors_atomicShared(texture, alphas, threadId, survivors, &survivorCount, 8, 64);
 			
 			
 			__syncthreads();
@@ -526,7 +551,7 @@ namespace wbd
 				survivorCount = 0;
 			__syncthreads();
 			
-			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 64, 256);
+			detectSurvivors_atomicShared(texture, alphas, threadId, survivors, &survivorCount, 64, 256);
 			
 			__syncthreads();
 			if (threadId >= survivorCount)
@@ -536,57 +561,57 @@ namespace wbd
 				survivorCount = 0;
 			__syncthreads();
 
-			detectSurvivors_atomicShared(threadId, survivors, &survivorCount, 256, 512);
+			detectSurvivors_atomicShared(texture, alphas, threadId, survivors, &survivorCount, 256, 512);
 			
 			__syncthreads();
 			if (threadId >= survivorCount)
 				return;
 
-			detectDetections_atomicShared(threadId, survivors, detections, detectionCount, 512);
+			detectDetections_atomicShared(texture, alphas, threadId, survivors, detections, detectionCount, 512);
 		
 	}
 
-	__device__ void sumRegions(float* values, float x, float y, Stage* stage)
+	__device__ void sumRegions(cudaTextureObject_t texture, float* values, float x, float y, Stage* stage)
 	{
-		values[0] = tex2D(texturePyramidImage, x, y);
+		values[0] = tex2D<float>(texture, x, y);
 		x += stage->width;
-		values[1] = tex2D(texturePyramidImage, x, y);
+		values[1] = tex2D<float>(texture, x, y);
 		x += stage->width;
-		values[2] = tex2D(texturePyramidImage, x, y);
+		values[2] = tex2D<float>(texture, x, y);
 		y += stage->height;
-		values[5] = tex2D(texturePyramidImage, x, y);
+		values[5] = tex2D<float>(texture, x, y);
 		y += stage->height;
-		values[8] = tex2D(texturePyramidImage, x, y);
+		values[8] = tex2D<float>(texture, x, y);
 		x -= stage->width;
-		values[7] = tex2D(texturePyramidImage, x, y);
+		values[7] = tex2D<float>(texture, x, y);
 		x -= stage->width;
-		values[6] = tex2D(texturePyramidImage, x, y);
+		values[6] = tex2D<float>(texture, x, y);
 		y -= stage->height;
-		values[3] = tex2D(texturePyramidImage, x, y);
+		values[3] = tex2D<float>(texture, x, y);
 		x += stage->width;
-		values[4] = tex2D(texturePyramidImage, x, y);
+		values[4] = tex2D<float>(texture, x, y);
 	}
 
-	__device__ float evalLBP(uint32 x, uint32 y, Stage* stage)
+	__device__ float evalLBP(cudaTextureObject_t texture, cudaTextureObject_t alphas, uint32 x, uint32 y, Stage* stage)
 	{
 		const uint8 LBPOrder[8] = { 0, 1, 2, 5, 8, 7, 6, 3 };
 
 		float values[9];
 
-		sumRegions(values, static_cast<float>(x) + (static_cast<float>(stage->width) * 0.5f), y + (static_cast<float>(stage->height) * 0.5f), stage);
+		sumRegions(texture, values, static_cast<float>(x) + (static_cast<float>(stage->width) * 0.5f), y + (static_cast<float>(stage->height) * 0.5f), stage);
 
 		uint8 code = 0;
 		for (uint8 i = 0; i < 8; ++i)
 			code |= (values[LBPOrder[i]] > values[4]) << i;
 
-		return tex1Dfetch(textureAlphas, stage->alphaOffset + code);
+		return tex1Dfetch<float>(alphas, stage->alphaOffset + code);
 	}
 
-	__device__ bool eval(uint32 x, uint32 y, float* response, uint16 startStage, uint16 endStage)
+	__device__ bool eval(cudaTextureObject_t texture, cudaTextureObject_t alphas, uint32 x, uint32 y, float* response, uint16 startStage, uint16 endStage)
 	{
 		for (uint16 i = startStage; i < endStage; ++i) {
 			Stage stage = stages[i];
-			*response += evalLBP(x + stage.x, y + stage.y, &stage);
+			*response += evalLBP(texture, alphas, x + stage.x, y + stage.y, &stage);
 			if (*response < stage.thetaB) {
 				return false;
 			}
@@ -615,7 +640,7 @@ namespace wbd
 		}			
 	}	
 
-	__global__ void firstPyramidKernel(float* outData, float* finalData)
+	__global__ void createFirstPyramid(cudaTextureObject_t initialImageTexture, float* subPyramidImageData, float* finalImageData)
 	{					
 		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
 		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
@@ -642,15 +667,15 @@ namespace wbd
 			{
 				float origX = static_cast<float>(x /* - oct.offsetX */) / static_cast<float>(octave.images[index].width) * static_cast<float>(octave.images[0].width);
 				float origY = static_cast<float>(y - octave.images[index].offsetY) / static_cast<float>(octave.images[index].height) * static_cast<float>(octave.images[0].height);
-				res = tex2D(textureWorkingImage, origX, origY);
+				res = tex2D<float>(initialImageTexture, origX, origY);
 			}
 
-			outData[y * octave.width + x] = res;	
-			finalData[y * PYRAMID.canvasWidth + x] = res;
+			subPyramidImageData[y * octave.width + x] = res;
+			finalImageData[y * PYRAMID.canvasWidth + x] = res;
 		}		
 	}
 
-	__global__ void pyramidFromPyramidKernel(float* outData, float* finalData, cudaTextureObject_t inData, uint8 level)
+	__global__ void pyramidFromPyramidKernel(float* pyramidLevelImage, float* pyramidFinalImage, cudaTextureObject_t inData, uint8 level)
 	{
 		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
 		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
@@ -665,12 +690,12 @@ namespace wbd
 
 			float res = tex2D<float>(inData, prevX, prevY);
 
-			outData[y * octave.width + x] = res;
-			finalData[(y + octave.offsetY) * PYRAMID.canvasWidth + (x + octave.offsetX)] = res;
+			pyramidLevelImage[y * octave.width + x] = res;
+			pyramidFinalImage[(y + octave.offsetY) * PYRAMID.canvasWidth + (x + octave.offsetX)] = res;
 		}
 	}
 
-	__global__ void staticPyramidKernel(float* outData)
+	__global__ void createPyramidSingleTexture(float* outImage, cudaTextureObject_t pyramidImageTexture, cudaTextureObject_t inPreprocessedImageTexture)
 	{
 		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
 		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
@@ -696,9 +721,9 @@ namespace wbd
 			{
 				float origX = static_cast<float>(x /* - oct.offsetX */) / static_cast<float>(octave0.images[index].width) * static_cast<float>(octave0.images[0].width);
 				float origY = static_cast<float>(y - octave0.images[index].offsetY) / static_cast<float>(octave0.images[index].height) * static_cast<float>(octave0.images[0].height);
-				res = tex2D(textureWorkingImage, origX, origY);
+				res = tex2D<float>(inPreprocessedImageTexture, origX, origY);
 			}
-			outData[y * pitch + x] = res;
+			outImage[y * pitch + x] = res;
 		}
 		else
 			return; // we can return, other octaves are always smaller				
@@ -720,7 +745,7 @@ namespace wbd
 				prevX += prevOctave.offsetX;
 				prevY += prevOctave.offsetY;
 				
-				outData[(y + octave.offsetY) * pitch + (x + octave.offsetX)] = tex2D(texturePyramidImage, static_cast<float>(prevX), static_cast<float>(prevY));;
+				outImage[(y + octave.offsetY) * pitch + (x + octave.offsetX)] = tex2D<float>(pyramidImageTexture, static_cast<float>(prevX), static_cast<float>(prevY));;
 			}
 			else
 				return; // again we can return, other octaves are smaller
@@ -730,33 +755,17 @@ namespace wbd
 	void WaldboostDetector::_pyramidGenSingleTexture()
 	{		
 		dim3 grid(_pyramid.canvasWidth / _block.x + 1, _pyramid.canvasHeight / _block.y + 1, 1);		
-		staticPyramidKernel <<<grid,_block>>>(_devPyramidData);		
+		createPyramidSingleTexture <<<grid, _block>>>(_devPyramidData, _finalPyramidTexture, _preprocessedImageTexture);
 	}
+	
+	
 
 	void WaldboostDetector::_pyramidGenBindlessTexture()
 	{
 		dim3 grid0(_pyramid.octaves[0].width / _block.x + 1, _pyramid.octaves[0].height / _block.y + 1, 1);
-		firstPyramidKernel <<<grid0, _block>>>(_devPyramidImage[0], _devPyramidData);
+		createFirstPyramid << <grid0, _block >> >(_preprocessedImageTexture, _devPyramidImage[0], _devPyramidData);
 
-		cudaResourceDesc resourceDesc0;
-		memset(&resourceDesc0, 0, sizeof(resourceDesc0));
-		resourceDesc0.resType = cudaResourceTypePitch2D;
-		resourceDesc0.res.pitch2D.devPtr = _devPyramidImage[0];
-		resourceDesc0.res.pitch2D.desc.f = cudaChannelFormatKindFloat;
-		resourceDesc0.res.pitch2D.desc.x = 32; // bits per channel
-		resourceDesc0.res.pitch2D.width = _pyramid.octaves[0].width;
-		resourceDesc0.res.pitch2D.height = _pyramid.octaves[0].height;
-		resourceDesc0.res.pitch2D.pitchInBytes = _pyramid.octaves[0].width * sizeof(float);
-
-		cudaTextureDesc textureDesc0;
-		memset(&textureDesc0, 0, sizeof(textureDesc0));
-		textureDesc0.readMode = cudaReadModeElementType;
-		textureDesc0.filterMode = cudaFilterModeLinear;
-		textureDesc0.addressMode[0] = cudaAddressModeClamp;
-		textureDesc0.addressMode[1] = cudaAddressModeClamp;
-		textureDesc0.normalizedCoords = false;
-
-		cudaCreateTextureObject(&_texturePyramidObjects[0], &resourceDesc0, &textureDesc0, NULL);
+		bindFloatImageTo2DTexture(&_texturePyramidObjects[0], _devPyramidImage[0], _pyramid.octaves[0].width, _pyramid.octaves[0].height);		
 
 		for (uint8 oct = 1; oct < WB_OCTAVES; ++oct)
 		{
@@ -764,25 +773,8 @@ namespace wbd
 
 			pyramidFromPyramidKernel<<<grid, _block>>>(_devPyramidImage[oct], _devPyramidData, _texturePyramidObjects[oct - 1], oct);
 
-			cudaResourceDesc resourceDesc;
-			memset(&resourceDesc, 0, sizeof(resourceDesc));
-			resourceDesc.resType = cudaResourceTypePitch2D;
-			resourceDesc.res.pitch2D.devPtr = _devPyramidImage[oct];
-			resourceDesc.res.pitch2D.desc.f = cudaChannelFormatKindFloat;
-			resourceDesc.res.pitch2D.desc.x = 32; // bits per channel
-			resourceDesc.res.pitch2D.width = _pyramid.octaves[oct].width;
-			resourceDesc.res.pitch2D.height = _pyramid.octaves[oct].height;
-			resourceDesc.res.pitch2D.pitchInBytes = _pyramid.octaves[oct].width * sizeof(float);
-
-			cudaTextureDesc textureDesc;
-			memset(&textureDesc, 0, sizeof(textureDesc));
-			textureDesc.readMode = cudaReadModeElementType;
-			textureDesc.filterMode = cudaFilterModeLinear;
-			textureDesc.addressMode[0] = cudaAddressModeClamp;
-			textureDesc.addressMode[1] = cudaAddressModeClamp;
-			textureDesc.normalizedCoords = false;
-
-			cudaCreateTextureObject(&_texturePyramidObjects[oct], &resourceDesc, &textureDesc, NULL);
+			if (oct != WB_OCTAVES - 1)			
+				bindFloatImageTo2DTexture(&_texturePyramidObjects[oct], _devPyramidImage[oct], _pyramid.octaves[oct].width, _pyramid.octaves[oct].height);
 		}
 	}
 
@@ -982,7 +974,7 @@ namespace wbd
 		cudaMemcpyToSymbol(stages, hostStages, sizeof(Stage) * WB_STAGE_COUNT);
 
 		cudaMalloc((void**)&_devOriginalImage, sizeof(uint8) * _info.imageSize * _info.channels);
-		cudaMalloc((void**)&_devWorkingImage, sizeof(float) * _info.imageSize);
+		cudaMalloc((void**)&_devPreprocessedImage, sizeof(float) * _info.imageSize);
 				
 		for (uint8 oct = 0; oct < WB_OCTAVES; ++oct)
 			cudaMalloc((void**)&_devPyramidImage[oct], sizeof(float) * _pyramid.octaves[oct].imageSize);		
@@ -999,14 +991,9 @@ namespace wbd
 		cudaMalloc(&_devAlphaBuffer, WB_STAGE_COUNT * WB_ALPHA_COUNT * sizeof(float));
 		cudaMemcpy(_devAlphaBuffer, alphas, WB_STAGE_COUNT * WB_ALPHA_COUNT * sizeof(float), cudaMemcpyHostToDevice);
 		
-		cudaChannelFormatDesc alphaDesc = cudaCreateChannelDesc<float>();
-		cudaBindTexture(nullptr, &textureAlphas, _devAlphaBuffer, &alphaDesc, WB_STAGE_COUNT * WB_ALPHA_COUNT * sizeof(float));
+		bindLinearFloatDataToTexture(&_alphasTexture, _devAlphaBuffer, WB_STAGE_COUNT * WB_ALPHA_COUNT);
 
-		cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<float>();
-		cudaBindTexture2D(nullptr, &textureWorkingImage, _devWorkingImage, &channelDesc, _info.width, _info.height, sizeof(float) * _info.width);
-
-		cudaChannelFormatDesc finalDesc = cudaCreateChannelDesc<float>();
-		cudaBindTexture2D(nullptr, &texturePyramidImage, _devPyramidData, &finalDesc, _pyramid.canvasWidth, _pyramid.canvasHeight, sizeof(float) * _pyramid.canvasWidth);
+		bindFloatImageTo2DTexture(&_finalPyramidTexture, _devPyramidData, _pyramid.canvasWidth, _pyramid.canvasHeight);
 
 		cudaDeviceSynchronize();
 
@@ -1036,7 +1023,7 @@ namespace wbd
 			data[y * width + x] = 0.f;
 	}
 
-	__global__ void copyKernel(float* out, cudaTextureObject_t obj, uint32 width, uint32 height)
+	__global__ void copyImageFromTextureObject(float* out, cudaTextureObject_t obj, uint32 width, uint32 height)
 	{
 		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
 		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
@@ -1047,30 +1034,9 @@ namespace wbd
 		}
 	}
 
-	__global__ void copyKernel(float* out, uint32 width, uint32 height)
-	{
-		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
-		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
-
-		if (x < width && y < height)
-		{
-			out[y * width + x] = tex2D(texturePyramidImage, x + 0.5f, y + 0.5f);
-		}
-	}
-
 	void WaldboostDetector::setImage(cv::Mat* image)
 	{
-		_initTimers();
-
-		textureWorkingImage.addressMode[0] = cudaAddressModeClamp;
-		textureWorkingImage.addressMode[1] = cudaAddressModeClamp;
-		textureWorkingImage.filterMode = cudaFilterModeLinear;
-		textureWorkingImage.normalized = false;
-
-		texturePyramidImage.addressMode[0] = cudaAddressModeClamp;
-		texturePyramidImage.addressMode[1] = cudaAddressModeClamp;
-		texturePyramidImage.filterMode = cudaFilterModeLinear;
-		texturePyramidImage.normalized = false;
+		_initTimers();		
 
 		_myImage = image;
 		cudaMemcpy(_devOriginalImage, image->data, _info.imageSize * _info.channels * sizeof(uint8), cudaMemcpyHostToDevice);
@@ -1085,7 +1051,7 @@ namespace wbd
 			cudaEventRecord(start_preprocess);
 		}
 
-		preprocessKernel <<<grid, _block>>>(_devWorkingImage, _devOriginalImage);
+		preprocessKernel <<<grid, _block>>>(_devPreprocessedImage, _devOriginalImage);
 
 		if (_opt & OPT_TIMER)
 		{
@@ -1097,10 +1063,12 @@ namespace wbd
 		if (_opt & OPT_VISUAL_DEBUG)
 		{
 			cv::Mat tmp(cv::Size(_info.width, _info.height), CV_32FC1);
-			cudaMemcpy(tmp.data, _devWorkingImage, _info.imageSize * sizeof(float), cudaMemcpyDeviceToHost);
+			cudaMemcpy(tmp.data, _devPreprocessedImage, _info.imageSize * sizeof(float), cudaMemcpyDeviceToHost);
 			cv::imshow("Preprocessed image (B&W image should be displayed)", tmp);
 			cv::waitKey(WB_WAIT_DELAY);
 		}
+
+		bindFloatImageTo2DTexture(&_preprocessedImageTexture, _devPreprocessedImage, _info.width, _info.height);
 
 		cudaEvent_t start_pyramid, stop_pyramid;			
 		if (_opt & OPT_TIMER)
@@ -1127,7 +1095,7 @@ namespace wbd
 			cudaMalloc((void**)&pyramidImage, _pyramid.canvasImageSize * sizeof(float));
 			
 			// copies from statically defined texture
-			copyKernel <<<grid, _block>>>(pyramidImage, _pyramid.canvasWidth, _pyramid.canvasHeight);			
+			copyImageFromTextureObject<<<grid, _block>>>(pyramidImage, _finalPyramidTexture, _pyramid.canvasWidth, _pyramid.canvasHeight);
 
 			// display using OpenCV
 			cv::Mat tmp(cv::Size(_pyramid.canvasWidth, _pyramid.canvasHeight), CV_32FC1);
@@ -1222,7 +1190,7 @@ namespace wbd
 					cudaEventCreate(&stop_detection);
 					cudaEventRecord(start_detection);
 				}
-				detectionKernel_global<<<grid, _block>>>(_devSurvivors, _devDetections, _devDetectionCount);
+				detectionKernel_global<<<grid, _block>>>(_finalPyramidTexture, _alphasTexture, _devSurvivors, _devDetections, _devDetectionCount);
 				if (_opt & OPT_TIMER)
 				{
 					cudaEventRecord(stop_detection);
@@ -1241,7 +1209,7 @@ namespace wbd
 					cudaEventRecord(start_detection);
 				}
 				uint32 sharedMemsize = _block.x * _block.y * sizeof(SurvivorData);
-				detectionKernel_atomicShared<<<grid, _block, sharedMemsize>>>(_devDetections, _devDetectionCount);
+				detectionKernel_atomicShared << <grid, _block, sharedMemsize >> >(_finalPyramidTexture, _alphasTexture, _devDetections, _devDetectionCount);
 				if (_opt & OPT_TIMER)
 				{
 					cudaEventRecord(stop_detection);
@@ -1260,7 +1228,7 @@ namespace wbd
 					cudaEventRecord(start_detection);
 				}
 				uint32 sharedMemsize = (_block.x * _block.y * sizeof(SurvivorData)) + (_block.x * _block.y * sizeof(uint32));
-				detectionKernel_prefixsum <<<grid, _block, sharedMemsize>>>(_devDetections, _devDetectionCount);
+				detectionKernel_prefixsum << <grid, _block, sharedMemsize >> >(_finalPyramidTexture, _alphasTexture, _devDetections, _devDetectionCount);
 				if (_opt & OPT_TIMER)
 				{
 					cudaEventRecord(stop_detection);
@@ -1276,7 +1244,7 @@ namespace wbd
 				float* pyramidImage;
 				dim3 grid(_pyramid.canvasWidth / _block.x + 1, _pyramid.canvasHeight / _block.y + 1, 1);
 				cudaMalloc((void**)&pyramidImage, _pyramid.canvasImageSize * sizeof(float));
-				copyKernel <<<grid, _block>>>(pyramidImage, _pyramid.canvasWidth, _pyramid.canvasHeight);
+				copyImageFromTextureObject<<<grid, _block>>>(pyramidImage, _finalPyramidTexture, _pyramid.canvasWidth, _pyramid.canvasHeight);
 
 				// float representation is used inside GPU
 				// we need to convert it to uint8
@@ -1340,17 +1308,18 @@ namespace wbd
 
 	void WaldboostDetector::free()
 	{
-		cudaUnbindTexture(textureWorkingImage);
-		cudaUnbindTexture(textureAlphas);
-
 		for (uint8 oct = 0; oct < WB_OCTAVES; ++oct)
 		{ 
-			cudaFree(_devPyramidImage);
+			cudaFree(_devPyramidImage[oct]);
 			cudaDestroyTextureObject(_texturePyramidObjects[oct]);
 		}
+
+		cudaDestroyTextureObject(_preprocessedImageTexture);
+		cudaDestroyTextureObject(_finalPyramidTexture);
+		cudaDestroyTextureObject(_alphasTexture);		
 			
 		cudaFree(_devOriginalImage);
-		cudaFree(_devWorkingImage);	
+		cudaFree(_devPreprocessedImage);
 		cudaFree(_devPyramidImage);
 		cudaFree(_devAlphaBuffer);
 		cudaFree(_devDetections);

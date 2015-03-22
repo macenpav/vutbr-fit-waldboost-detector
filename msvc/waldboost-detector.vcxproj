@@ -28,6 +28,7 @@
     </CudaCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\wbd_func.h" />
     <ClInclude Include="..\src\wbd_gpu.cuh" />
     <ClInclude Include="..\src\wbd_simple.h" />
     <ClInclude Include="..\src\wbd_structures.h" />
@@ -38,6 +39,7 @@
     <ClInclude Include="..\src\wbd_enums.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\wbd_func.cpp" />
     <ClCompile Include="..\src\wbd_simple.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

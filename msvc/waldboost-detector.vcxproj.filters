@@ -44,9 +44,15 @@
     <ClInclude Include="..\src\wbd_waldboostdetector.cuh">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="..\src\wbd_func.h">
+      <Filter>headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\wbd_simple.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\wbd_func.cpp">
       <Filter>sources</Filter>
     </ClCompile>
   </ItemGroup>

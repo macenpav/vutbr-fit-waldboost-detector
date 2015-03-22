@@ -36,6 +36,8 @@ namespace wbd
 	 */
 	__device__
 	void detectSurvivorsInit_prefixsum(
+	cudaTextureObject_t texture,
+	cudaTextureObject_t alphas,
 		uint32 const&	x,
 		uint32 const&	y,
 		uint32 const&	threadId,
@@ -60,6 +62,8 @@ namespace wbd
 	 */
 	__device__
 	void detectSurvivors_prefixsum(
+	cudaTextureObject_t texture,
+	cudaTextureObject_t alphas,
 		uint32 const&		threadId,
 		uint32 const&		globalOffset,
 		uint32 const&		blockSize,
@@ -84,6 +88,8 @@ namespace wbd
 	 */
 	__device__
 	void detectDetections_prefixsum(
+	cudaTextureObject_t texture,
+	cudaTextureObject_t alphas,
 		uint32 const& threadId, 
 		uint32 const&	globalOffset,
 		SurvivorData* survivors, 
@@ -105,7 +111,7 @@ namespace wbd
 	 * @return				Detection success.
 	 */
 	__device__
-	bool eval(uint32 x, uint32 y, float* response, uint16 startStage, uint16 endStage);
+		bool eval(cudaTextureObject_t texture, cudaTextureObject_t alphas, uint32 x, uint32 y, float* response, uint16 startStage, uint16 endStage);
 
 	/** @brief Evaluates LBP for a given coordinate
 	 *
@@ -117,7 +123,7 @@ namespace wbd
 	 * @return				A response.
 	 */
 	__device__
-	float evalLBP(uint32 x, uint32 y, Stage* stage);
+		float evalLBP(cudaTextureObject_t texture, cudaTextureObject_t alphas, uint32 x, uint32 y, Stage* stage);
 
 	/** @brief Sums regions for LBP calculation.
 	 *
@@ -131,7 +137,7 @@ namespace wbd
 	 * @return			Void.
 	 */
 	__device__
-	void sumRegions(float* values, uint32 x, uint32 y, Stage* stage);
+		void sumRegions(cudaTextureObject_t texture, float* values, uint32 x, uint32 y, Stage* stage);
 
 	/** @brief Preprocessing kernel.
 	 *
@@ -154,21 +160,18 @@ namespace wbd
 	* @return			Void.
 	*/
 	__global__
-	void pyramidKernel(float* outData);
+		__global__ void createPyramidSingleTexture(float* outImage, cudaTextureObject_t pyramidImageTexture, cudaTextureObject_t inPreprocessedImageTexture);
 
-	__global__ 
-	void firstPyramidKernel(float* outData, float* finalData);
+	__global__
+		void createFirstPyramid(cudaTextureObject_t initialImageTexture, float* subPyramidImageData, float* finalImageData);
 
 	__global__ 
 	void pyramidFromPyramidKernel(float* outData, float* finalData, cudaTextureObject_t inData, uint8 level);
 
-	/** @brief Copies image from a statically set texture. */
-	__global__
-	void copyKernel(float* out, uint32 width, uint32 height);
 
 	/** @brief Copies image from a dynamically set texture. */
 	__global__
-	void copyKernel(float* out, cudaTextureObject_t obj, uint32 width, uint32 height);
+		void copyImageFromTextureObject(float* out, cudaTextureObject_t obj, uint32 width, uint32 height);
 
 	/** @brief Clears an image.
 	 * 
@@ -176,15 +179,6 @@ namespace wbd
 	 */
 	__global__
 	void clearKernel(float* data, uint32 width, uint32 height);
-
-	/** @brief Black and white floating-point texture. */
-	texture<float, 2> textureWorkingImage;
-
-	/** @brief Final texture used for detection */
-	texture<float, 2> texturePyramidImage;
-
-	/** @brief Detector alphas saved as texture. */
-	texture<float> textureAlphas;
 
 	/** @brief Image information. */
 	__constant__ ImageInfo devInfo[1];
@@ -331,13 +325,18 @@ namespace wbd
 			float				_timers[MAX_TIMERS];///< timers
 			dim3				_block;				///< kernel block size
 
-			uint8*				_devOriginalImage;					///< pointer to device original image memory
-			float*				_devWorkingImage;					///< pointer to device preprocessed image memory					
+			uint8*				_devOriginalImage;		///< pointer to device original image memory
+			float*				_devPreprocessedImage;	///< pointer to device preprocessed image memory					
 
 			float*				_devPyramidData;					///< pointer to device pyramid memory (used by single texture)
 
 			float*				_devPyramidImage[WB_OCTAVES];		///< pointer to device pyramid memory (used by bindless texture)	
+
 			cudaTextureObject_t	_texturePyramidObjects[WB_OCTAVES]; ///< cuda texture objects (used by bindless texture)
+			
+			cudaTextureObject_t _preprocessedImageTexture;
+			cudaTextureObject_t _finalPyramidTexture;
+			cudaTextureObject_t _alphasTexture;
 
 			float*				_devAlphaBuffer;		///< pointer to device alpha memory
 			Detection*			_devDetections;			///< pointer to the detections in device memory
