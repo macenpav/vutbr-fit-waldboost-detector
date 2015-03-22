@@ -67,6 +67,10 @@ typedef std::chrono::system_clock::time_point ClockPoint;
 /** @brief Number of image sets sampled from 1:1 to 1:0.5 scale */
 #define WB_OCTAVES 4
 
+#define WB_RGB2BW_RED 0.299f
+#define WB_RGB2BW_GREEN 0.587f
+#define WB_RGB2BW_BLUE 0.114f
+
 /** @brief Library name. */
 const std::string LIBNAME = "waldboost-detector";
 

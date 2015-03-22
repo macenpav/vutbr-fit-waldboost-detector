@@ -12,6 +12,7 @@
 #include "wbd_alphas.h"
 #include "wbd_simple.h"
 #include "wbd_func.h"
+#include "wbd_gpu.cuh"
 
 namespace wbd 
 {
@@ -621,157 +622,21 @@ namespace wbd
 		return *response > WB_FINAL_THRESHOLD;
 	}
 
-
-	__global__ void preprocessKernel(float* outData, uint8* inData)
-	{
-		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
-		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
-
-		if (x < DEV_INFO.width && y < DEV_INFO.height)
-		{
-			uint32 pos = y * DEV_INFO.width + x;
-			// convert to B&W
-			outData[pos] = 0.299f * static_cast<float>(inData[3 * pos])
-				+ 0.587f * static_cast<float>(inData[3 * pos + 1])
-				+ 0.114f * static_cast<float>(inData[3 * pos + 2]);
-
-			// clip to <0.0f;1.0f>
-			outData[pos] /= 255.0f;
-		}			
-	}	
-
-	__global__ void createFirstPyramid(cudaTextureObject_t initialImageTexture, float* subPyramidImageData, float* finalImageData)
-	{					
-		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
-		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
-
-		Octave octave = PYRAMID.octaves[0];
-		if (x < octave.width && y < octave.height)
-		{						
-			float res;
-			uint8 i = 1;
-			
-			// find image index
-			for (; i < WB_LEVELS_PER_OCTAVE; ++i)
-			{
-				if (y < octave.images[i].offsetY)
-					break;
-			}
-			uint8 index = i - 1;
-
-			// black if its outside of the image
-			// or downsample from the original texture
-			if (x > octave.images[index].width)			
-				res = 0.f;					
-			else
-			{
-				float origX = static_cast<float>(x /* - oct.offsetX */) / static_cast<float>(octave.images[index].width) * static_cast<float>(octave.images[0].width);
-				float origY = static_cast<float>(y - octave.images[index].offsetY) / static_cast<float>(octave.images[index].height) * static_cast<float>(octave.images[0].height);
-				res = tex2D<float>(initialImageTexture, origX, origY);
-			}
-
-			subPyramidImageData[y * octave.width + x] = res;
-			finalImageData[y * PYRAMID.canvasWidth + x] = res;
-		}		
-	}
-
-	__global__ void pyramidFromPyramidKernel(float* pyramidLevelImage, float* pyramidFinalImage, cudaTextureObject_t inData, uint8 level)
-	{
-		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
-		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
-
-		const Octave octave = PYRAMID.octaves[level];
-
-		if (x < octave.width && y < octave.height)
-		{
-			// x,y in previous octave
-			const float prevX = static_cast<float>(x)* 2.f;
-			const float prevY = static_cast<float>(y)* 2.f;
-
-			float res = tex2D<float>(inData, prevX, prevY);
-
-			pyramidLevelImage[y * octave.width + x] = res;
-			pyramidFinalImage[(y + octave.offsetY) * PYRAMID.canvasWidth + (x + octave.offsetX)] = res;
-		}
-	}
-
-	__global__ void createPyramidSingleTexture(float* outImage, cudaTextureObject_t pyramidImageTexture, cudaTextureObject_t inPreprocessedImageTexture)
-	{
-		const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
-		const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
-
-		// first octave 
-		Octave octave0 = PYRAMID.octaves[0];
-		uint32 pitch = PYRAMID.canvasWidth;
-		if (x < octave0.width && y < octave0.height)
-		{
-			// find image index
-			uint8 i = 1;
-			for (; i < WB_LEVELS_PER_OCTAVE; ++i)
-			{
-				if (y < octave0.images[i].offsetY)
-					break;
-			}
-			uint8 index = i - 1;
-
-			float res;
-			if (x > octave0.images[index].width)
-				res = 0.f;
-			else
-			{
-				float origX = static_cast<float>(x /* - oct.offsetX */) / static_cast<float>(octave0.images[index].width) * static_cast<float>(octave0.images[0].width);
-				float origY = static_cast<float>(y - octave0.images[index].offsetY) / static_cast<float>(octave0.images[index].height) * static_cast<float>(octave0.images[0].height);
-				res = tex2D<float>(inPreprocessedImageTexture, origX, origY);
-			}
-			outImage[y * pitch + x] = res;
-		}
-		else
-			return; // we can return, other octaves are always smaller				
-
-		// other octaves are downsampled from a previous octave
-		for (uint8 oct = 1; oct < WB_OCTAVES; ++oct)
-		{
-			__syncthreads(); // sync to be sure previous octave is generated
-
-			Octave octave = PYRAMID.octaves[oct];
-			Octave prevOctave = PYRAMID.octaves[oct - 1];
-
-			if (x < octave.width && y < octave.height)
-			{
-				// x,y in previous octave
-				uint32 prevX = x << 1;
-				uint32 prevY = y << 1;
-
-				prevX += prevOctave.offsetX;
-				prevY += prevOctave.offsetY;
-				
-				outImage[(y + octave.offsetY) * pitch + (x + octave.offsetX)] = tex2D<float>(pyramidImageTexture, static_cast<float>(prevX), static_cast<float>(prevY));;
-			}
-			else
-				return; // again we can return, other octaves are smaller
-		}
-	}
-
-	void WaldboostDetector::_pyramidGenSingleTexture()
-	{		
-		dim3 grid(_pyramid.canvasWidth / _block.x + 1, _pyramid.canvasHeight / _block.y + 1, 1);		
-		createPyramidSingleTexture <<<grid, _block>>>(_devPyramidData, _finalPyramidTexture, _preprocessedImageTexture);
-	}
-	
-	
-
 	void WaldboostDetector::_pyramidGenBindlessTexture()
 	{
-		dim3 grid0(_pyramid.octaves[0].width / _block.x + 1, _pyramid.octaves[0].height / _block.y + 1, 1);
-		createFirstPyramid << <grid0, _block >> >(_preprocessedImageTexture, _devPyramidImage[0], _devPyramidData);
+		Octave octave0 = _pyramid.octaves[0];
 
-		bindFloatImageTo2DTexture(&_texturePyramidObjects[0], _devPyramidImage[0], _pyramid.octaves[0].width, _pyramid.octaves[0].height);		
+		dim3 grid0(octave0.width / _block.x + 1, octave0.height / _block.y + 1, 1);
+		gpu::pyramid::createFirstPyramid<<<grid0, _block >>>(_devPyramidImage[0], _devPyramidData, _preprocessedImageTexture, octave0.width, octave0.height, _info.width, _info.height, _pyramid.canvasWidth, WB_LEVELS_PER_OCTAVE);
+		
+		bindFloatImageTo2DTexture(&_texturePyramidObjects[0], _devPyramidImage[0], octave0.width, octave0.height);		
 
 		for (uint8 oct = 1; oct < WB_OCTAVES; ++oct)
 		{
-			dim3 grid(_pyramid.octaves[oct].width / _block.x + 1, _pyramid.octaves[oct].height / _block.y + 1, 1);
+			Octave octave = _pyramid.octaves[oct];
 
-			pyramidFromPyramidKernel<<<grid, _block>>>(_devPyramidImage[oct], _devPyramidData, _texturePyramidObjects[oct - 1], oct);
+			dim3 grid(octave.width / _block.x + 1, octave.height / _block.y + 1, 1);
+			gpu::pyramid::createPyramidFromPyramid<<<grid, _block>>>(_devPyramidImage[oct], _devPyramidData, _texturePyramidObjects[oct - 1], octave.width, octave.height, octave.offsetX, octave.offsetY, _pyramid.canvasWidth);
 
 			if (oct != WB_OCTAVES - 1)			
 				bindFloatImageTo2DTexture(&_texturePyramidObjects[oct], _devPyramidImage[oct], _pyramid.octaves[oct].width, _pyramid.octaves[oct].height);
@@ -781,11 +646,7 @@ namespace wbd
 	void WaldboostDetector::_pyramidKernelWrapper()
 	{
 		switch (_pyGenMode)
-		{
-			case PYGEN_SINGLE_TEXTURE:
-				_pyramidGenSingleTexture();
-				break;
-
+		{			
 			case PYGEN_BINDLESS_TEXTURE:
 				_pyramidGenBindlessTexture();
 				break;
@@ -1051,7 +912,7 @@ namespace wbd
 			cudaEventRecord(start_preprocess);
 		}
 
-		preprocessKernel <<<grid, _block>>>(_devPreprocessedImage, _devOriginalImage);
+		gpu::preprocess<<<grid, _block>>>(_devPreprocessedImage, _devOriginalImage, _info.width, _info.height);
 
 		if (_opt & OPT_TIMER)
 		{

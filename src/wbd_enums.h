@@ -45,8 +45,6 @@ namespace wbd
 
 	/** @brief How the pyramid is generated. */
 	enum PyramidGenModes {
-		/** @brief Pyramid generated inside a texture from the same texture. */
-		PYGEN_SINGLE_TEXTURE,
 		/** @brief Textures generated separately and the final image is then copied. */
 		PYGEN_BINDLESS_TEXTURE,
 

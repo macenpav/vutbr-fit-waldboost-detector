@@ -226,13 +226,11 @@ int main(int argc, char** argv)
 		else if (std::string(argv[i]) == "-pg" && i + 1 < argc)
 		{
 			std::string str = argv[++i];
-			if (str == "single") 
-				settings.pyGenMode = wbd::PYGEN_SINGLE_TEXTURE;
-			else if (str == "bindless")
+			if (str == "bindless")
 				settings.pyGenMode = wbd::PYGEN_BINDLESS_TEXTURE;
 			else 
 			{
-				std::cerr << LIBHEADER << "Option -pg (pyramid generation) has two options available: 'bindless' and 'single'." << std::endl;
+				std::cerr << LIBHEADER << "Option -pg (pyramid generation) has currently only one option available: 'bindless'." << std::endl;
 				return EXIT_FAILURE;
 			}
 		}

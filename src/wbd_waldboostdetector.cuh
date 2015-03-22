@@ -35,9 +35,9 @@ namespace wbd
 	 * @return					Void.
 	 */
 	__device__
-	void detectSurvivorsInit_prefixsum(
-	cudaTextureObject_t texture,
-	cudaTextureObject_t alphas,
+		void detectSurvivorsInit_prefixsum(
+		cudaTextureObject_t texture,
+		cudaTextureObject_t alphas,
 		uint32 const&	x,
 		uint32 const&	y,
 		uint32 const&	threadId,
@@ -137,19 +137,7 @@ namespace wbd
 	 * @return			Void.
 	 */
 	__device__
-		void sumRegions(cudaTextureObject_t texture, float* values, uint32 x, uint32 y, Stage* stage);
-
-	/** @brief Preprocessing kernel.
-	 *
-	 * @details GPU kernel doing preprocessing - converts image to black and white and integer
-	 * values to float.	FP values are then stored as a texture.
-	 *
-	 * @param outData	Output data.
-	 * @param inData	Input data.
-	 * @return			Void.
-	 */
-	__global__
-	void preprocessKernel(float* outData, uint8* inData);
+		void sumRegions(cudaTextureObject_t texture, float* values, uint32 x, uint32 y, Stage* stage);	
 
 	/** @brief Pyramidal image kernel.
 	*
@@ -159,14 +147,8 @@ namespace wbd
 	* @param outData	Output data.
 	* @return			Void.
 	*/
-	__global__
-		__global__ void createPyramidSingleTexture(float* outImage, cudaTextureObject_t pyramidImageTexture, cudaTextureObject_t inPreprocessedImageTexture);
 
-	__global__
-		void createFirstPyramid(cudaTextureObject_t initialImageTexture, float* subPyramidImageData, float* finalImageData);
-
-	__global__ 
-	void pyramidFromPyramidKernel(float* outData, float* finalData, cudaTextureObject_t inData, uint8 level);
+		
 
 
 	/** @brief Copies image from a dynamically set texture. */
