@@ -13,6 +13,7 @@
 #include "wbd_simple.h"
 #include "wbd_func.h"
 #include "wbd_gpu.cuh"
+#include "wbd_gpu_pyramid.cuh"
 
 namespace wbd 
 {

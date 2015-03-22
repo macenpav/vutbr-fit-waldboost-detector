@@ -18,6 +18,12 @@
     <CudaCompile Include="..\src\wbd_waldboostdetector.cu">
       <Filter>sources</Filter>
     </CudaCompile>
+    <CudaCompile Include="..\src\wbd_gpu_pyramid.cu">
+      <Filter>sources</Filter>
+    </CudaCompile>
+    <CudaCompile Include="..\src\wbd_gpu_detection.cu">
+      <Filter>sources</Filter>
+    </CudaCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\wbd_alphas.h">
@@ -45,6 +51,12 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="..\src\wbd_func.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\wbd_gpu_detection.cuh">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\wbd_gpu_pyramid.cuh">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

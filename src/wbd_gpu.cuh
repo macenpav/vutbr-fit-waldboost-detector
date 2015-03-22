@@ -1,6 +1,6 @@
 /**
-* @file	wb_general.h
-* @brief Waldboost detector gpu functions.
+* @file	wbd_gpu.cuh
+* @brief Waldboost detector general gpu functions.
 *
 * @author Pavel Macenauer <macenauer.p@gmail.com>
 */
@@ -26,44 +26,7 @@ namespace wbd
 		 * @param height				Image height.
 		 * @return					Void.
 		 */
-		__global__ void preprocess(float* preprocessedImage, uint8* image, const uint32 width, const uint32 height);
-
-		namespace pyramid
-		{		
-			/** @brief
-			 * 
-			 * @details
-			 * 
-			 * @param outImage
-			 * @param finalImage
-			 * @param inImageTexture
-			 * @param pyramidWidth
-			 * @param pyramidHeight
-			 * @param imageWidth
-			 * @param imageHeight
-			 * @param pitch
-			 * @param levels
-			 * @return
-			 */
-			__global__ void createFirstPyramid(float* outImage, float* finalImage, cudaTextureObject_t inImageTexture, const uint32 pyramidWidth, const uint32 pyramidHeight, const uint32 imageWidth, const uint32 imageHeight, const uint32 pitch, const uint32 levels);
-
-			/** @brief
-			*
-			* @details
-			*
-			* @param outImage
-			* @param finalImage
-			* @param inImageTexture
-			* @param width
-			* @param height
-			* @param offsetX
-			* @param offsetY
-			* @param pitch
-			* @return
-			*/
-			__global__ void createPyramidFromPyramid(float* outImage, float* finalImage, cudaTextureObject_t inImageTexture, const uint32 width, const uint32 height, const uint32 offsetX, const uint32 offsetY, const uint32 pitch);
-		} // namespace pyramid
-		
+		__global__ void preprocess(float* preprocessedImage, uint8* image, const uint32 width, const uint32 height);	
 	} // namespace gpu
 } // namespace wbd
 

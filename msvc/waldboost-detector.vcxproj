@@ -23,6 +23,8 @@
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="..\src\wbd_gpu.cu" />
+    <CudaCompile Include="..\src\wbd_gpu_detection.cu" />
+    <CudaCompile Include="..\src\wbd_gpu_pyramid.cu" />
     <CudaCompile Include="..\src\wbd_waldboostdetector.cu">
       <FileType>CppCode</FileType>
     </CudaCompile>
@@ -30,6 +32,8 @@
   <ItemGroup>
     <ClInclude Include="..\src\wbd_func.h" />
     <ClInclude Include="..\src\wbd_gpu.cuh" />
+    <ClInclude Include="..\src\wbd_gpu_detection.cuh" />
+    <ClInclude Include="..\src\wbd_gpu_pyramid.cuh" />
     <ClInclude Include="..\src\wbd_simple.h" />
     <ClInclude Include="..\src\wbd_structures.h" />
     <ClInclude Include="..\src\wbd_alphas.h" />
