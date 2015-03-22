@@ -23,159 +23,21 @@
 
 namespace wbd 
 {
-
-	/** @brief Initial survivor detection processing
-	 *
-	 * @details Processes detections on an image from the first stage (of the waldboost detector).
-	 * Processes the whole image and outputs the remaining surviving positions after reaching
-	 * the ending stage.
-	 *
-	 * @param survivors			Output array of surviving positions.
-	 * @param endStage			Ending stage of the waldboost detector.
-	 * @return					Void.
-	 */
-	__device__
-		void detectSurvivorsInit_prefixsum(
-		cudaTextureObject_t texture,
-		cudaTextureObject_t alphas,
-		uint32 const&	x,
-		uint32 const&	y,
-		uint32 const&	threadId,
-		uint32 const&	globalOffset,
-		uint32 const&	blockSize,
-		SurvivorData*	survivors,
-		uint32&			survivorCount,
-		uint32*			survivorScanArray,
-		uint16			endStage
-	);
-
-	/** @brief Survivor detection processing
-	 *
-	 * @details Processes detections on an image from a set starting stage (of the waldboost detector).
-	 * Processes only positions in the initSurvivors array and outputs still surviving positions
-	 * after reaching the ending stage.
-	 *
-	 * @param survivors			Output and input array of surviving positions.
-	 * @param startStage		Starting stage of the waldboost detector.
-	 * @param endStage			Ending stage of the waldboost detector.
-	 * @return					Void.
-	 */
-	__device__
-	void detectSurvivors_prefixsum(
-	cudaTextureObject_t texture,
-	cudaTextureObject_t alphas,
-		uint32 const&		threadId,
-		uint32 const&		globalOffset,
-		uint32 const&		blockSize,
-		SurvivorData*		survivors,
-		uint32&				survivorCount,
-		uint32*				survivorScanArray,
-		uint16				startStage,
-		uint16				endStage
-	);
-
-	/** @brief Final detection processing
-	 *
-	 * @details Processes detections on an image beginning at a starting stage, until the end.
-	 * Processes only given surviving positions and outputs detections, which can then
-	 * be displayed.
-	 *
-	 * @param survivors			Input array of surviving positions.
-	 * @param detections		Output array of detections.
-	 * @param detectionCount	Number of detections.
-	 * @param startStage		Starting stage of the waldboost detector.
-	 * @return					Void.
-	 */
-	__device__
-	void detectDetections_prefixsum(
-	cudaTextureObject_t texture,
-	cudaTextureObject_t alphas,
-		uint32 const& threadId, 
-		uint32 const&	globalOffset,
-		SurvivorData* survivors, 
-		Detection* detections, 
-		uint32* detectionCount, 
-		uint16 startStage
-	);
-
-	/** @brief Evaluates stages for a given coordinate
-	 *
-	 * @details Evaluates stages for a given coordinate from a starting stage to an end stage,
-	 * accumulates a response and determines if given sample is an object.
-	 *
-	 * @param x				X-coordinate.
-	 * @param y				Y-coordinate.
-	 * @param response		Accumulated reponse.
-	 * @param startStage	Starting stage.
-	 * @param endStage		Ending stage.
-	 * @return				Detection success.
-	 */
-	__device__
-		bool eval(cudaTextureObject_t texture, cudaTextureObject_t alphas, uint32 x, uint32 y, float* response, uint16 startStage, uint16 endStage);
-
-	/** @brief Evaluates LBP for a given coordinate
-	 *
-	 * @details Evaluates LBP for a given coordinate with a given stage and returns a response.
-	 *
-	 * @param x				X-coordinate.
-	 * @param y				Y-coordinate.
-	 * @param stage			Classifier stage.
-	 * @return				A response.
-	 */
-	__device__
-		float evalLBP(cudaTextureObject_t texture, cudaTextureObject_t alphas, uint32 x, uint32 y, Stage* stage);
-
-	/** @brief Sums regions for LBP calculation.
-	 *
-	 * @details Interpolates image regions (1x1, 2x1, 1x2, 2x2) for LBP calculation. Uses
-	 * texture unit bilinear interpolation capabilities.
-	 *
-	 * @param values	Values used for LBP calculation.
-	 * @param x			X-coordinate.
-	 * @param y			Y-coordinate.
-	 * @param stage		Classifier stage.
-	 * @return			Void.
-	 */
-	__device__
-		void sumRegions(cudaTextureObject_t texture, float* values, uint32 x, uint32 y, Stage* stage);	
-
-	/** @brief Pyramidal image kernel.
-	*
-	* @details GPU kernel, which creates a pyramidal image from a texture. Uses texture unit
-	* bilinear interpolation.
-	*
-	* @param outData	Output data.
-	* @return			Void.
-	*/
-
-		
-
-
 	/** @brief Copies image from a dynamically set texture. */
-	__global__
-		void copyImageFromTextureObject(float* out, cudaTextureObject_t obj, uint32 width, uint32 height);
+	__global__ void copyImageFromTextureObject(float* out, cudaTextureObject_t obj, uint32 width, uint32 height);
 
 	/** @brief Clears an image.
 	 * 
 	 * Sets all floating-point pixels to 0.
 	 */
-	__global__
-	void clearKernel(float* data, uint32 width, uint32 height);
-
-	/** @brief Image information. */
-	__constant__ ImageInfo devInfo[1];
-	#define DEV_INFO devInfo[0]
-
-	/** @brief Pyramid image information. */
-	__constant__ Pyramid devPyramid[1];
-	#define PYRAMID devPyramid[0]
-
-	/** @brief Detector stages. */
-	__constant__ Stage stages[WB_STAGE_COUNT];
+	__global__ void clearKernel(float* data, uint32 width, uint32 height);	
 
 	class WaldboostDetector 
 	{
 		public:
+			/** @brief Constructor. */
+			WaldboostDetector();
+
 			/** @brief Initializes the detector.
 			 *
 			 * @details Initializes the detector based on given image parameters. It's stuff, 

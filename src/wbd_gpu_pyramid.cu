@@ -51,8 +51,8 @@ namespace wbd
 				if (x < width && y < height)
 				{
 					// x,y in previous octave
-					const float prevX = static_cast<float>(x)* 2.f;
-					const float prevY = static_cast<float>(y)* 2.f;
+					const float prevX = static_cast<float>(x) * 2.f;
+					const float prevY = static_cast<float>(y) * 2.f;
 
 					float res = tex2D<float>(inImageTexture, prevX, prevY);
 

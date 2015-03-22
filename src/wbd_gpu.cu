@@ -20,6 +20,27 @@ namespace wbd
 				// clip to <0.0f;1.0f>
 				preprocessedImage[i] /= 255.0f;
 			}
-		}		
+		}	
+
+		__global__ void clearImage(float* imageData, const uint32 width, const uint32 height)
+		{
+			const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
+			const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
+
+			if (x < width && y < height)
+				imageData[y * width + x] = 0.f;
+		}
+
+		__global__ void copyImageFromTextureObject(float* imageData, cudaTextureObject_t texture, const uint32 width, const uint32 height)
+		{
+			const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
+			const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
+
+			if (x < width && y < height)
+			{
+				imageData[y * width + x] = tex2D<float>(texture, x + 0.5f, y + 0.5f);
+			}
+		}
+
 	} // namespace gpu
 } // namespace wbd
