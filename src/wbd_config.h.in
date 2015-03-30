@@ -1,0 +1,3 @@
+// the configured options and settings for Tutorial
+#define WBD_VERSION_MAJOR @WBD_VERSION_MAJOR@
+#define WBD_VERSION_MINOR @WBD_VERSION_MINOR@

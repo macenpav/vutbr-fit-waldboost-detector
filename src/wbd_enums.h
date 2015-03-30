@@ -1,13 +1,13 @@
 /**
-* @file	wb_enums.h
-* @brief	Waldboost detector enums.
-*
-* @details All enums are held hear. That means run parameters, pyramid generation modes and
-* other such options. When implementing a way how to generate a pyramid a new mode
-* should be defined here.
-*
-* @author Pavel Macenauer <macenauer.p@gmail.com>
-*/
+ * @file	wb_enums.h
+ * @brief	Waldboost detector enums.
+ *
+ * @details All enums are held hear. That means run parameters, pyramid generation modes and
+ * other such options. When implementing a way how to generate a pyramid a new mode
+ * should be defined here.
+ *
+ * @author Pavel Macenauer <macenauer.p@gmail.com>
+ */
 
 #ifndef H_WB_ENUMS
 #define H_WB_ENUMS
@@ -89,6 +89,18 @@ namespace wbd
 		TIMER_TOTAL,
 
 		MAX_TIMERS
+	};
+
+	/** @brief Types of kernels used for different run settings. */
+	enum KernelType {
+		/** @brief Preprocessing kernel. */
+		KERTYPE_PREPROCESS,
+		/** @brief Pyramid generation kernel. */
+		KERTYPE_PYRAMID,
+		/** @brief Detection processing kernel. */
+		KERTYPE_DETECTION,
+
+		MAX_KERNEL_TYPES
 	};
 }
 

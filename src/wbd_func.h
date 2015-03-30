@@ -1,15 +1,15 @@
 /**
-* @file	wb_general.h
-* @brief Waldboost detector functions shared by all the implementations.
-*
-* @author Pavel Macenauer <macenauer.p@gmail.com>
-*/
+ * @file	wbd_func.h
+ * @brief Waldboost detector functions shared by all the implementations.
+ *
+ * @author Pavel Macenauer <macenauer.p@gmail.com>
+ */
 
 #ifndef H_WBD_FUNC
 #define H_WBD_FUNC
 
 #include "wbd_general.h"
-#include "cuda_runtime.h"
+#include <cuda_runtime.h>
 
 namespace wbd
 {

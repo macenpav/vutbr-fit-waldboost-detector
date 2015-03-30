@@ -87,7 +87,9 @@ bool processVideo(std::string const& filename, wbd::RunSettings const& settings,
 		return false;
 
 	wbd::WaldboostDetector detector;	
-	detector.setBlockSize(settings.blockSize, settings.blockSize);
+	detector.setBlockSize(wbd::KERTYPE_PREPROCESS, settings.blockSize, settings.blockSize);
+	detector.setBlockSize(wbd::KERTYPE_PYRAMID, settings.blockSize, settings.blockSize);
+	detector.setBlockSize(wbd::KERTYPE_DETECTION, settings.blockSize, settings.blockSize);
 	detector.setPyGenMode(settings.pyGenMode);
 	detector.setPyType(settings.pyType);	
 	detector.setRunOptions(opts);

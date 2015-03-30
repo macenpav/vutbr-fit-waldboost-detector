@@ -1,3 +1,10 @@
+/**
+ * @file	wb_enums.h
+ * @brief	Waldboost detector classifier stages.
+ *
+ * @author Roman Juranek <juranek@fit.vutbr.cz>
+ */
+
 #ifndef H_DETECTOR
 #define H_DETECTOR
 

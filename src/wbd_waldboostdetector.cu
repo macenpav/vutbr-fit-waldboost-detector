@@ -27,8 +27,8 @@ namespace wbd
 	{
 		Octave octave0 = _pyramid.octaves[0];
 
-		dim3 grid0(octave0.width / _block.x + 1, octave0.height / _block.y + 1, 1);
-		gpu::pyramid::createFirstPyramid<<<grid0, _block >>>(_devPyramidImage[0], _devPyramidData, _preprocessedImageTexture, octave0.width, octave0.height, _info.width, _info.height, _pyramid.canvasWidth, WB_LEVELS_PER_OCTAVE);
+		dim3 grid0(octave0.width / _kernelBlockConfig[KERTYPE_PYRAMID].x + 1, octave0.height / _kernelBlockConfig[KERTYPE_PYRAMID].y + 1, 1);
+		gpu::pyramid::createFirstPyramid<<<grid0, _kernelBlockConfig[KERTYPE_PYRAMID]>>>(_devPyramidImage[0], _devPyramidData, _preprocessedImageTexture, octave0.width, octave0.height, _info.width, _info.height, _pyramid.canvasWidth, WB_LEVELS_PER_OCTAVE);
 		
 		bindFloatImageTo2DTexture(&_texturePyramidObjects[0], _devPyramidImage[0], octave0.width, octave0.height);		
 
@@ -36,8 +36,8 @@ namespace wbd
 		{
 			Octave octave = _pyramid.octaves[oct];
 
-			dim3 grid(octave.width / _block.x + 1, octave.height / _block.y + 1, 1);
-			gpu::pyramid::createPyramidFromPyramid<<<grid, _block>>>(_devPyramidImage[oct], _devPyramidData, _texturePyramidObjects[oct - 1], octave.width, octave.height, octave.offsetX, octave.offsetY, _pyramid.canvasWidth);
+			dim3 grid(octave.width / _kernelBlockConfig[KERTYPE_PYRAMID].x + 1, octave.height / _kernelBlockConfig[KERTYPE_PYRAMID].y + 1, 1);
+			gpu::pyramid::createPyramidFromPyramid<<<grid, _kernelBlockConfig[KERTYPE_PYRAMID]>>>(_devPyramidImage[oct], _devPyramidData, _texturePyramidObjects[oct - 1], octave.width, octave.height, octave.offsetX, octave.offsetY, _pyramid.canvasWidth);
 
 			if (oct != WB_OCTAVES - 1)			
 				bindFloatImageTo2DTexture(&_texturePyramidObjects[oct], _devPyramidImage[oct], _pyramid.octaves[oct].width, _pyramid.octaves[oct].height);
@@ -242,7 +242,7 @@ namespace wbd
 		cudaMalloc((void**)&_devDetections, sizeof(Detection) * WB_MAX_DETECTIONS);
 		cudaMalloc((void**)&_devDetectionCount, sizeof(uint32));
 		cudaMemset((void**)&_devDetectionCount, 0, sizeof(uint32));
-		cudaMalloc((void**)&_devSurvivors, sizeof(SurvivorData) * (_pyramid.canvasWidth / _block.x + 1) * (_pyramid.canvasHeight / _block.y + 1) * (_block.x * _block.y));
+		cudaMalloc((void**)&_devSurvivors, sizeof(SurvivorData) * (_pyramid.canvasWidth / _kernelBlockConfig[KERTYPE_DETECTION].x + 1) * (_pyramid.canvasHeight / _kernelBlockConfig[KERTYPE_DETECTION].y + 1) * (_kernelBlockConfig[KERTYPE_DETECTION].x * _kernelBlockConfig[KERTYPE_DETECTION].y));
 		cudaMalloc((void**)&_devSurvivorCount, sizeof(uint32));
 		cudaMemset((void**)&_devSurvivorCount, 0, sizeof(uint32));
 				
@@ -278,7 +278,7 @@ namespace wbd
 		_myImage = image;
 		cudaMemcpy(_devOriginalImage, image->data, _info.imageSize * _info.channels * sizeof(uint8), cudaMemcpyHostToDevice);
 
-		dim3 grid(_info.width / _block.x + 1, _info.height / _block.y + 1, 1);
+		dim3 grid(_info.width / _kernelBlockConfig[KERTYPE_PREPROCESS].x + 1, _info.height / _kernelBlockConfig[KERTYPE_PREPROCESS].y + 1, 1);
 
 		cudaEvent_t start_preprocess, stop_preprocess;
 		if (_opt & OPT_TIMER)
@@ -288,7 +288,7 @@ namespace wbd
 			cudaEventRecord(start_preprocess);
 		}
 
-		gpu::preprocess<<<grid, _block>>>(_devPreprocessedImage, _devOriginalImage, _info.width, _info.height);
+		gpu::preprocess<<<grid, _kernelBlockConfig[KERTYPE_PREPROCESS]>>>(_devPreprocessedImage, _devOriginalImage, _info.width, _info.height);
 
 		if (_opt & OPT_TIMER)
 		{
@@ -328,11 +328,11 @@ namespace wbd
 		{	
 			// copy image from GPU to CPU
 			float* pyramidImage;			
-			dim3 grid(_pyramid.canvasWidth / _block.x + 1, _pyramid.canvasHeight / _block.y + 1, 1);
+			dim3 grid(_pyramid.canvasWidth / _kernelBlockConfig[KERTYPE_PYRAMID].x + 1, _pyramid.canvasHeight / _kernelBlockConfig[KERTYPE_PYRAMID].y + 1, 1);
 			cudaMalloc((void**)&pyramidImage, _pyramid.canvasImageSize * sizeof(float));
 			
 			// copies from statically defined texture
-			gpu::copyImageFromTextureObject<<<grid, _block>>>(pyramidImage, _finalPyramidTexture, _pyramid.canvasWidth, _pyramid.canvasHeight);
+			gpu::copyImageFromTextureObject<<<grid, _kernelBlockConfig[KERTYPE_PYRAMID]>>>(pyramidImage, _finalPyramidTexture, _pyramid.canvasWidth, _pyramid.canvasHeight);
 
 			// display using OpenCV
 			cv::Mat tmp(cv::Size(_pyramid.canvasWidth, _pyramid.canvasHeight), CV_32FC1);
@@ -414,7 +414,7 @@ namespace wbd
 		if (_opt & OPT_VERBOSE)		
 			std::cout << LIBHEADER << "Processing detections ..." << std::endl;		
 		
-		dim3 grid(_pyramid.canvasWidth / _block.x + 1, _pyramid.canvasHeight / _block.y + 1, 1);
+		dim3 grid(_pyramid.canvasWidth / _kernelBlockConfig[KERTYPE_DETECTION].x + 1, _pyramid.canvasHeight / _kernelBlockConfig[KERTYPE_DETECTION].y + 1, 1);
 		cudaMemset(_devDetectionCount, 0, sizeof(uint32));
 			
 		cudaEvent_t start_detection, stop_detection;		
@@ -427,7 +427,7 @@ namespace wbd
 					cudaEventCreate(&stop_detection);
 					cudaEventRecord(start_detection);
 				}
-				gpu::detection::atomicglobal::detect<<<grid, _block>>>(_finalPyramidTexture, _alphasTexture, _pyramid.canvasWidth, _pyramid.canvasHeight, _devSurvivors, _devDetections, _devDetectionCount);
+				gpu::detection::atomicglobal::detect<<<grid, _kernelBlockConfig[KERTYPE_DETECTION]>>>(_finalPyramidTexture, _alphasTexture, _pyramid.canvasWidth, _pyramid.canvasHeight, _devSurvivors, _devDetections, _devDetectionCount);
 				if (_opt & OPT_TIMER)
 				{
 					cudaEventRecord(stop_detection);
@@ -445,8 +445,8 @@ namespace wbd
 					cudaEventCreate(&stop_detection);
 					cudaEventRecord(start_detection);
 				}
-				uint32 sharedMemsize = _block.x * _block.y * sizeof(SurvivorData);
-				gpu::detection::atomicshared::detect <<<grid, _block, sharedMemsize>>>(_finalPyramidTexture, _alphasTexture, _pyramid.canvasWidth, _pyramid.canvasHeight, _devDetections, _devDetectionCount);
+				uint32 sharedMemsize = _kernelBlockConfig[KERTYPE_DETECTION].x * _kernelBlockConfig[KERTYPE_DETECTION].y * sizeof(SurvivorData);
+				gpu::detection::atomicshared::detect <<<grid, _kernelBlockConfig[KERTYPE_DETECTION], sharedMemsize>>>(_finalPyramidTexture, _alphasTexture, _pyramid.canvasWidth, _pyramid.canvasHeight, _devDetections, _devDetectionCount);
 				if (_opt & OPT_TIMER)
 				{
 					cudaEventRecord(stop_detection);
@@ -464,8 +464,8 @@ namespace wbd
 					cudaEventCreate(&stop_detection);
 					cudaEventRecord(start_detection);
 				}
-				uint32 sharedMemsize = (_block.x * _block.y * sizeof(SurvivorData)) + (_block.x * _block.y * sizeof(uint32));
-				gpu::detection::prefixsum::detect << <grid, _block, sharedMemsize >> >(_finalPyramidTexture, _alphasTexture, _devDetections, _devDetectionCount);
+				uint32 sharedMemsize = (_kernelBlockConfig[KERTYPE_DETECTION].x * _kernelBlockConfig[KERTYPE_DETECTION].y * sizeof(SurvivorData)) + (_kernelBlockConfig[KERTYPE_DETECTION].x * _kernelBlockConfig[KERTYPE_DETECTION].y * sizeof(uint32));
+				gpu::detection::prefixsum::detect <<<grid, _kernelBlockConfig[KERTYPE_DETECTION], sharedMemsize>>>(_finalPyramidTexture, _alphasTexture, _devDetections, _devDetectionCount);
 				if (_opt & OPT_TIMER)
 				{
 					cudaEventRecord(stop_detection);
@@ -479,9 +479,9 @@ namespace wbd
 			{
 				// copy image from texture to GPU mem and then to CPU mem
 				float* pyramidImage;
-				dim3 grid(_pyramid.canvasWidth / _block.x + 1, _pyramid.canvasHeight / _block.y + 1, 1);
+				dim3 grid(_pyramid.canvasWidth / _kernelBlockConfig[KERTYPE_PYRAMID].x + 1, _pyramid.canvasHeight / _kernelBlockConfig[KERTYPE_PYRAMID].y + 1, 1);
 				cudaMalloc((void**)&pyramidImage, _pyramid.canvasImageSize * sizeof(float));
-				gpu::copyImageFromTextureObject<<<grid, _block>>>(pyramidImage, _finalPyramidTexture, _pyramid.canvasWidth, _pyramid.canvasHeight);
+				gpu::copyImageFromTextureObject<<<grid, _kernelBlockConfig[KERTYPE_PYRAMID]>>>(pyramidImage, _finalPyramidTexture, _pyramid.canvasWidth, _pyramid.canvasHeight);
 
 				// float representation is used inside GPU
 				// we need to convert it to uint8
@@ -564,4 +564,11 @@ namespace wbd
 		cudaFree(_devSurvivors);
 		cudaFree(_devSurvivorCount);
 	}
+
+	void WaldboostDetector::setBlockSize(KernelType type, uint32 const& x, uint32 const& y, uint32 const& z)
+	{
+		_kernelBlockConfig[type] = dim3(x, y, z);
+	}
 }
+
+

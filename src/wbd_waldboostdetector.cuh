@@ -85,7 +85,7 @@ namespace wbd
 			void setDetectionMode(DetectionModes const& mode) { _detectionMode = mode; }
 
 			/** @brief Sets the kernel block size. */
-			void setBlockSize(uint32 const& x = 32, uint32 const& y = 32, uint32 const& z = 1){ _block = dim3(x, y, z); }
+			void setBlockSize(KernelType type, uint32 const& x = 32, uint32 const& y = 32, uint32 const& z = 1);
 
 			/** @brief Passes run parameters to the detector. */
 			void setRunOptions(uint32 const& options) { _opt = options; }
@@ -93,6 +93,7 @@ namespace wbd
 			/** @brief Sets a file for output. */
 			void setOutputFile(std::string const& output) { _outputFilename = output; }			
 
+			/** @brief Number of processed frames. */
 			uint32 getFrameCount() const { return _frame; }
 
 		private:
@@ -151,45 +152,51 @@ namespace wbd
 			/** @brief Recalcs detections. 
 			 *
 			 * @details Detections are detected on an image containing lots of downsampled images (pyramids). Here we map detected
-			 * positions to the original image.
+			 *			positions to the original image.
 			 *
 			 * @return Void.
 			 */
-			void _processDetections();			
+			void _processDetections();
+
+			/** @brief Recals detections. 
+			 *
+			 * @param detections		Passed array of unprocessed detections.
+			 * @param detectionCount	Number of detections to process.
+			 */
 			void _processDetections(Detection* detections, uint32 const& detectionCount);
 
-
+			/** CONFIGURATION */
 			ImageInfo			_info;				///< image information
-
 			Pyramid				_pyramid;			///< pyramid image information
 			PyramidGenModes		_pyGenMode;			///< pyramid generation mode
 			PyramidTypes		_pyType;			///< pyramid type (look)
 			DetectionModes		_detectionMode;		///< detection mode
 			uint32				_opt;				///< run options/parameters
-			float				_timers[MAX_TIMERS];///< timers
-			dim3				_block;				///< kernel block size
+			float				_timers[MAX_TIMERS];///< timers			
+			dim3				_kernelBlockConfig[MAX_KERNEL_TYPES]; ///< kernel block configuration
 
+			/** DATA ARRAYS USED WITH TEXTURES */
 			uint8*				_devOriginalImage;		///< pointer to device original image memory
 			float*				_devPreprocessedImage;	///< pointer to device preprocessed image memory					
-
 			float*				_devPyramidData;					///< pointer to device pyramid memory (used by single texture)
-
 			float*				_devPyramidImage[WB_OCTAVES];		///< pointer to device pyramid memory (used by bindless texture)	
 
-			cudaTextureObject_t	_texturePyramidObjects[WB_OCTAVES]; ///< cuda texture objects (used by bindless texture)
-			
-			cudaTextureObject_t _preprocessedImageTexture;
-			cudaTextureObject_t _finalPyramidTexture;
-			cudaTextureObject_t _alphasTexture;
+			/* TEXTURE OBJECTS */
+			cudaTextureObject_t	_texturePyramidObjects[WB_OCTAVES]; ///< cuda texture objects (used by bindless texture)			
+			cudaTextureObject_t _preprocessedImageTexture;			///< Texture with preprocessed frame (black and white float image)
+			cudaTextureObject_t _finalPyramidTexture;				///< Texture with subsampled images in a pyramid.
+			cudaTextureObject_t _alphasTexture;						///< Texture with detector alpha values.
 
+			/* DEVICE MEMORY */
 			float*				_devAlphaBuffer;		///< pointer to device alpha memory
 			Detection*			_devDetections;			///< pointer to the detections in device memory
 			uint32*				_devDetectionCount;		///< pointer to the number of detections in device memory
 			SurvivorData*		_devSurvivors;			///< pointer to device survivor memory			
 			uint32*				_devSurvivorCount;
+
+			/** HOST MEMORY */
 			cv::Mat*			_myImage;				///< pointer to the original processed image
 			std::string			_outputFilename;		///< filename for csv output
-
 			uint32				_frame;					///< frame counter
 	};
 }

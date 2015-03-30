@@ -1,14 +1,14 @@
 /**
-* @file	wb_general.h
-* @brief Waldboost detector general settings.
-*
-* Settings and constants are held here.
-*
-* @author Pavel Macenauer <macenauer.p@gmail.com>
-*/
+ * @file wbd_general.h
+ * @brief Waldboost detector general settings.
+ *
+ * Settings and constants are held here.
+ *
+ * @author Pavel Macenauer <macenauer.p@gmail.com>
+ */
 
-#ifndef H_GENERAL
-#define H_GENERAL
+#ifndef H_WBD_GENERAL
+#define H_WBD_GENERAL
 
 #include <string>
 #include <chrono>

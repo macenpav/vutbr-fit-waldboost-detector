@@ -23,18 +23,17 @@ namespace wbd
 		 * @param preprocessedImage	Output image.
 		 * @param image				Input image.
 		 * @param width				Image width.
-		 * @param height				Image height.
+		 * @param height			Image height.
 		 * @return					Void.
 		 */
 		__global__ void preprocess(float* preprocessedImage, uint8* image, const uint32 width, const uint32 height);	
 
-		/** @brief Clears images, sets all pixels to black. 
-		 *		 
+		/** @brief Clears images, sets all pixels to black. 	 
 		 *
 		 * @param imageData	Image data.
 		 * @param width		Image width.
 		 * @param height	Image height.
-		 * @return Void.
+		 * @return			Void.
 		 */
 		__global__ void clearImage(float* imageData, const uint32 width, const uint32 height);
 
@@ -44,6 +43,7 @@ namespace wbd
 		 * @param texture	Texture.
 		 * @param width		Image width.
 		 * @param height	Image height.
+		 * @return			Void.					
 		 */
 		__global__ void copyImageFromTextureObject(float* imageData, cudaTextureObject_t texture, const uint32 width, const uint32 height);
 
