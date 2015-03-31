@@ -10,7 +10,6 @@
 data/
 temp/
 tmp/
-msvc/src
 
 # Build results
 [Dd]ebug/
