@@ -144,7 +144,7 @@ Constant memory & \verb|__constant__| & Grid & Read-only & Application \\
 
 \section{Introduction}
 
-Object detection is a computer technology with the capability of localizing an object in  input image data. The type of object depends on which data the detector was trained. Typical applications are human faces, pedestrians, cars, traffic signs and others.
+Object detection is a computer technology with the capability of localizing an object in input image data. The type of object depends on which data the detector was trained. Typical applications are human faces, pedestrians, cars, traffic signs and others.
 
 Detector used by the implementation is a frontal-face human detector, which tries to identify a human face within an image. The implementation is therefore optimized for human faces, which means, that the software can be used with other detectors, but it might effect its performance due to specific optimizations. Combined with the capabilities of a GPU, the aim is to produce an object detector capable of real-time object detection on videos.
 
@@ -232,11 +232,24 @@ $R_{m}$ is always positive and therefore the algorithm will only classify the sa
 
 \chapter{Implementation}
 
-Application is implemented in \verb|C++| with dependencies on OpenCV - an open source computer vision library with \verb|C| and \verb|C++| interfaces and CUDA - a library for writing NVIDIA GPU code with a CUDA C interface, which is an extension to C. OpenCV is used to load and process separate video frames. There are also many libraries based on CUDA, which might be used in the future to enhance performance.
+Project is implemented in \verb|C++| with dependencies on OpenCV - an open source computer vision library with \verb|C| and \verb|C++| interfaces and CUDA - a library for writing NVIDIA GPU code with a CUDA C interface, which is an extension to C. OpenCV is used to load and process separate video frames. It is also designed with a library in mind.
+
+A CMake project is included, therefore it can be built on multiple platforms. The project itself is logically separated into the following modules and sub-modules (in code this is done using \verb|C++| namespaces):
+
+\begin{itemize}
+	\item simple - a simple \verb|C++| implementation
+	\item gpu - a GPU implementation using CUDA
+	\begin{itemize}
+		\item pyramid - pyramidal image generation
+		\item detection - detection processing
+	\end{itemize}
+	\item waldboost detector - a class wrapper for simple detector usage
+\end{itemize}
+
 
 \begin{center}
 \begin{figure}[h]
-	\centering\includegraphics[height=7cm]{fig/detections.jpg}
+	\centering\includegraphics[width=0.8\textwidth]{fig/sample.jpg}
 	\caption{A sample output}
 \end{figure}
 \end{center}
@@ -262,24 +275,59 @@ In this phase all the constants and the detector itself are copied to the GPU. C
 After loading a video frame and copying the frame to the GPU there are 3 types of kernels to be run.
 
 \begin{itemize}
-	\item Grayscale conversion
-	\item Pyramidal image build
+	\item Preprocessing
+	\item Pyramidal image
 	\item Detection
 \end{itemize}
 
-\subsubsection{Grayscale conversion kernel} \label{subsubsec:grayscale} 
+\subsection{Preprocessing} \label{subsubsec:grayscale} 
 
-Conversion to grayscale is a simple image processing operation described by the formila \eqref{eq:rgbtograyscale}. The detector itself is trained on grayscale images, and so the input must also be in grayscale. After the kernel finishes, the result is converted to a texture.
+First the initial loaded image has to be preprocessed. There are 2 operations to be done - conversion from the initial integers to a float-point representation and then a conversion to grayscale.
+
+Floats are needed in order to work with textures. Texture memory enables hardware implemented bilinear interpolation for subsampling images and this is done many times while creating the pyramidal image.
+
+Conversion to grayscale is a simple image processing operation described by the formula \eqref{eq:rgbtograyscale}. The detector itself is trained on grayscale images, and so the input must also be in grayscale. After the kernel finishes, the result is saved as a texture.
 
 \begin{equation} \label{eq:rgbtograyscale}
 Y=0.2126R + 0.7152G + 0.0722B
 \end{equation}
 
-\subsubsection{Pyramidal image kernel} 
+\subsection{Dynamic texture and texture objects}
 
-The pyramidal image is created from the grayscale image saved in texture memory. All the features are processed inside a 26x26 pixel-wide window. The size again depends on how the detector is trained. The basic idea is that all the features inside this window somehow describe the object, so we have to create a sub-sampled image, where the object is similar or the same size as the scanning window.
+As of CUDA 5.0 and Kepler GPUs textures don't have to be defined globally as static textures, but they can be used dynamically using Texture Objects (\verb|cudaTextureObject_t| class API \cite{cuda-texture-obj}).
 
-As mentioned in \ref{subsubsec:grayscale} the grayscale image is stored as a texture. The advantage of this is, that it enables us to use bilinear interpolation at no performance cost. It has to be kept in mind though, that bilinear interpolation has some negative side-effects, one of them being, that sub-sampling an image below half its original size can cause errors.
+This has several advantages. One of them being the slight overhead (up to 1.5 \mu s) by binding and unbinding static textures during kernel launch, which is eliminated. Even though this is not our case and doesn't sound as much, it might be quite a significant overhead while launching large quantities of fast kernels.
+
+The main advantage in our case is, that texture objects can be passed as arguments and therefore used as a part of a library. Also multiple textures can be created using given parameters, which is exploited in pyramidal image creation and explained in \ref{subsec:pyramidal}.
+
+\subsection{Pyramidal image}\label{subsec:pyramidal}
+
+All the pixels are processed using a 26x26 pixel-wide window. The size again depends on how the detector is trained. The basic idea is that all the features inside the window somehow describe an object of similar size as the window. Objects such as faces are usually much larger, therefore we have to create many sub-sampled images and hope, that we find at least one among them, where the object fits inside the window.
+
+In order to do this, the straight forward method is to create a pyramidal image.
+
+As mentioned previously, the implementation uses hardware bilinear interpolation provided by the texture memory for sub-sampling the image. It has to be kept in mind, that bilinear interpolation has some negative side-effects, one of them being the sub-sampling of an image below half its original width.
+
+\begin{center}
+\begin{figure}[h]
+	\centering\includegraphics[height=9cm]{fig/bilinear_error.pdf}\label{fig:bilinear-error}
+	\caption{Error when sub-sampling an image below twice the original width using bilinear interpolation}
+\end{figure}
+\end{center}
+
+As shown on \ref{fig:bilinear-error} when sub-sampling an image below half its original width, pixels are left out and a sampling error is created.
+
+The image is generated in octaves. An octave is a structure of several images, where the smallest image has half the width/height of the original image. Depending on the number of images in an octave, every image is $2^1/number_of_images$ smaller than the previous. The following octave is then sub-sampled from the previous octave.
+
+Two methods were tested. The first one using a single texture for both writing a reading the individual octaves. This proved to be very costly and therefore another method had been implemented and is described below:
+
+\begin{enumerate}
+	\item A pyramidal image of $N$ images is generated, where each image is $2^1/N$ smaller then the previous. Every image is sub-sampled from the original image.
+	\item Generated pyramidal image is stored as a dynamic texture. Simultaneously the pyramid is being written inside a final image used for detection.
+	\item A pyramidal image is generated, by sub-sampling the previously generated pyramid. Width and height of the sub-sampled pyramid are twice smaller than that of the original.
+	\item Generated pyramidal image is saved as a dynamic texture.
+	\item Steps 3 and 4 get repeated for a set number of octaves.
+\end{enumerate}
 
 \begin{center}
 \begin{figure}[h]
@@ -288,11 +336,11 @@ As mentioned in \ref{subsubsec:grayscale} the grayscale image is stored as a tex
 \end{figure}
 \end{center}
 
-While the previous kernels can be viewed as preprocessing, the core of the application is the detector kernel.
+The implementation itself uses 8 levels and 4 octaves. This results in the smallest image being 16x smaller than the original. By reducing the number of octaves or levels, better performance can be gained, but it will be get reflected in the number of detections.
 
-\subsubsection{Detection kernel}
+\subsection{Detection}
 
-The detector consists of several parts, which will also be discussed later in \ref{sec:memory-organization} and how they are stored in the GPU memory.
+A Waldboost detector consists of several parts. First we will discuss the general idea of a waldboost detector and the memory organization of the different structures. Then we will focus more on the details of the implementation.
 
 \begin{itemize}
 	\item $\alpha$ coefficient table
@@ -300,23 +348,21 @@ The detector consists of several parts, which will also be discussed later in \r
 	\item final threshold
 \end{itemize}
 
-Before we discuss detection processing, let's first make clear what we mean by a stage. As mentioned in \ref{sec:waldboost} a WaldBoost algorithm processes a sample sequentially and in our case determines it is an object we are looking for only after processing all the measurements or also called stages. Every stage the algorithm processes, a response is given and added the accumulated response. If it rises above a given threshold, the sample is discarded.
+To detect an object, the detector has to successfully evaluate a given number of stages, which are processed sequentially. In our case 1024, this number can be reduced, but it will have an impact on the number of detections. Every stage the algorithm processes, a response is given by the $\alpha$-table and sample's LBP. It is then added to the accumulated response. The sample is discarded in case the accumulated value falls below the threshold \verb|thetaB|.
 
-Such stage is described by the following structure:
-
-\begin{figure}[h!]
+\begin{figure}[h!] \label{fig:stage}
 \begin{verbatim}
 struct Stage {
-    uint8 x, y;
-    uint8 width, height;
-    float thetaB;
-    uint32 alphaOffset;
+    uint8 x, y; // X, Y offsets
+    uint8 width, height; // width, height of the feature
+    float thetaB; // threshold
+    uint32 alphaOffset; // alpha table offset
 };
 \end{verbatim}
 \caption{Stage structure}
 \end{figure}
 
-The detector uses a 26x26 pixel-wide window, where \verb|x| and \verb|y| are offsets inside this window and \verb|width| and \verb|height| describe the size of the feature. Using this data, the LBP coefficient is calculated resulting in an 8-bit code. This code is then added to the \verb|alphaOffset|, which points to a specific $\alpha$, which is then added to the accumulated response. The accumulated response is then compared with \verb|thetaB| whether to discard the sample or continue processing. This can be summarized by the algorithm \ref{alg:detection}.
+The detector uses a 26x26 pixel-wide window, where \verb|x| and \verb|y| are offsets inside the window and \verb|width| and \verb|height| describe the size of the feature. \verb|alphaOffset| is an offset inside the $\alpha$-table corresponding to appropriate LBP values. \verb|thetaB| is the accumulated threshold value.
 
 \begin{algorithm} \label{alg:detection}
 \For{every pixel (a GPU thread is created)}
@@ -344,11 +390,78 @@ Below we will discuss, how the most important parts of the detector are stored a
 \item \textbf{Stages} - constant memory \\
 Stages are stored in the constant memory. Even though it's not as fast as let's say shared memory, its capability to broadcast simultaneously accessed data is ideal. Every thread processes a single image position, for which it loops through a for-cycle of stages. Every read from the constant memory is then not only broadcast to a half-warp (a group of 16 threads), but also cached. The only problem can be the size, which is limited to 64 KB. The detector uses 2048 stages, where each stage is 12 B. This leads to 24 KB, which is enough, but has to be accounted for when storing other data in the constant memory.
 
-\item \textbf{$\alpha$ coefficients} - texture memory \\
+\item \textbf{$\alpha$-table} - texture memory \\
 Texture memory not only has read-only properties, but also there are 256 coefficients for every stage. Every coefficient is stored as a float, which leads to $256 * 2048 * 4 = 2 MB$ and by far exceeds the memory available for constant memory. Also the access is random, because we are likely to get different LBPs for every pixel.
 
 \item \textbf{Original image and pyramidal image} - texture memory \\
-Both are stored in the texture memory. Original image is used to create a pyramidal image using hardware accelerated bilinear interpolation for creating down-sampled images, which is a feature of the texture memory. Another feature is its read-only access.
+Both are stored in the texture memory. Original image is used to create a pyramidal image using hardware accelerated bilinear interpolation for creating down-sampled images as described in \ref{subsec:pyramidal}. It is highly optimezd for random read-only access, which is exactly what we want.
+\end{itemize}
+
+\section{Thread allocation}
+
+A GPU thread is allocated for every sample, therefore every pixel. Based on \cite{herout-realtime-cuda} only a fraction of samples (around 1\%) is still processed by the classifier after only 10 stages. On the other hand the GPU organizes threads in warps - groups of 32 threads, which are organized in blocks across with they can be synchronized. The problem is that, when only a single thread within a warp is active, the other threads have to wait for it until it finishes thus wasting GPU resources.
+
+\cite{herout-realtime-cuda} proposed, that every few stages threads can be checked if they are still evaluating the classifier stages or they have been dropped. Surviving threads can then be reorganized to continue within fewer warps and the other resources to be freed.
+
+The detector uses several ways of reorganizing surviving threads. They are summarized below by the types of functions they use and where surviving threads are stored:
+
+\begin{itemize}
+	\item atomic functions / global memory
+	\item atomic functions / shared memory
+	\item prefix sum / global memory
+\end{itemize}
+
+It also uses 3 functions within a kernel to distribute the computation between stages:
+
+\begin{itemize}
+	\item \verb|detectSurvivorsInit| - processes all samples for a given number of stages and outputs the surviving threads. Called at the beginning.
+	\item \verb|detectSurvivors| - processes surviving samples for a given number of stages and outputs the surviving threads. Called multiple times.
+	\item \verb|detectDetections| - processes remaining surviving threads and outputs detections. Called at the end.
+\end{itemize}
+
+\subsection{Atomic functions and global memory} \label{subsec:afgm}
+
+The first proposed method uses \verb|atomicInc| on a counter stored in global memory to count the number of surviving threads within a block and global memory for storing the surviving threads. After processing the given number of stages a thread, if it survives, is assigned an ID by atomically incrementing the counter. It also saves the information about the sample it processes in \ref{fig:survivordata} and is written to the global memory on position given by the ID.
+
+\begin{figure}[h!] \label{fig:survivordata}
+\begin{verbatim}
+struct SurvivorData {
+    uint32 x, y; // X, Y coordinates of the sample
+    float response; // current response
+};
+\end{verbatim}
+\caption{Stage structure}
+\end{figure}
+
+After all running threads reach the given stage \verb|detectSurvivors| or \verb|detectDetections| is run. Surviving samples are packed into fewer warps and lots of GPU resources is freed.
+
+Another way of rearranging the threads was tested by using a .
+
+\subsection{Atomic functions and shared memory}
+
+The second method is very much the same as \ref{subsec:afgm} except it uses shared memory instead of global memory and a counter stored is shared memory. Global memory isn't used at all. The advantage of this method is that shared memory is much faster than global memory (the bandwidth of shared memory is ~1.7TB/s compared to that of global memory which is ~150GB/s).
+
+Shared memory on the other hand only works for a block of threads and so, when packing threads, they are always packed at the start of the shared memory using which the detection is rerun. This has the following advantages and disadvantages:
+
+\subsubsection{Advantages}
+
+\begin{itemize}
+	\item Shared memory is 10-12x faster than global memory
+	\item Atomic increments are divided between shared memory counters instead of a single global memory counter	
+	\item Threads can be synchronized using a \verb|__syncthreads| command, on the other on the grid-level the whole kernel has to be rerun
+\end{itemize}
+
+\subsubsection{Disadvantages}
+
+\begin{itemize}
+	\item More warps are being run due to threads being packed at the start of the shared memory
+\end{itemize}
+
+For example if there would be only 32 surviving threads, the global memory method would only need a single warp. On the other hand the shared memory variant would need as many warps as there are blocks in which the surviving threads reside.
+
+
+\begin{itemize}
+
 \end{itemize}
 
 \chapter{Results}
