@@ -421,7 +421,7 @@ It also uses 3 functions within a kernel to distribute the computation between s
 
 \subsection{Atomic functions and global memory} \label{subsec:afgm}
 
-The first proposed method uses \verb|atomicInc| on a counter stored in global memory to count the number of surviving threads within a block and global memory for storing the surviving threads. After processing the given number of stages a thread, if it survives, is assigned an ID by atomically incrementing the counter. It also saves the information about the sample it processes in \ref{fig:survivordata} and is written to the global memory on position given by the ID.
+The first proposed method uses a counter stored in global memory to count the number of surviving threads within a block and global memory for storing the surviving sample information. After processing a given number of stages of a classifier, every sample which wasn't discarded by the classifier is assigned an ID in global memory based on the value of the global counter and atomically incrementing it. It then saves the information about the sample (\ref{fig:survivordata}) to global memory with the ID as an index.
 
 \begin{figure}[h!] \label{fig:survivordata}
 \begin{verbatim}
@@ -433,36 +433,38 @@ struct SurvivorData {
 \caption{Stage structure}
 \end{figure}
 
-After all running threads reach the given stage \verb|detectSurvivors| or \verb|detectDetections| is run. Surviving samples are packed into fewer warps and lots of GPU resources is freed.
+Threads cannot be synchronized across the whole grid (between all the threads), only across a block, therefore a new kernel must be launched. Three kernels are used to accomplish this: 
 
-Another way of rearranging the threads was tested by using a .
+\begin{itemize}
+	\item \verb|detectSurvivorsInit| - an initial kernel, which is passed a finishing stage of the classifier and outputs surviving samples.
+	\item \verb|detectSurvivors| - an intermediate kernel, which processes surviving samples and outputs surviving samples starting and finishing at given stages. Multiple instances are run.
+	\item \verb|detectDetections| - a final kernel starting at a given stage and processing surviving samples until the final stage of the classifier to output detections.
+\end{itemize}
 
 \subsection{Atomic functions and shared memory}
 
-The second method is very much the same as \ref{subsec:afgm} except it uses shared memory instead of global memory and a counter stored is shared memory. Global memory isn't used at all. The advantage of this method is that shared memory is much faster than global memory (the bandwidth of shared memory is ~1.7TB/s compared to that of global memory which is ~150GB/s).
+The global memory method has two logical downsides. One being the use of a global memory counter, which might become a serious bottleneck on an image with lots of detections. The other being the synchronization, when a whole new kernel has to be run.
 
-Shared memory on the other hand only works for a block of threads and so, when packing threads, they are always packed at the start of the shared memory using which the detection is rerun. This has the following advantages and disadvantages:
+To solve these issues a method exploiting the use of shared memory was proposed. It is very similar to \ref{subsec:afgm}, also using three types of functions: initial, intermediate and final, but these are wrapped in a single kernel.
+
+After processing a given number of classifier stages threads are synchronized and assigned an ID within their block. A function - intermediate or final is then called. This way only samples at the start of the shared memory are processed.
 
 \subsubsection{Advantages}
 
 \begin{itemize}
-	\item Shared memory is 10-12x faster than global memory
-	\item Atomic increments are divided between shared memory counters instead of a single global memory counter	
-	\item Threads can be synchronized using a \verb|__syncthreads| command, on the other on the grid-level the whole kernel has to be rerun
+	\item Shared memory is much faster than global memory (the bandwidth of shared memory is ~1.7TB/s compared to that of global memory which is ~150GB/s.
+	\item Counters and atomic increments are distributed across shared memory removing the single counter bottleneck.
+	\item Only a single kernel can be run with the use of \verb|__syncthreads| to synchronize threads inside a block every given stage.
 \end{itemize}
 
 \subsubsection{Disadvantages}
 
 \begin{itemize}
-	\item More warps are being run due to threads being packed at the start of the shared memory
+	\item More warps are being run due to threads being packed at the start of the shared memory.
+	\item An overhead of syncing threads, resetting the counter and checking for surviving threads is added.
 \end{itemize}
 
 For example if there would be only 32 surviving threads, the global memory method would only need a single warp. On the other hand the shared memory variant would need as many warps as there are blocks in which the surviving threads reside.
-
-
-\begin{itemize}
-
-\end{itemize}
 
 \chapter{Results}
 
