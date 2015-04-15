@@ -29,6 +29,7 @@ namespace wbd
 
 		dim3 grid0(octave0.width / _kernelBlockConfig[KERTYPE_PYRAMID].x + 1, octave0.height / _kernelBlockConfig[KERTYPE_PYRAMID].y + 1, 1);
 		gpu::pyramid::createFirstPyramid<<<grid0, _kernelBlockConfig[KERTYPE_PYRAMID]>>>(_devPyramidImage[0], _devPyramidData, _preprocessedImageTexture, octave0.width, octave0.height, _info.width, _info.height, _pyramid.canvasWidth, WB_LEVELS_PER_OCTAVE);
+		GPU_CHECK_ERROR(cudaPeekAtLastError());
 		
 		bindFloatImageTo2DTexture(&_texturePyramidObjects[0], _devPyramidImage[0], octave0.width, octave0.height);		
 
@@ -38,6 +39,7 @@ namespace wbd
 
 			dim3 grid(octave.width / _kernelBlockConfig[KERTYPE_PYRAMID].x + 1, octave.height / _kernelBlockConfig[KERTYPE_PYRAMID].y + 1, 1);
 			gpu::pyramid::createPyramidFromPyramid<<<grid, _kernelBlockConfig[KERTYPE_PYRAMID]>>>(_devPyramidImage[oct], _devPyramidData, _texturePyramidObjects[oct - 1], octave.width, octave.height, octave.offsetX, octave.offsetY, _pyramid.canvasWidth);
+			GPU_CHECK_ERROR(cudaPeekAtLastError());
 
 			if (oct != WB_OCTAVES - 1)			
 				bindFloatImageTo2DTexture(&_texturePyramidObjects[oct], _devPyramidImage[oct], _pyramid.octaves[oct].width, _pyramid.octaves[oct].height);
@@ -231,28 +233,28 @@ namespace wbd
 			init_time_start = Clock::now();
 		}		
 
-		cudaMalloc((void**)&_devOriginalImage, sizeof(uint8) * _info.imageSize * _info.channels);
-		cudaMalloc((void**)&_devPreprocessedImage, sizeof(float) * _info.imageSize);
+		GPU_CHECK_ERROR(cudaMalloc((void**)&_devOriginalImage, sizeof(uint8) * _info.imageSize * _info.channels));
+		GPU_CHECK_ERROR(cudaMalloc((void**)&_devPreprocessedImage, sizeof(float) * _info.imageSize));
 				
 		for (uint8 oct = 0; oct < WB_OCTAVES; ++oct)
-			cudaMalloc((void**)&_devPyramidImage[oct], sizeof(float) * _pyramid.octaves[oct].imageSize);		
+			GPU_CHECK_ERROR(cudaMalloc((void**)&_devPyramidImage[oct], sizeof(float) * _pyramid.octaves[oct].imageSize));
 
-		cudaMalloc((void**)&_devPyramidData, sizeof(float) * _pyramid.canvasImageSize);
+		GPU_CHECK_ERROR(cudaMalloc((void**)&_devPyramidData, sizeof(float) * _pyramid.canvasImageSize));
 
-		cudaMalloc((void**)&_devDetections, sizeof(Detection) * WB_MAX_DETECTIONS);
-		cudaMalloc((void**)&_devDetectionCount, sizeof(uint32));
-		cudaMemset((void**)&_devDetectionCount, 0, sizeof(uint32));
-		cudaMalloc((void**)&_devSurvivors, sizeof(SurvivorData) * (_pyramid.canvasWidth / _kernelBlockConfig[KERTYPE_DETECTION].x + 1) * (_pyramid.canvasHeight / _kernelBlockConfig[KERTYPE_DETECTION].y + 1) * (_kernelBlockConfig[KERTYPE_DETECTION].x * _kernelBlockConfig[KERTYPE_DETECTION].y));
-		cudaMalloc((void**)&_devSurvivorCount, sizeof(uint32));
-		cudaMemset((void**)&_devSurvivorCount, 0, sizeof(uint32));
+		GPU_CHECK_ERROR(cudaMalloc((void**)&_devDetections, sizeof(Detection) * WB_MAX_DETECTIONS));
+		GPU_CHECK_ERROR(cudaMalloc((void**)&_devDetectionCount, sizeof(uint32)));
+		GPU_CHECK_ERROR(cudaMemset(_devDetectionCount, 0x00, sizeof(uint32)));
+		GPU_CHECK_ERROR(cudaMalloc((void**)&_devSurvivors, sizeof(SurvivorData) * (_pyramid.canvasWidth / _kernelBlockConfig[KERTYPE_DETECTION].x + 1) * (_pyramid.canvasHeight / _kernelBlockConfig[KERTYPE_DETECTION].y + 1) * (_kernelBlockConfig[KERTYPE_DETECTION].x * _kernelBlockConfig[KERTYPE_DETECTION].y)));
+		GPU_CHECK_ERROR(cudaMalloc((void**)&_devSurvivorCount, sizeof(uint32)));
+		GPU_CHECK_ERROR(cudaMemset(_devSurvivorCount, 0x00, sizeof(uint32)));
 				
-		cudaMalloc(&_devAlphaBuffer, WB_STAGE_COUNT * WB_ALPHA_COUNT * sizeof(float));
-		cudaMemcpy(_devAlphaBuffer, alphas, WB_STAGE_COUNT * WB_ALPHA_COUNT * sizeof(float), cudaMemcpyHostToDevice);
+		GPU_CHECK_ERROR(cudaMalloc(&_devAlphaBuffer, WB_STAGE_COUNT * WB_ALPHA_COUNT * sizeof(float)));
+		GPU_CHECK_ERROR(cudaMemcpy(_devAlphaBuffer, alphas, WB_STAGE_COUNT * WB_ALPHA_COUNT * sizeof(float), cudaMemcpyHostToDevice));
 		
 		bindLinearFloatDataToTexture(&_alphasTexture, _devAlphaBuffer, WB_STAGE_COUNT * WB_ALPHA_COUNT);
 		bindFloatImageTo2DTexture(&_finalPyramidTexture, _devPyramidData, _pyramid.canvasWidth, _pyramid.canvasHeight);
 
-		cudaDeviceSynchronize();
+		GPU_CHECK_ERROR(cudaDeviceSynchronize());
 
 		if (_opt & OPT_TIMER)
 		{
@@ -283,24 +285,25 @@ namespace wbd
 		cudaEvent_t start_preprocess, stop_preprocess;
 		if (_opt & OPT_TIMER)
 		{
-			cudaEventCreate(&start_preprocess);
-			cudaEventCreate(&stop_preprocess);
-			cudaEventRecord(start_preprocess);
+			GPU_CHECK_ERROR(cudaEventCreate(&start_preprocess));
+			GPU_CHECK_ERROR(cudaEventCreate(&stop_preprocess));
+			GPU_CHECK_ERROR(cudaEventRecord(start_preprocess));
 		}
 
 		gpu::preprocess<<<grid, _kernelBlockConfig[KERTYPE_PREPROCESS]>>>(_devPreprocessedImage, _devOriginalImage, _info.width, _info.height);
+		GPU_CHECK_ERROR(cudaPeekAtLastError());
 
 		if (_opt & OPT_TIMER)
 		{
-			cudaEventRecord(stop_preprocess);
-			cudaEventSynchronize(stop_preprocess);
-			cudaEventElapsedTime(&_timers[TIMER_PREPROCESS], start_preprocess, stop_preprocess);
+			GPU_CHECK_ERROR(cudaEventRecord(stop_preprocess));
+			GPU_CHECK_ERROR(cudaEventSynchronize(stop_preprocess));
+			GPU_CHECK_ERROR(cudaEventElapsedTime(&_timers[TIMER_PREPROCESS], start_preprocess, stop_preprocess));
 		}
 
 		if (_opt & OPT_VISUAL_DEBUG)
 		{
 			cv::Mat tmp(cv::Size(_info.width, _info.height), CV_32FC1);
-			cudaMemcpy(tmp.data, _devPreprocessedImage, _info.imageSize * sizeof(float), cudaMemcpyDeviceToHost);
+			GPU_CHECK_ERROR(cudaMemcpy(tmp.data, _devPreprocessedImage, _info.imageSize * sizeof(float), cudaMemcpyDeviceToHost));
 			cv::imshow("Preprocessed image (B&W image should be displayed)", tmp);
 			cv::waitKey(WB_WAIT_DELAY);
 		}
@@ -310,18 +313,18 @@ namespace wbd
 		cudaEvent_t start_pyramid, stop_pyramid;			
 		if (_opt & OPT_TIMER)
 		{
-			cudaEventCreate(&start_pyramid);
-			cudaEventCreate(&stop_pyramid);
-			cudaEventRecord(start_pyramid);			
+			GPU_CHECK_ERROR(cudaEventCreate(&start_pyramid));
+			GPU_CHECK_ERROR(cudaEventCreate(&stop_pyramid));
+			GPU_CHECK_ERROR(cudaEventRecord(start_pyramid));
 		}
 
 		_pyramidKernelWrapper();		
 		
 		if (_opt & OPT_TIMER)
 		{			
-			cudaEventRecord(stop_pyramid);
-			cudaEventSynchronize(stop_pyramid);
-			cudaEventElapsedTime(&_timers[TIMER_PYRAMID], start_pyramid, stop_pyramid);				
+			GPU_CHECK_ERROR(cudaEventRecord(stop_pyramid));
+			GPU_CHECK_ERROR(cudaEventSynchronize(stop_pyramid));
+			GPU_CHECK_ERROR(cudaEventElapsedTime(&_timers[TIMER_PYRAMID], start_pyramid, stop_pyramid));
 		}
 		
 		if (_opt & OPT_VISUAL_DEBUG)
@@ -329,18 +332,19 @@ namespace wbd
 			// copy image from GPU to CPU
 			float* pyramidImage;			
 			dim3 grid(_pyramid.canvasWidth / _kernelBlockConfig[KERTYPE_PYRAMID].x + 1, _pyramid.canvasHeight / _kernelBlockConfig[KERTYPE_PYRAMID].y + 1, 1);
-			cudaMalloc((void**)&pyramidImage, _pyramid.canvasImageSize * sizeof(float));
+			GPU_CHECK_ERROR(cudaMalloc((void**)&pyramidImage, _pyramid.canvasImageSize * sizeof(float)));
 			
 			// copies from statically defined texture
 			gpu::copyImageFromTextureObject<<<grid, _kernelBlockConfig[KERTYPE_PYRAMID]>>>(pyramidImage, _finalPyramidTexture, _pyramid.canvasWidth, _pyramid.canvasHeight);
+			GPU_CHECK_ERROR(cudaPeekAtLastError());
 
 			// display using OpenCV
 			cv::Mat tmp(cv::Size(_pyramid.canvasWidth, _pyramid.canvasHeight), CV_32FC1);
-			cudaMemcpy(tmp.data, pyramidImage, _pyramid.canvasImageSize * sizeof(float), cudaMemcpyDeviceToHost);			
+			GPU_CHECK_ERROR(cudaMemcpy(tmp.data, pyramidImage, _pyramid.canvasImageSize * sizeof(float), cudaMemcpyDeviceToHost));
 			cv::imshow("Pyramid texture (B&W pyramid images should be displayed)", tmp);
 			cv::waitKey(WB_WAIT_DELAY);			
 
-			cudaFree(pyramidImage);
+			GPU_CHECK_ERROR(cudaFree(pyramidImage));
 		}
 	}
 
@@ -354,8 +358,8 @@ namespace wbd
 	{
 		Detection detections[WB_MAX_DETECTIONS];
 		uint32 detectionCount = 0;
-		cudaMemcpy(&detectionCount, _devDetectionCount, sizeof(uint32), cudaMemcpyDeviceToHost);
-		cudaMemcpy(&detections, _devDetections, detectionCount * sizeof(Detection), cudaMemcpyDeviceToHost);
+		GPU_CHECK_ERROR(cudaMemcpy(&detectionCount, _devDetectionCount, sizeof(uint32), cudaMemcpyDeviceToHost));
+		GPU_CHECK_ERROR(cudaMemcpy(&detections, _devDetections, detectionCount * sizeof(Detection), cudaMemcpyDeviceToHost));
 
 		_processDetections(detections, detectionCount);
 	}
@@ -415,7 +419,7 @@ namespace wbd
 			std::cout << LIBHEADER << "Processing detections ..." << std::endl;		
 		
 		dim3 grid(_pyramid.canvasWidth / _kernelBlockConfig[KERTYPE_DETECTION].x + 1, _pyramid.canvasHeight / _kernelBlockConfig[KERTYPE_DETECTION].y + 1, 1);
-		cudaMemset(_devDetectionCount, 0, sizeof(uint32));
+		GPU_CHECK_ERROR(cudaMemset(_devDetectionCount, 0, sizeof(uint32)));
 			
 		cudaEvent_t start_detection, stop_detection;		
 		switch (_detectionMode)
@@ -423,16 +427,17 @@ namespace wbd
 			case DET_ATOMIC_GLOBAL:
 				if (_opt & OPT_TIMER)
 				{
-					cudaEventCreate(&start_detection);
-					cudaEventCreate(&stop_detection);
-					cudaEventRecord(start_detection);
+					GPU_CHECK_ERROR(cudaEventCreate(&start_detection));
+					GPU_CHECK_ERROR(cudaEventCreate(&stop_detection));
+					GPU_CHECK_ERROR(cudaEventRecord(start_detection));
 				}
 				gpu::detection::atomicglobal::detect<<<grid, _kernelBlockConfig[KERTYPE_DETECTION]>>>(_finalPyramidTexture, _alphasTexture, _pyramid.canvasWidth, _pyramid.canvasHeight, _devSurvivors, _devDetections, _devDetectionCount);
+				GPU_CHECK_ERROR(cudaPeekAtLastError());
 				if (_opt & OPT_TIMER)
 				{
-					cudaEventRecord(stop_detection);
-					cudaEventSynchronize(stop_detection);
-					cudaEventElapsedTime(&_timers[TIMER_DETECTION], start_detection, stop_detection);
+					GPU_CHECK_ERROR(cudaEventRecord(stop_detection));
+					GPU_CHECK_ERROR(cudaEventSynchronize(stop_detection));
+					GPU_CHECK_ERROR(cudaEventElapsedTime(&_timers[TIMER_DETECTION], start_detection, stop_detection));
 				}
 				_processDetections();
 				break;
@@ -441,17 +446,18 @@ namespace wbd
 			{
 				if (_opt & OPT_TIMER)
 				{
-					cudaEventCreate(&start_detection);
-					cudaEventCreate(&stop_detection);
-					cudaEventRecord(start_detection);
+					GPU_CHECK_ERROR(cudaEventCreate(&start_detection));
+					GPU_CHECK_ERROR(cudaEventCreate(&stop_detection));
+					GPU_CHECK_ERROR(cudaEventRecord(start_detection));
 				}
 				uint32 sharedMemsize = _kernelBlockConfig[KERTYPE_DETECTION].x * _kernelBlockConfig[KERTYPE_DETECTION].y * sizeof(SurvivorData);
 				gpu::detection::atomicshared::detect <<<grid, _kernelBlockConfig[KERTYPE_DETECTION], sharedMemsize>>>(_finalPyramidTexture, _alphasTexture, _pyramid.canvasWidth, _pyramid.canvasHeight, _devDetections, _devDetectionCount);
+				GPU_CHECK_ERROR(cudaPeekAtLastError());
 				if (_opt & OPT_TIMER)
 				{
-					cudaEventRecord(stop_detection);
-					cudaEventSynchronize(stop_detection);
-					cudaEventElapsedTime(&_timers[TIMER_DETECTION], start_detection, stop_detection);
+					GPU_CHECK_ERROR(cudaEventRecord(stop_detection));
+					GPU_CHECK_ERROR(cudaEventSynchronize(stop_detection));
+					GPU_CHECK_ERROR(cudaEventElapsedTime(&_timers[TIMER_DETECTION], start_detection, stop_detection));
 				}
 				_processDetections();
 				break;
@@ -460,17 +466,18 @@ namespace wbd
 			{
 				if (_opt & OPT_TIMER)
 				{
-					cudaEventCreate(&start_detection);
-					cudaEventCreate(&stop_detection);
-					cudaEventRecord(start_detection);
+					GPU_CHECK_ERROR(cudaEventCreate(&start_detection));
+					GPU_CHECK_ERROR(cudaEventCreate(&stop_detection));
+					GPU_CHECK_ERROR(cudaEventRecord(start_detection));
 				}
 				uint32 sharedMemsize = (_kernelBlockConfig[KERTYPE_DETECTION].x * _kernelBlockConfig[KERTYPE_DETECTION].y * sizeof(SurvivorData)) + (_kernelBlockConfig[KERTYPE_DETECTION].x * _kernelBlockConfig[KERTYPE_DETECTION].y * sizeof(uint32));
 				gpu::detection::prefixsum::detect <<<grid, _kernelBlockConfig[KERTYPE_DETECTION], sharedMemsize>>>(_finalPyramidTexture, _alphasTexture, _devDetections, _devDetectionCount);
+				GPU_CHECK_ERROR(cudaPeekAtLastError());
 				if (_opt & OPT_TIMER)
 				{
-					cudaEventRecord(stop_detection);
-					cudaEventSynchronize(stop_detection);
-					cudaEventElapsedTime(&_timers[TIMER_DETECTION], start_detection, stop_detection);
+					GPU_CHECK_ERROR(cudaEventRecord(stop_detection));
+					GPU_CHECK_ERROR(cudaEventSynchronize(stop_detection));
+					GPU_CHECK_ERROR(cudaEventElapsedTime(&_timers[TIMER_DETECTION], start_detection, stop_detection));
 				}
 				_processDetections();
 				break;
@@ -480,7 +487,7 @@ namespace wbd
 				// copy image from texture to GPU mem and then to CPU mem
 				float* pyramidImage;
 				dim3 grid(_pyramid.canvasWidth / _kernelBlockConfig[KERTYPE_PYRAMID].x + 1, _pyramid.canvasHeight / _kernelBlockConfig[KERTYPE_PYRAMID].y + 1, 1);
-				cudaMalloc((void**)&pyramidImage, _pyramid.canvasImageSize * sizeof(float));
+				GPU_CHECK_ERROR(cudaMalloc((void**)&pyramidImage, _pyramid.canvasImageSize * sizeof(float)));
 				gpu::copyImageFromTextureObject<<<grid, _kernelBlockConfig[KERTYPE_PYRAMID]>>>(pyramidImage, _finalPyramidTexture, _pyramid.canvasWidth, _pyramid.canvasHeight);
 
 				// float representation is used inside GPU
@@ -488,11 +495,11 @@ namespace wbd
 				cv::Mat tmp(cv::Size(_pyramid.canvasWidth, _pyramid.canvasHeight), CV_32FC1);	
 				uint8* bw = (uint8*)malloc(_pyramid.canvasWidth * _pyramid.canvasHeight);
 				
-				cudaMemcpy(tmp.data, pyramidImage, _pyramid.canvasImageSize * sizeof(float), cudaMemcpyDeviceToHost);					
+				GPU_CHECK_ERROR(cudaMemcpy(tmp.data, pyramidImage, _pyramid.canvasImageSize * sizeof(float), cudaMemcpyDeviceToHost));
 				for (int i = 0; i < tmp.rows; i++)
 					for (int j = 0; j < tmp.cols; j++)						
 						bw[i * tmp.cols + j] = static_cast<uint8>(tmp.at<float>(i, j) * 255.f);				
-				cudaFree(pyramidImage);
+				GPU_CHECK_ERROR(cudaFree(pyramidImage));
 
 				ClockPoint det_time_start, det_time_end;
 				if (_opt & OPT_TIMER)
@@ -547,22 +554,22 @@ namespace wbd
 	{
 		for (uint8 oct = 0; oct < WB_OCTAVES; ++oct)
 		{ 
-			cudaFree(_devPyramidImage[oct]);
-			cudaDestroyTextureObject(_texturePyramidObjects[oct]);
+			GPU_CHECK_ERROR(cudaFree(_devPyramidImage[oct]));
+			GPU_CHECK_ERROR(cudaDestroyTextureObject(_texturePyramidObjects[oct]));
 		}
 
-		cudaDestroyTextureObject(_preprocessedImageTexture);
-		cudaDestroyTextureObject(_finalPyramidTexture);
-		cudaDestroyTextureObject(_alphasTexture);		
+		GPU_CHECK_ERROR(cudaDestroyTextureObject(_preprocessedImageTexture));
+		GPU_CHECK_ERROR(cudaDestroyTextureObject(_finalPyramidTexture));
+		GPU_CHECK_ERROR(cudaDestroyTextureObject(_alphasTexture));
 			
-		cudaFree(_devOriginalImage);
-		cudaFree(_devPreprocessedImage);
-		cudaFree(_devPyramidImage);
-		cudaFree(_devAlphaBuffer);
-		cudaFree(_devDetections);
-		cudaFree(_devDetectionCount);
-		cudaFree(_devSurvivors);
-		cudaFree(_devSurvivorCount);
+		GPU_CHECK_ERROR(cudaFree(_devOriginalImage));
+		GPU_CHECK_ERROR(cudaFree(_devPreprocessedImage));
+		GPU_CHECK_ERROR(cudaFree(_devPyramidImage));
+		GPU_CHECK_ERROR(cudaFree(_devAlphaBuffer));
+		GPU_CHECK_ERROR(cudaFree(_devDetections));
+		GPU_CHECK_ERROR(cudaFree(_devDetectionCount));
+		GPU_CHECK_ERROR(cudaFree(_devSurvivors));
+		GPU_CHECK_ERROR(cudaFree(_devSurvivorCount));
 	}
 
 	void WaldboostDetector::setBlockSize(KernelType type, uint32 const& x, uint32 const& y, uint32 const& z)

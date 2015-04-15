@@ -22,7 +22,7 @@ namespace wbd
 		textureDesc.addressMode[1] = cudaAddressModeClamp;
 		textureDesc.normalizedCoords = false;
 
-		cudaCreateTextureObject(textureObject, &resourceDesc, &textureDesc, NULL);
+		GPU_CHECK_ERROR(cudaCreateTextureObject(textureObject, &resourceDesc, &textureDesc, NULL));
 	}
 
 	void bindLinearFloatDataToTexture(cudaTextureObject_t* textureObject, float* data, uint32 count)
@@ -39,6 +39,6 @@ namespace wbd
 		memset(&textureDesc, 0, sizeof(textureDesc));
 		textureDesc.readMode = cudaReadModeElementType;	
 
-		cudaCreateTextureObject(textureObject, &resourceDesc, &textureDesc, NULL);
+		GPU_CHECK_ERROR(cudaCreateTextureObject(textureObject, &resourceDesc, &textureDesc, NULL));
 	}
 }
