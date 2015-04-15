@@ -107,15 +107,18 @@ bool processVideo(std::string const& filename, wbd::RunSettings const& settings,
 			if (settings.maxFrames < detector.getFrameCount())
 				break;
 		}
+				
+		if (opts & wbd::OPT_VERBOSE)		
+			std::cout << LIBHEADER << "Loading image frame ..." << std::endl;					
 
-		auto start_time = std::chrono::high_resolution_clock::now();
-		video >> image;
+		video >> image;		
 
 		if (image.empty())
 			break;
 
 		// load detector with an image
 		detector.setImage(&image);
+
 		if (opts & wbd::OPT_VERBOSE)
 		{ 
 			std::cout << LIBHEADER << "Image set." << std::endl;

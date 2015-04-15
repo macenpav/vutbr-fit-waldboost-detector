@@ -10,6 +10,18 @@
 
 #include "wbd_general.h"
 #include <cuda_runtime.h>
+#include <iostream>
+
+#define GPU_CHECK_ERROR(ans) { gpuAssert((ans), __FILE__, __LINE__); }
+inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort = true)
+{
+	if (code != cudaSuccess)
+	{
+		std::cerr << "GPU assert: " << cudaGetErrorString(code) << " " << file << " " << line << std::endl;
+		system("pause");
+		if (abort) exit(code);
+	}
+}
 
 namespace wbd
 {
