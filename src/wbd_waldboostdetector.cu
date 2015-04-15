@@ -242,13 +242,17 @@ namespace wbd
 		GPU_CHECK_ERROR(cudaMalloc((void**)&_devPyramidData, sizeof(float) * _pyramid.canvasImageSize));
 
 		GPU_CHECK_ERROR(cudaMalloc((void**)&_devDetections, sizeof(Detection) * WB_MAX_DETECTIONS));
-		GPU_CHECK_ERROR(cudaMalloc((void**)&_devDetectionCount, sizeof(uint32)));
-		GPU_CHECK_ERROR(cudaMemset(_devDetectionCount, 0x00, sizeof(uint32)));
-		GPU_CHECK_ERROR(cudaMalloc((void**)&_devSurvivors, sizeof(SurvivorData) * (_pyramid.canvasWidth / _kernelBlockConfig[KERTYPE_DETECTION].x + 1) * (_pyramid.canvasHeight / _kernelBlockConfig[KERTYPE_DETECTION].y + 1) * (_kernelBlockConfig[KERTYPE_DETECTION].x * _kernelBlockConfig[KERTYPE_DETECTION].y)));
-		GPU_CHECK_ERROR(cudaMalloc((void**)&_devSurvivorCount, sizeof(uint32)));
-		GPU_CHECK_ERROR(cudaMemset(_devSurvivorCount, 0x00, sizeof(uint32)));
+		GPU_CHECK_ERROR(cudaMalloc((void**)&_devDetectionCount, sizeof(uint32)));		
+        
+        if (_detectionMode == DET_ATOMIC_GLOBAL)
+        {
+            GPU_CHECK_ERROR(cudaMalloc((void**)&_devSurvivors[0], sizeof(SurvivorData) * (_pyramid.canvasWidth / _kernelBlockConfig[KERTYPE_DETECTION].x + 1) * (_pyramid.canvasHeight / _kernelBlockConfig[KERTYPE_DETECTION].y + 1) * (_kernelBlockConfig[KERTYPE_DETECTION].x * _kernelBlockConfig[KERTYPE_DETECTION].y)));
+            GPU_CHECK_ERROR(cudaMalloc((void**)&_devSurvivorCount[0], sizeof(uint32)));
+            GPU_CHECK_ERROR(cudaMalloc((void**)&_devSurvivors[1], sizeof(SurvivorData) * (_pyramid.canvasWidth / _kernelBlockConfig[KERTYPE_DETECTION].x + 1) * (_pyramid.canvasHeight / _kernelBlockConfig[KERTYPE_DETECTION].y + 1) * (_kernelBlockConfig[KERTYPE_DETECTION].x * _kernelBlockConfig[KERTYPE_DETECTION].y)));
+            GPU_CHECK_ERROR(cudaMalloc((void**)&_devSurvivorCount[1], sizeof(uint32)));
+        }
 				
-		GPU_CHECK_ERROR(cudaMalloc(&_devAlphaBuffer, WB_STAGE_COUNT * WB_ALPHA_COUNT * sizeof(float)));
+		GPU_CHECK_ERROR(cudaMalloc((void**)&_devAlphaBuffer, WB_STAGE_COUNT * WB_ALPHA_COUNT * sizeof(float)));
 		GPU_CHECK_ERROR(cudaMemcpy(_devAlphaBuffer, alphas, WB_STAGE_COUNT * WB_ALPHA_COUNT * sizeof(float), cudaMemcpyHostToDevice));
 		
 		bindLinearFloatDataToTexture(&_alphasTexture, _devAlphaBuffer, WB_STAGE_COUNT * WB_ALPHA_COUNT);
@@ -425,14 +429,38 @@ namespace wbd
 		switch (_detectionMode)
 		{
 			case DET_ATOMIC_GLOBAL:
+			{
 				if (_opt & OPT_TIMER)
 				{
 					GPU_CHECK_ERROR(cudaEventCreate(&start_detection));
 					GPU_CHECK_ERROR(cudaEventCreate(&stop_detection));
 					GPU_CHECK_ERROR(cudaEventRecord(start_detection));
 				}
-				gpu::detection::atomicglobal::detect<<<grid, _kernelBlockConfig[KERTYPE_DETECTION]>>>(_finalPyramidTexture, _alphasTexture, _pyramid.canvasWidth, _pyramid.canvasHeight, _devSurvivors, _devDetections, _devDetectionCount);
+
+                GPU_CHECK_ERROR(cudaMemset(_devSurvivorCount[0], 0x00, sizeof(uint32)));
+				gpu::detection::atomicglobal::detectSurvivorsInit<<<grid, _kernelBlockConfig[KERTYPE_DETECTION]>>>(_finalPyramidTexture, _alphasTexture, _pyramid.canvasWidth, _pyramid.canvasHeight, _devSurvivors[0], _devSurvivorCount[0], 1);
 				GPU_CHECK_ERROR(cudaPeekAtLastError());
+
+                GPU_CHECK_ERROR(cudaMemset(_devSurvivorCount[1], 0x00, sizeof(uint32)));
+				gpu::detection::atomicglobal::detectSurvivors<<<grid, _kernelBlockConfig[KERTYPE_DETECTION]>>>(_finalPyramidTexture, _alphasTexture, _devSurvivors[0], _devSurvivors[1], _devSurvivorCount[0], _devSurvivorCount[1], 1, 8);
+				GPU_CHECK_ERROR(cudaPeekAtLastError());
+
+                GPU_CHECK_ERROR(cudaMemset(_devSurvivorCount[0], 0x00, sizeof(uint32)));
+				gpu::detection::atomicglobal::detectSurvivors<<<grid, _kernelBlockConfig[KERTYPE_DETECTION]>>>(_finalPyramidTexture, _alphasTexture, _devSurvivors[1], _devSurvivors[0], _devSurvivorCount[1], _devSurvivorCount[0], 8, 64);
+				GPU_CHECK_ERROR(cudaPeekAtLastError());
+
+                GPU_CHECK_ERROR(cudaMemset(_devSurvivorCount[1], 0x00, sizeof(uint32)));
+				gpu::detection::atomicglobal::detectSurvivors<<<grid, _kernelBlockConfig[KERTYPE_DETECTION]>>>(_finalPyramidTexture, _alphasTexture, _devSurvivors[0], _devSurvivors[1], _devSurvivorCount[0], _devSurvivorCount[1], 64, 256);
+				GPU_CHECK_ERROR(cudaPeekAtLastError());
+
+                GPU_CHECK_ERROR(cudaMemset(_devSurvivorCount[0], 0x00, sizeof(uint32)));
+				gpu::detection::atomicglobal::detectSurvivors<<<grid, _kernelBlockConfig[KERTYPE_DETECTION]>>>(_finalPyramidTexture, _alphasTexture, _devSurvivors[1], _devSurvivors[0], _devSurvivorCount[1], _devSurvivorCount[0], 256, 512);
+				GPU_CHECK_ERROR(cudaPeekAtLastError());
+
+                GPU_CHECK_ERROR(cudaMemset(_devDetectionCount, 0x00, sizeof(uint32)));
+				gpu::detection::atomicglobal::detectDetections<<<grid, _kernelBlockConfig[KERTYPE_DETECTION]>>>(_finalPyramidTexture, _alphasTexture, _devSurvivors[0], _devSurvivorCount[0], _devDetections, _devDetectionCount, 512);
+				GPU_CHECK_ERROR(cudaPeekAtLastError());
+
 				if (_opt & OPT_TIMER)
 				{
 					GPU_CHECK_ERROR(cudaEventRecord(stop_detection));
@@ -441,6 +469,7 @@ namespace wbd
 				}
 				_processDetections();
 				break;
+			}
 
 			case DET_ATOMIC_SHARED:
 			{
@@ -516,8 +545,8 @@ namespace wbd
 					_timers[TIMER_DETECTION] += static_cast<float>(std::chrono::duration_cast<Nanoseconds>(duration).count()) / 1000000.f;
 				}
 				_processDetections(&(detections[0]), detections.size());
-			}
-			break;
+				break;
+			}			
 		}														
 
 		if (_opt & OPT_TIMER)
@@ -550,26 +579,31 @@ namespace wbd
 		_frame++;		
 	}
 
-	void WaldboostDetector::free()
-	{
-		for (uint8 oct = 0; oct < WB_OCTAVES; ++oct)
-		{ 
-			GPU_CHECK_ERROR(cudaFree(_devPyramidImage[oct]));
-			GPU_CHECK_ERROR(cudaDestroyTextureObject(_texturePyramidObjects[oct]));
-		}
+    void WaldboostDetector::free()
+    {
+        for (uint8 oct = 0; oct < WB_OCTAVES; ++oct)
+        {            
+            GPU_CHECK_ERROR(cudaDestroyTextureObject(_texturePyramidObjects[oct]));
+            GPU_CHECK_ERROR(cudaFree(_devPyramidImage[oct]));
+        }
+        
+        GPU_CHECK_ERROR(cudaDestroyTextureObject(_preprocessedImageTexture));
+        GPU_CHECK_ERROR(cudaDestroyTextureObject(_finalPyramidTexture));
+        GPU_CHECK_ERROR(cudaDestroyTextureObject(_alphasTexture));        
+        GPU_CHECK_ERROR(cudaFree(_devOriginalImage));
+        GPU_CHECK_ERROR(cudaFree(_devPreprocessedImage));        
+        GPU_CHECK_ERROR(cudaFree(_devPyramidData));        
+        GPU_CHECK_ERROR(cudaFree(_devAlphaBuffer));
+        GPU_CHECK_ERROR(cudaFree(_devDetections));
+        GPU_CHECK_ERROR(cudaFree(_devDetectionCount));
 
-		GPU_CHECK_ERROR(cudaDestroyTextureObject(_preprocessedImageTexture));
-		GPU_CHECK_ERROR(cudaDestroyTextureObject(_finalPyramidTexture));
-		GPU_CHECK_ERROR(cudaDestroyTextureObject(_alphasTexture));
-			
-		GPU_CHECK_ERROR(cudaFree(_devOriginalImage));
-		GPU_CHECK_ERROR(cudaFree(_devPreprocessedImage));
-		GPU_CHECK_ERROR(cudaFree(_devPyramidImage));
-		GPU_CHECK_ERROR(cudaFree(_devAlphaBuffer));
-		GPU_CHECK_ERROR(cudaFree(_devDetections));
-		GPU_CHECK_ERROR(cudaFree(_devDetectionCount));
-		GPU_CHECK_ERROR(cudaFree(_devSurvivors));
-		GPU_CHECK_ERROR(cudaFree(_devSurvivorCount));
+        if (_detectionMode == DET_ATOMIC_GLOBAL)
+        {
+            GPU_CHECK_ERROR(cudaFree(_devSurvivors[0]));
+            GPU_CHECK_ERROR(cudaFree(_devSurvivorCount[0]));
+            GPU_CHECK_ERROR(cudaFree(_devSurvivors[1]));
+            GPU_CHECK_ERROR(cudaFree(_devSurvivorCount[1]));
+        }
 	}
 
 	void WaldboostDetector::setBlockSize(KernelType type, uint32 const& x, uint32 const& y, uint32 const& z)

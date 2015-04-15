@@ -400,14 +400,15 @@ namespace wbd
 
 						if (threadId == 0)
 							survivorCount = 0;
+
 						__syncthreads();
 
 						detectSurvivorsInit(texture, alphas, x, y, threadId, survivors, &survivorCount, 1);
 
 						__syncthreads();
-						if (threadId >= survivorCount)
-							return;
-						__syncthreads();
+                        if (threadId >= survivorCount)
+                            return;
+                        __syncthreads();					
 						if (threadId == 0)
 							survivorCount = 0;
 						__syncthreads();
@@ -457,179 +458,90 @@ namespace wbd
 
 			namespace atomicglobal
 			{
-
-				__device__
-					void detectSurvivorsInit(
+				__global__ void detectSurvivors(
 					cudaTextureObject_t texture,
-					cudaTextureObject_t alphas,
-					uint32 const&	x,
-					uint32 const&	y,
-					uint32 const&	threadId,
-					uint32 const&	globalOffset,
-					SurvivorData*	globalSurvivors,
-					uint32*			survivorCount,
-					uint16			endStage)
+					cudaTextureObject_t alphas,						
+					SurvivorData*		survivorsStart,
+					SurvivorData*		survivorsEnd,
+					const uint32*		survivorCountStart,
+					uint32*				survivorCountEnd,
+					const uint16		startStage,
+					const uint16		endStage)
 				{
-					float response = 0.0f;
-					bool survived = eval(texture, alphas, x, y, &response, 0, endStage);
+					const uint32 threadId = (blockDim.x * gridDim.x) * (blockDim.y * blockIdx.y + threadIdx.y) + (blockDim.x * blockIdx.x + threadIdx.x);										
 
-					if (survived)
+					if (threadId < *survivorCountStart)
 					{
-						uint32 threadOffset = atomicInc(survivorCount, blockDim.x * blockDim.y); // there can be max. block size survivors
-						uint32 newThreadId = globalOffset + threadOffset;
-						// save position and current response
-						globalSurvivors[newThreadId].x = x;
-						globalSurvivors[newThreadId].y = y;
-						globalSurvivors[newThreadId].response = response;
+						float response = survivorsStart[threadId].response;
+						const uint32 x = survivorsStart[threadId].x;
+						const uint32 y = survivorsStart[threadId].y;
+
+						bool survived = eval(texture, alphas, x, y, &response, startStage, endStage);
+						if (survived)
+						{
+							uint32 newThreadId = atomicInc(survivorCountEnd, *survivorCountStart);
+							survivorsEnd[newThreadId].x = x;
+							survivorsEnd[newThreadId].y = y;
+							survivorsEnd[newThreadId].response = response;
+						}
 					}
 				}
 
-				__device__ void detectSurvivors(
-					cudaTextureObject_t texture,
-					cudaTextureObject_t alphas,
-					uint32 const&	threadId,
-					uint32 const&	globalOffset,
-					SurvivorData*	globalSurvivors,
-					uint32*			survivorCount,
-					uint16			startStage,
-					uint16			endStage)
-				{
-					const uint32 id = globalOffset + threadId;
-
-					float response = globalSurvivors[id].response;
-					const uint32 x = globalSurvivors[id].x;
-					const uint32 y = globalSurvivors[id].y;
-
-					bool survived = eval(texture, alphas, x, y, &response, startStage, endStage);
-					if (survived)
-					{
-						uint32 threadOffset = atomicInc(survivorCount, blockDim.x * blockDim.y); // there can be max. block size survivors
-						uint32 newThreadId = globalOffset + threadOffset;
-						globalSurvivors[newThreadId].x = x;
-						globalSurvivors[newThreadId].y = y;
-						globalSurvivors[newThreadId].response = response;
-					}
-				}
-
-				__device__
+				__global__
 					void detectDetections(
 					cudaTextureObject_t texture,
-					cudaTextureObject_t alphas,
-					uint32 const&	threadId,
-					uint32 const&	globalOffset,
-					SurvivorData*	globalSurvivors,
-					Detection*		detections,
-					uint32*			detectionCount,
-					uint16			startStage)
+					cudaTextureObject_t alphas,					
+					SurvivorData*		survivors,
+					const uint32*		survivorsCount,
+					Detection*			detections,
+					uint32*				detectionCount,
+					const uint16		startStage)
 				{
-					const uint32 id = globalOffset + threadId;
+					const uint32 threadId = (blockDim.x * gridDim.x) * (blockDim.y * blockIdx.y + threadIdx.y) + (blockDim.x * blockIdx.x + threadIdx.x);
 
-					float response = globalSurvivors[id].response;
-					const uint32 x = globalSurvivors[id].x;
-					const uint32 y = globalSurvivors[id].y;
-
-					bool survived = eval(texture, alphas, x, y, &response, startStage, WB_STAGE_COUNT);
-					if (survived)
+					if (threadId < *survivorsCount)
 					{
-						uint32 pos = atomicInc(detectionCount, WB_MAX_DETECTIONS);
-						detections[pos].x = x;
-						detections[pos].y = y;
-						detections[pos].width = WB_CLASSIFIER_WIDTH;
-						detections[pos].height = WB_CLASSIFIER_HEIGHT;
-						detections[pos].response = response;
+						float response = survivors[threadId].response;
+						const uint32 x = survivors[threadId].x;
+						const uint32 y = survivors[threadId].y;
+
+						bool survived = eval(texture, alphas, x, y, &response, startStage, WB_STAGE_COUNT);
+						if (survived)
+						{
+							uint32 pos = atomicInc(detectionCount, WB_MAX_DETECTIONS);
+							detections[pos].x = x;
+							detections[pos].y = y;
+							detections[pos].width = WB_CLASSIFIER_WIDTH;
+							detections[pos].height = WB_CLASSIFIER_HEIGHT;
+							detections[pos].response = response;
+						}
 					}
 				}
 
-				__global__ void detect(
+				__global__ void detectSurvivorsInit(
 					cudaTextureObject_t texture,
 					cudaTextureObject_t alphas,
 					const uint32		width,
 					const uint32		height,
 					SurvivorData*		survivors,
-					Detection*			detections,
-					uint32*				detectionCount)
+					uint32*				survivorCount,
+					const uint16		endStage)
 				{
 					const uint32 x = (blockIdx.x * blockDim.x) + threadIdx.x;
-					const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;
+					const uint32 y = (blockIdx.y * blockDim.y) + threadIdx.y;					
 
 					if (x < width - WB_CLASSIFIER_WIDTH && y < height - WB_CLASSIFIER_HEIGHT)
-					{
-						__shared__ uint32 blockSurvivors;
+					{																		
+						float response = 0.0f;
+						bool survived = eval(texture, alphas, x, y, &response, 0, endStage);
 
-						const uint32 blockSize = blockDim.x * blockDim.y;
-						const uint32 blockPitch = gridDim.x * blockSize;
-
-						// every block has a reserved space in global mem.
-						const uint32 blockOffset = blockIdx.y * blockPitch + blockIdx.x * blockSize;
-						// thread id inside a block
-						const uint32 threadId = threadIdx.y * blockDim.x + threadIdx.x;
-
-						if (threadId == 0)
-							blockSurvivors = 0;
-
-						__syncthreads();
-
-						detectSurvivorsInit(texture, alphas, x, y, threadId, blockOffset, survivors, &blockSurvivors, 1);
-
-						// finish all the detections within a block
-						__syncthreads();
-						if (threadId >= blockSurvivors)
-							return;
-						// dump all threads, which didn't survive
-						__syncthreads();
-
-						if (threadId == 0)
-							blockSurvivors = 0;
-						// reset the counter
-						__syncthreads();
-
-						detectSurvivors(texture, alphas, threadId, blockOffset, survivors, &blockSurvivors, 1, 8);
-
-						// finish all the detections within a block
-						__syncthreads();
-						if (threadId >= blockSurvivors)
-							return;
-						// dump all threads, which didn't survive
-						__syncthreads();
-						if (threadId == 0)
-							blockSurvivors = 0;
-						// reset the counter
-						__syncthreads();
-
-						detectSurvivors(texture, alphas, threadId, blockOffset, survivors, &blockSurvivors, 8, 64);
-
-						// finish all the detections within a block
-						__syncthreads();
-						if (threadId >= blockSurvivors)
-							return;
-						// dump all threads, which didn't survive
-						__syncthreads();
-						if (threadId == 0)
-							blockSurvivors = 0;
-						// reset the counter
-						__syncthreads();
-
-						detectSurvivors(texture, alphas, threadId, blockOffset, survivors, &blockSurvivors, 64, 256);
-
-						// finish all the detections within a block
-						__syncthreads();
-						if (threadId >= blockSurvivors)
-							return;
-						// dump all threads, which didn't survive
-						__syncthreads();
-						if (threadId == 0)
-							blockSurvivors = 0;
-						// reset the counter
-						__syncthreads();
-
-						detectSurvivors(texture, alphas, threadId, blockOffset, survivors, &blockSurvivors, 256, 512);
-
-						// finish all the detections within a block
-						__syncthreads();
-						if (threadId >= blockSurvivors)
-							return;
-
-						detectDetections(texture, alphas, threadId, blockOffset, survivors, detections, detectionCount, 512);
+						if (survived)
+						{
+							uint32 newThreadId = atomicInc(survivorCount, width * height);							
+							survivors[newThreadId].x = x;
+							survivors[newThreadId].y = y;
+							survivors[newThreadId].response = response;
+						}
 					}
 				}
 

@@ -285,63 +285,33 @@ namespace wbd
 			} // namespace atomicshared
 
 			namespace atomicglobal
-			{
-				/** @brief Initial survivor detection processing
-				 *
-				 * @details Processes detections on an image from the first stage (of the waldboost detector).
-				 *			Processes the whole image and outputs the remaining surviving positions after reaching
-				 *			the ending stage.
-				 *
-				 * @param texture			Pyramid image texture.
-				 * @param alphas				Alpha texture.
-				 * @param x					X-coordinate.
-				 * @param y					Y-coordinate
-				 * @param threadId			Thread id.
-				 * @param globalOffset		Global memory offset.
-				 * @param globalSurvivors	Output array of surviving positions.
-				 * @param survivorCount		Number of surviving positions.
-				 * @param endStage			Ending stage of the waldboost detector.
-				 * @return					Void.
-				 */
-				__device__ void detectSurvivorsInit
-				(
-					cudaTextureObject_t texture,
-					cudaTextureObject_t alphas,
-					uint32 const&		x,
-					uint32 const&		y,
-					uint32 const&		threadId,
-					uint32 const&		globalOffset,
-					SurvivorData*		globalSurvivors,
-					uint32*				survivorCount,
-					uint16				endStage);
-
+			{				
 				/** @brief Survivor detection processing
 				 *
-				 * @details Intermediate detection function, processes surviving detections starting at a given
-				 *			stage and ending at another stage. Uses global memory for storing surviving detections.
-				 *			Every block has a defined offset inside the global memory array.
+				 * @details Intermediate detection kernel, processes surviving detections starting at a given
+				 *			stage and ending at another stage. Uses global memory for storing surviving detections
+				 *			and a global counter.
 				 *
 				 * @param texture			Image texture.
-				 * @param alphas			Alpha texture.
-				 * @param threadId			Thread id.
-				 * @param globalOffset		Global memory block offset.
-				 * @param globalSurvivors	Global memory detection survivor array.
-				 * @param survivorCount		Number of surviving positions. Different for each block (stored in shared memory).				 
-				 * @param startStage		Starting stage of the waldboost detector.
-				 * @param endStage			Ending stage of the waldboost detector.
+				 * @param alphas			Alpha texture.				 
+				 * @param survivorsStart	Input array of survivors.
+				 * @param survivorsEnd	    Output array of survivors.
+				 * @param survivorCountStart Number of input survivors.
+                 * @param survivorCountEnd  Number of output survivors.
+				 * @param startStage		Starting classifier stage.
+				 * @param endStage			Final classifier stage.
 				 * @return					Void.
 				 */
-				__device__ void detectSurvivors
-				(
+				__global__ void detectSurvivors(
 					cudaTextureObject_t texture,
 					cudaTextureObject_t alphas,
-					uint32 const&		threadId,
-					uint32 const&		globalOffset,
-					SurvivorData*		globalSurvivors,
-					uint32*				survivorCount,
-					uint16				startStage,
-					uint16				endStage
-				);
+					SurvivorData*		survivorsStart,
+					SurvivorData*		survivorsEnd,
+					const uint32*		survivorCountStart,
+					uint32*				survivorCountEnd,
+					const uint16		startStage,
+					const uint16		endStage
+                );
 
 				/** @brief Final detection processing
 				 *
@@ -350,52 +320,49 @@ namespace wbd
 				 *			be displayed.
 				 *
 				 * @param texture			Image texture.
-				 * @param alphas			Alpha texture.
-				 * @param threadId			Thread id.
-				 * @param globalOffset		Global memory offset.
+				 * @param alphas			Alpha texture.				 
 				 * @param survivors			Input array of surviving positions.
+                 * @param suvivorsCount     Number of input survivors.
 				 * @param detections		Output array of detections.
 				 * @param detectionCount	Number of detections.
-				 * @param startStage		Starting stage of the waldboost detector.
+				 * @param startStage		Starting classifier stage.
 				 * @return					Void.
 				 */
-				__device__ void detectDetections
-				(
+				__global__
+					void detectDetections(
 					cudaTextureObject_t texture,
 					cudaTextureObject_t alphas,
-					uint32 const&		threadId,
-					uint32 const&		globalOffset,
-					SurvivorData*		globalSurvivors,
+					SurvivorData*		survivors,
+					const uint32*		survivorsCount,
 					Detection*			detections,
 					uint32*				detectionCount,
-					uint16				startStage
-				);
+					const uint16		startStage
+                );
 
 				/** @brief Atomic global memory kernel wrapper.
 				 *
-				 * @details Processes detections with survivors stored in global memory. Uses a counter
-				 *			stored in shared memory and a global memory with offsets for every block for
-				 *			storing surviving detections. This way the counter is distributed between blocks.
+				 * @details Processes samples where each surviving sample is assigned an id
+                 *          from a global counter and written to global memory based on its
+                 *          value.
 				 *
 				 * @param texture		Image texture.
 				 * @param alphas		Detector alphas texture.
 				 * @param width			Image width.
 				 * @param height		Image height.
-				 * @param survivors		Global memory array of survivors.
-				 * @param detections	Global memory array of detections.
-				 * @param detectionCount Detection count in global memory.
+				 * @param survivors		Output global memory array of survivors.
+                 * @param survivorCount Output Number of survivors.
+                 * @param endStage      Final classifier stage.
 				 * @return				Void.
 				 */
-				__global__ void detect
-				(
+				__global__ void detectSurvivorsInit(
 					cudaTextureObject_t texture,
 					cudaTextureObject_t alphas,
 					const uint32		width,
 					const uint32		height,
 					SurvivorData*		survivors,
-					Detection*			detections,
-					uint32*				detectionCount
-				);
+					uint32*				survivorCount,
+					const uint16		endStage
+                );
 
 			} // namespace atomicglobal
 

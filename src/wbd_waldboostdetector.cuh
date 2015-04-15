@@ -178,7 +178,7 @@ namespace wbd
 			/** DATA ARRAYS USED WITH TEXTURES */
 			uint8*				_devOriginalImage;		///< pointer to device original image memory
 			float*				_devPreprocessedImage;	///< pointer to device preprocessed image memory					
-			float*				_devPyramidData;					///< pointer to device pyramid memory (used by single texture)
+		    float*				_devPyramidData;					///< pointer to device pyramid memory (used by single texture)
 			float*				_devPyramidImage[WB_OCTAVES];		///< pointer to device pyramid memory (used by bindless texture)	
 
 			/* TEXTURE OBJECTS */
@@ -191,8 +191,8 @@ namespace wbd
 			float*				_devAlphaBuffer;		///< pointer to device alpha memory
 			Detection*			_devDetections;			///< pointer to the detections in device memory
 			uint32*				_devDetectionCount;		///< pointer to the number of detections in device memory
-			SurvivorData*		_devSurvivors;			///< pointer to device survivor memory			
-			uint32*				_devSurvivorCount;
+			SurvivorData*		_devSurvivors[2];		///< pointers to device survivor memory			
+			uint32*				_devSurvivorCount[2];   ///< pointers to device survivor counts
 
 			/** HOST MEMORY */
 			cv::Mat*			_myImage;				///< pointer to the original processed image
