@@ -20,19 +20,24 @@
  * @param filename	filename
  * @param opts		run optseters
  */
-bool processImageDataset(std::string filename, uint32 opts)
+bool processImageDataset(std::string filename, wbd::RunSettings const& settings, uint32 opts)
 {	
 	std::ifstream in;
 	in.open(filename);
 
 	std::string buffer;
 	cv::Mat image;
-	wbd::WaldboostDetector detector;
+	wbd::WaldboostDetector detector;    
+    detector.setBlockSize(wbd::KERTYPE_PREPROCESS, settings.blockSize, settings.blockSize);
+    detector.setBlockSize(wbd::KERTYPE_PYRAMID, settings.blockSize, settings.blockSize);
+    detector.setBlockSize(wbd::KERTYPE_DETECTION, settings.blockSize, settings.blockSize);
+    detector.setRunOptions(opts);
+    detector.setSettings(settings);    
 
 	while (!in.eof())
 	{
 		std::getline(in, buffer);
-		image = cv::imread(buffer.c_str(), CV_LOAD_IMAGE_COLOR);
+        image = cv::imread(buffer.c_str(), CV_LOAD_IMAGE_COLOR);
 
 		if (!image.data)
 		{
@@ -53,12 +58,12 @@ bool processImageDataset(std::string filename, uint32 opts)
 		detector.run();
 		if (opts & wbd::OPT_VERBOSE)
 			std::cout << LIBHEADER << "Detection finished." << std::endl;
-
-		if (opts & wbd::OPT_VISUAL_OUTPUT)
-		{
-			cv::imshow(LIBNAME, image);
-			cv::waitKey(WB_WAIT_DELAY);
-		}
+        
+        if (opts & (wbd::OPT_VISUAL_OUTPUT | wbd::OPT_VISUAL_DEBUG))
+        {
+            cv::imshow(LIBNAME, image);
+            cv::waitKey(WB_WAIT_DELAY);
+        }
 
 		detector.free();
 		if (opts & wbd::OPT_VERBOSE)
@@ -90,11 +95,9 @@ bool processVideo(std::string const& filename, wbd::RunSettings const& settings,
 	detector.setBlockSize(wbd::KERTYPE_PREPROCESS, settings.blockSize, settings.blockSize);
 	detector.setBlockSize(wbd::KERTYPE_PYRAMID, settings.blockSize, settings.blockSize);
 	detector.setBlockSize(wbd::KERTYPE_DETECTION, settings.blockSize, settings.blockSize);
-	detector.setPyGenMode(settings.pyGenMode);
-	detector.setPyType(settings.pyType);	
 	detector.setRunOptions(opts);
-	detector.setOutputFile(settings.outputFilename);
-	detector.setDetectionMode(settings.detectionMode);
+    detector.setSettings(settings);
+	
 	detector.init(&image);
 
 	if (opts & wbd::OPT_VERBOSE)	
@@ -133,8 +136,8 @@ bool processVideo(std::string const& filename, wbd::RunSettings const& settings,
 		
 		if (opts & (wbd::OPT_VISUAL_OUTPUT|wbd::OPT_VISUAL_DEBUG))
 		{
-			cv::imshow(LIBNAME, image);
-			cv::waitKey(WB_WAIT_DELAY);
+			cv::imshow(LIBNAME, image);			
+            cv::waitKey(WB_WAIT_DELAY);
 		}		
 	}
 	detector.free();
@@ -155,11 +158,12 @@ bool processVideo(std::string const& filename, wbd::RunSettings const& settings,
  */
 bool process(std::string input, wbd::InputTypes inputType, wbd::RunSettings settings, uint32 opts = 0)
 {	
+    settings.inputType = inputType;
 	switch (inputType)
 	{
 		case wbd::INPUT_IMAGE_DATASET:
 		{
-			processImageDataset(input, opts);
+			processImageDataset(input, settings, opts);
 			break;
 		}
 		case wbd::INPUT_VIDEO:

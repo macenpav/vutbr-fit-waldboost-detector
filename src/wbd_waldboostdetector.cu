@@ -19,8 +19,8 @@
 namespace wbd 
 {			
 	WaldboostDetector::WaldboostDetector()
-	{
-		gpu::detection::initDetectionStages();
+	{        
+		gpu::detection::initDetectionStages();        
 	}
 
 	void WaldboostDetector::_pyramidGenBindlessTexture()
@@ -48,7 +48,7 @@ namespace wbd
 
 	void WaldboostDetector::_pyramidKernelWrapper()
 	{
-		switch (_pyGenMode)
+		switch (_settings.pyGenMode)
 		{			
 			case PYGEN_BINDLESS_TEXTURE:
 				_pyramidGenBindlessTexture();
@@ -170,21 +170,31 @@ namespace wbd
 
 	void WaldboostDetector::init(cv::Mat* image)
 	{
+        ClockPoint init_time_start, init_time_end;
+        if (_opt & OPT_TIMER)
+        {
+            // reset total timers only for a video
+            // for a dataset init is called for every processed photo
+            _initTimers();
+            init_time_start = Clock::now();
+        }
+
 		_info.width = image->cols;
 		_info.height = image->rows;
 		_info.imageSize = image->cols * image->rows;		
 		_info.channels = image->channels();	
-
-		_frame = 0;
-
-		ClockPoint init_time_start, init_time_end;
-		if (_opt & OPT_TIMER)
-		{ 
-			_initTimers();
-			init_time_start = Clock::now();
-		}
+		_frame = 0;		
 	
-		switch (_pyType)
+        if (_opt & OPT_VERBOSE)
+        {
+            std::cout << LIBHEADER << "width: " << _info.width << std::endl;
+            std::cout << LIBHEADER << "height: " << _info.height << std::endl;
+            std::cout << LIBHEADER << "channels: " << static_cast<uint32>(_info.channels) << std::endl << std::endl;
+
+            std::cout << LIBHEADER << "Precalculating pyramid ..." << std::endl;
+        }
+
+		switch (_settings.pyType)
 		{
 			case PYTYPE_OPTIMIZED:
 				_precalc4x8Pyramid();
@@ -193,45 +203,10 @@ namespace wbd
 			case PYTYPE_HORIZONAL:
 				_precalcHorizontalPyramid();
 				break;
-		}
+		}	
 
-		if (_opt & OPT_TIMER)
-		{
-			init_time_end = Clock::now();
-			FPDuration duration = init_time_end - init_time_start;
-			_timers[TIMER_INIT] += static_cast<float>(std::chrono::duration_cast<Nanoseconds>(duration).count()) / 1000000.f;
-		}
-		
-		if (_opt & OPT_VERBOSE)
-		{
-			std::cout << LIBHEADER << "Finished generating pyramid." << std::endl;
-			std::cout << LIBHEADER << "Outputting details ..." << std::endl;
-			std::cout << LIBHEADER << "Canvas size: " << _pyramid.canvasImageSize << " (" << _pyramid.canvasWidth << "x" << _pyramid.canvasHeight << ")" << std::endl;
-			std::cout << LIBHEADER << "Octaves ..." << std::endl;
-
-			for (uint8 oct = 0; oct < WB_OCTAVES; ++oct)
-			{
-				Octave octave = _pyramid.octaves[oct];
-				std::cout << LIBHEADER << "[" << (uint32)oct << "]" << std::endl;
-				std::cout << LIBHEADER << "Octave size: " << octave.imageSize << " (" << octave.width << "x" << octave.height << ")" << std::endl;
-				std::cout << LIBHEADER << "Octave offsets x: " << octave.offsetX << " y: " << octave.offsetY << std::endl;
-				std::cout << LIBHEADER << "Images ..." << std::endl;
-
-				for (uint8 lvl = 0; lvl < WB_LEVELS_PER_OCTAVE; ++lvl)
-				{
-					PyramidImage im = _pyramid.octaves[oct].images[lvl];
-					std::cout << LIBHEADER << "[" << (uint32)oct << "]" << "[" << (uint32)lvl << "]" << std::endl;
-					std::cout << LIBHEADER << "Image size: " << im.width << "x" << im.height << std::endl;
-					std::cout << LIBHEADER << "Image offsets x: " << im.offsetX << " y: " << im.offsetY << std::endl;
-				}
-				std::cout << std::endl;
-			}
-		}
-
-		if (_opt & OPT_TIMER)
-		{
-			init_time_start = Clock::now();
-		}		
+        if (_opt & OPT_VERBOSE)
+            std::cout << "Allocating memory ..." << std::endl;
 
 		GPU_CHECK_ERROR(cudaMalloc((void**)&_devOriginalImage, sizeof(uint8) * _info.imageSize * _info.channels));
 		GPU_CHECK_ERROR(cudaMalloc((void**)&_devPreprocessedImage, sizeof(float) * _info.imageSize));
@@ -244,7 +219,7 @@ namespace wbd
 		GPU_CHECK_ERROR(cudaMalloc((void**)&_devDetections, sizeof(Detection) * WB_MAX_DETECTIONS));
 		GPU_CHECK_ERROR(cudaMalloc((void**)&_devDetectionCount, sizeof(uint32)));		
         
-        if (_detectionMode == DET_ATOMIC_GLOBAL)
+        if (_settings.detectionMode == DET_ATOMIC_GLOBAL)
         {
             GPU_CHECK_ERROR(cudaMalloc((void**)&_devSurvivors[0], sizeof(SurvivorData) * (_pyramid.canvasWidth / _kernelBlockConfig[KERTYPE_DETECTION].x + 1) * (_pyramid.canvasHeight / _kernelBlockConfig[KERTYPE_DETECTION].y + 1) * (_kernelBlockConfig[KERTYPE_DETECTION].x * _kernelBlockConfig[KERTYPE_DETECTION].y)));
             GPU_CHECK_ERROR(cudaMalloc((void**)&_devSurvivorCount[0], sizeof(uint32)));
@@ -258,28 +233,37 @@ namespace wbd
 		bindLinearFloatDataToTexture(&_alphasTexture, _devAlphaBuffer, WB_STAGE_COUNT * WB_ALPHA_COUNT);
 		bindFloatImageTo2DTexture(&_finalPyramidTexture, _devPyramidData, _pyramid.canvasWidth, _pyramid.canvasHeight);
 
-		GPU_CHECK_ERROR(cudaDeviceSynchronize());
+		GPU_CHECK_ERROR(cudaDeviceSynchronize());		
 
-		if (_opt & OPT_TIMER)
-		{
-			init_time_end = Clock::now();
-			FPDuration duration = init_time_end - init_time_start;
-			_timers[TIMER_INIT] += static_cast<float>(std::chrono::duration_cast<Nanoseconds>(duration).count()) / 1000000.f;
-		}
+        if (_opt & OPT_VERBOSE)
+            std::cout << "Finished allocating memory." << std::endl;
 
-		if (_opt & OPT_OUTPUT_CSV)
-		{
-			std::ofstream file;
-			file.open(_outputFilename, std::ios::out);
-			file << "init;" << _timers[TIMER_INIT] << std::endl << std::endl;
-			file << "frame;preprocessing;pyramid gen.;detection" << std::endl;
-			file.close();
-		}
+        if (_opt & OPT_TIMER)
+        {
+            init_time_end = Clock::now();
+            Duration duration = init_time_end - init_time_start;
+            _timers[TIMER_INIT] += static_cast<float>(std::chrono::duration_cast<Nanoseconds>(duration).count()) / 1000000.f;            
+        }
+
+        if (_opt & OPT_OUTPUT_CSV)
+        {
+            if (_settings.inputType == INPUT_VIDEO)
+            {
+                std::ofstream file;
+                file.open(_settings.outputFilename, std::ios::out);
+                file << "init;" << _timers[TIMER_INIT] << std::endl << std::endl;
+                file << "frame;preprocessing;pyramid gen.;detection" << std::endl;
+                file.close();
+            }
+        }
 	}	
 
 	void WaldboostDetector::setImage(cv::Mat* image)
 	{
-		_initTimers();		
+        // never reset total timers as image is set every frame or a photo
+        // for both a dataset or a video
+        if (_settings.inputType == INPUT_VIDEO)
+            _initTimers();		
 
 		_myImage = image;
 		cudaMemcpy(_devOriginalImage, image->data, _info.imageSize * _info.channels * sizeof(uint8), cudaMemcpyHostToDevice);
@@ -301,7 +285,7 @@ namespace wbd
 		{
 			GPU_CHECK_ERROR(cudaEventRecord(stop_preprocess));
 			GPU_CHECK_ERROR(cudaEventSynchronize(stop_preprocess));
-			GPU_CHECK_ERROR(cudaEventElapsedTime(&_timers[TIMER_PREPROCESS], start_preprocess, stop_preprocess));
+			GPU_CHECK_ERROR(cudaEventElapsedTime(&_timers[TIMER_PREPROCESS], start_preprocess, stop_preprocess));            
 		}
 
 		if (_opt & OPT_VISUAL_DEBUG)
@@ -328,7 +312,7 @@ namespace wbd
 		{			
 			GPU_CHECK_ERROR(cudaEventRecord(stop_pyramid));
 			GPU_CHECK_ERROR(cudaEventSynchronize(stop_pyramid));
-			GPU_CHECK_ERROR(cudaEventElapsedTime(&_timers[TIMER_PYRAMID], start_pyramid, stop_pyramid));
+			GPU_CHECK_ERROR(cudaEventElapsedTime(&_timers[TIMER_PYRAMID], start_pyramid, stop_pyramid));           
 		}
 		
 		if (_opt & OPT_VISUAL_DEBUG)
@@ -352,10 +336,11 @@ namespace wbd
 		}
 	}
 
-	void WaldboostDetector::_initTimers()
+    void WaldboostDetector::_initTimers()
 	{
-		for (uint8 i = 0; i < MAX_TIMERS; ++i)
-			_timers[i] = 0.f;
+        for (uint8 i = 0; i < MAX_TIMERS; ++i)       
+            _timers[i] = 0.f;
+       
 	}
 
 	void WaldboostDetector::_processDetections()
@@ -426,7 +411,7 @@ namespace wbd
 		GPU_CHECK_ERROR(cudaMemset(_devDetectionCount, 0, sizeof(uint32)));
 			
 		cudaEvent_t start_detection, stop_detection;		
-		switch (_detectionMode)
+		switch (_settings.detectionMode)
 		{
 			case DET_ATOMIC_GLOBAL:
 			{
@@ -465,7 +450,7 @@ namespace wbd
 				{
 					GPU_CHECK_ERROR(cudaEventRecord(stop_detection));
 					GPU_CHECK_ERROR(cudaEventSynchronize(stop_detection));
-					GPU_CHECK_ERROR(cudaEventElapsedTime(&_timers[TIMER_DETECTION], start_detection, stop_detection));
+					GPU_CHECK_ERROR(cudaEventElapsedTime(&_timers[TIMER_DETECTION], start_detection, stop_detection));                    
 				}
 				_processDetections();
 				break;
@@ -541,7 +526,7 @@ namespace wbd
 				if (_opt & OPT_TIMER)
 				{
 					det_time_end = Clock::now();
-					FPDuration duration = det_time_end - det_time_start;
+					Duration duration = det_time_end - det_time_start;
 					_timers[TIMER_DETECTION] += static_cast<float>(std::chrono::duration_cast<Nanoseconds>(duration).count()) / 1000000.f;
 				}
 				_processDetections(&(detections[0]), detections.size());
@@ -553,6 +538,9 @@ namespace wbd
 		{			
 			if (_opt & OPT_VERBOSE)
 			{ 
+                if (_settings.inputType == INPUT_IMAGE_DATASET)
+                    std::cout << "Init: " << _timers[TIMER_INIT] << std::endl;
+
 				std::cout << "Preprocessing: " << _timers[TIMER_PREPROCESS] << std::endl;
 				std::cout << "Pyramid gen.: " << _timers[TIMER_PYRAMID] << std::endl;
 				std::cout << "Detection: " << _timers[TIMER_DETECTION] << std::endl;
@@ -562,17 +550,26 @@ namespace wbd
 			{
 				std::string t1 = std::string("Preprocessing: ") + std::to_string(_timers[TIMER_PREPROCESS]) + std::string(" ms");
 				std::string t2 = std::string("Pyramid gen.: ") + std::to_string(_timers[TIMER_PYRAMID]) + std::string(" ms");
-				std::string t3 = std::string("Detection: ") + std::to_string(_timers[TIMER_DETECTION]) + std::string(" ms");
+				std::string t3 = std::string("Detection: ") + std::to_string(_timers[TIMER_DETECTION]) + std::string(" ms");                
 				cv::putText(*_myImage, t1, cv::Point(10, 20), cv::FONT_HERSHEY_SIMPLEX, 0.35, CV_RGB(0, 255, 0));
 				cv::putText(*_myImage, t2, cv::Point(10, 35), cv::FONT_HERSHEY_SIMPLEX, 0.35, CV_RGB(0, 255, 0));
 				cv::putText(*_myImage, t3, cv::Point(10, 50), cv::FONT_HERSHEY_SIMPLEX, 0.35, CV_RGB(0, 255, 0));
+
+                if (_settings.inputType == INPUT_IMAGE_DATASET)
+                {
+                    std::string t4 = std::string("Init: ") + std::to_string(_timers[TIMER_INIT]) + std::string(" ms");
+                    cv::putText(*_myImage, t4, cv::Point(10, 80), cv::FONT_HERSHEY_SIMPLEX, 0.35, CV_RGB(0, 255, 0));
+                }
 			}
 
 			if (_opt & OPT_OUTPUT_CSV)
 			{				
 				std::ofstream file;
-				file.open(_outputFilename, std::ios::out|std::ios::app);
-				file << _frame << ";" << _timers[TIMER_PREPROCESS] << ";" << _timers[TIMER_PYRAMID] << ";" << _timers[TIMER_DETECTION] << std::endl;
+				file.open(_settings.outputFilename, std::ios::out|std::ios::app);
+                if (_settings.inputType == INPUT_IMAGE_DATASET)
+                    file << _frame << ";" << _timers[TIMER_INIT] << ";" << _timers[TIMER_PREPROCESS] << "; " << _timers[TIMER_PYRAMID] << "; " << _timers[TIMER_DETECTION] << std::endl;
+                else
+				    file << _frame << ";" << _timers[TIMER_PREPROCESS] << ";" << _timers[TIMER_PYRAMID] << ";" << _timers[TIMER_DETECTION] << std::endl;
 				file.close();				
 			}
 		}		
@@ -580,7 +577,7 @@ namespace wbd
 	}
 
     void WaldboostDetector::free()
-    {
+    {        
         for (uint8 oct = 0; oct < WB_OCTAVES; ++oct)
         {            
             GPU_CHECK_ERROR(cudaDestroyTextureObject(_texturePyramidObjects[oct]));
@@ -597,7 +594,7 @@ namespace wbd
         GPU_CHECK_ERROR(cudaFree(_devDetections));
         GPU_CHECK_ERROR(cudaFree(_devDetectionCount));
 
-        if (_detectionMode == DET_ATOMIC_GLOBAL)
+        if (_settings.detectionMode == DET_ATOMIC_GLOBAL)
         {
             GPU_CHECK_ERROR(cudaFree(_devSurvivors[0]));
             GPU_CHECK_ERROR(cudaFree(_devSurvivorCount[0]));

@@ -75,23 +75,13 @@ namespace wbd
 			 */
 			void free();	
 
-			/** @brief Sets pyramid generation mode. */
-			void setPyGenMode(PyramidGenModes const& mode) { _pyGenMode = mode; } 
-
-			/** @brief Sets pyramid type. */
-			void setPyType(PyramidTypes const& type) { _pyType = type; }
-
-			/** @brief Sets detection mode. */
-			void setDetectionMode(DetectionModes const& mode) { _detectionMode = mode; }
+            void setSettings(RunSettings const& settings) { _settings = settings; }
 
 			/** @brief Sets the kernel block size. */
 			void setBlockSize(KernelType type, uint32 const& x = 32, uint32 const& y = 32, uint32 const& z = 1);
 
 			/** @brief Passes run parameters to the detector. */
-			void setRunOptions(uint32 const& options) { _opt = options; }
-
-			/** @brief Sets a file for output. */
-			void setOutputFile(std::string const& output) { _outputFilename = output; }			
+			void setRunOptions(uint32 const& options) { _opt = options; }		
 
 			/** @brief Number of processed frames. */
 			uint32 getFrameCount() const { return _frame; }
@@ -168,9 +158,7 @@ namespace wbd
 			/** CONFIGURATION */
 			ImageInfo			_info;				///< image information
 			Pyramid				_pyramid;			///< pyramid image information
-			PyramidGenModes		_pyGenMode;			///< pyramid generation mode
-			PyramidTypes		_pyType;			///< pyramid type (look)
-			DetectionModes		_detectionMode;		///< detection mode
+            RunSettings         _settings;
 			uint32				_opt;				///< run options/parameters
 			float				_timers[MAX_TIMERS];///< timers			
 			dim3				_kernelBlockConfig[MAX_KERNEL_TYPES]; ///< kernel block configuration
@@ -195,8 +183,7 @@ namespace wbd
 			uint32*				_devSurvivorCount[2];   ///< pointers to device survivor counts
 
 			/** HOST MEMORY */
-			cv::Mat*			_myImage;				///< pointer to the original processed image
-			std::string			_outputFilename;		///< filename for csv output
+			cv::Mat*			_myImage;				///< pointer to the original processed image			
 			uint32				_frame;					///< frame counter
 	};
 }

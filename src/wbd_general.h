@@ -24,7 +24,7 @@ typedef int int32;
 typedef std::chrono::high_resolution_clock Clock;
 typedef std::chrono::milliseconds Milliseconds;
 typedef std::chrono::nanoseconds Nanoseconds;
-typedef std::chrono::duration<float> FPDuration;
+typedef std::chrono::duration<double> Duration;
 typedef std::chrono::system_clock::time_point ClockPoint;
 
 /** @brief Final detector threshold. */
