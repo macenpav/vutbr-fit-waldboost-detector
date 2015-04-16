@@ -250,8 +250,10 @@ int main(int argc, char** argv)
 				settings.detectionMode = wbd::DET_ATOMIC_GLOBAL;
 			else if (str == "ashared")
 				settings.detectionMode = wbd::DET_ATOMIC_SHARED;
-			else if (str == "prefixsum")
-				settings.detectionMode = wbd::DET_PREFIXSUM;
+            else if (str == "prefixsum")
+                settings.detectionMode = wbd::DET_PREFIXSUM;
+            else if (str == "hybridsg")
+                settings.detectionMode = wbd::DET_HYBRIG_SG;
 			else if (str == "cpu")
 				settings.detectionMode = wbd::DET_CPU;
 			else

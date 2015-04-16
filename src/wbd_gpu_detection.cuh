@@ -68,6 +68,39 @@ namespace wbd
 			 */
 			__device__ void sumRegions(cudaTextureObject_t texture, float* values, uint32 x, uint32 y, Stage* stage);
 
+            namespace hybridsg
+            {
+                __global__
+                    void detectSurvivorsInit(
+                    cudaTextureObject_t texture,
+                    cudaTextureObject_t alphas,
+                    const uint32		width,
+                    const uint32		height,
+                    SurvivorData*		survivors,
+                    uint32*				survivorCount,
+                    const uint16		endStage);
+
+                __global__ void detectSurvivors(
+                    cudaTextureObject_t texture,
+                    cudaTextureObject_t alphas,
+                    SurvivorData*		survivorsStart,
+                    SurvivorData*		survivorsEnd,
+                    const uint32*		survivorCountStart,
+                    uint32*				survivorCountEnd,
+                    const uint16		startStage,
+                    const uint16		endStage);
+
+                __global__
+                    void detectDetections(
+                    cudaTextureObject_t texture,
+                    cudaTextureObject_t alphas,
+                    SurvivorData*		survivors,
+                    const uint32*		survivorsCount,
+                    Detection*			detections,
+                    uint32*				detectionCount,
+                    const uint16		startStage);
+            } // namespace hybridsg
+
 			namespace prefixsum
 			{
 				/** @brief Initial survivor detection processing

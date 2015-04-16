@@ -59,6 +59,8 @@ namespace wbd
 		DET_ATOMIC_SHARED,
 		/** @brief Prefix sum used to count surviving threads. */
 		DET_PREFIXSUM,
+        /** @brief Hybrid method using a shared memory counter and global memory for survivors */
+        DET_HYBRIG_SG,
 		/** @brief Detection done on CPU. */
 		DET_CPU,
 
