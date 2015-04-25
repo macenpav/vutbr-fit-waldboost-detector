@@ -667,6 +667,8 @@ namespace wbd
             GPU_CHECK_ERROR(cudaFree(_devSurvivors[1]));
             GPU_CHECK_ERROR(cudaFree(_devSurvivorCount[1]));
         }
+
+        GPU_CHECK_ERROR(cudaDeviceReset());
 	}
 
 	void WaldboostDetector::setBlockSize(KernelType type, uint32 const& x, uint32 const& y, uint32 const& z)
