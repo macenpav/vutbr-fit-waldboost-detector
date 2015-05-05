@@ -1,4 +1,4 @@
-% ----------------------------------------------------------------------------
+ï»¿% ----------------------------------------------------------------------------
 % FIT thesis
 % ----------------------------------------------------------------------------
 % (C) 2007 Zdenek Vasicek, 2008 Michal Bidlo
@@ -36,7 +36,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage[czech,english]{babel}
-\usepackage[latin2]{inputenc} %kodovani
+\usepackage[utf8]{inputenc} %kodovani
 \ifczech
   \main@language{czech}
 \else
@@ -60,19 +60,19 @@
 %-----------------------------------------------------------------------------
 %Texty
 %-----------------------------------------------------------------------------
-\def\@vut@CS{Vysoké uèení technické v~Brnì}
+\def\@vut@CS{VysokÃ© uÄenÃ­ technickÃ© v~BrnÄ›}
 \def\@vut@EN{Brno University of Technology}
-\def\@fit@CS{Fakulta informaèních technologií}
+\def\@fit@CS{Fakulta informaÄnÃ­ch technologiÃ­}
 \def\@fit@EN{Faculty of Information Technology}
-\def\@author@CS{Autor práce}
+\def\@author@CS{Autor prÃ¡ce}
 \def\@author@EN{Author}
-\def\@supervisor@CS{Vedoucí práce}
+\def\@supervisor@CS{VedoucÃ­ prÃ¡ce}
 \def\@supervisor@EN{Supervisor}
-\def\@dep@CS{Ústav}
+\def\@dep@CS{Ãšstav}
 \def\@dep@EN{Department of}
 \def\@abstract@CS{Abstrakt}
 \def\@abstract@EN{Abstract}
-\def\@keywords@CS{Klíèová slova}
+\def\@keywords@CS{KlÃ­ÄovÃ¡ slova}
 \def\@keywords@EN{Keywords}
 \def\@cite@CS{Citation}
 \def\@copyright@CS{This work has been created as a school publication at Brno University of Technology, Faculty of Information Technology. 
@@ -88,13 +88,13 @@ It is hereby a subject to the copyright laws and its usage without the consent o
 %Vyber typu projektu
 \newcommand{\set@project}[1]{%
  \naselfalse
- \ifEqString{#1}{BP}{Bakaláøská práce}{\@projecttype@CS}%
+ \ifEqString{#1}{BP}{BakalÃ¡Å™skÃ¡ prÃ¡ce}{\@projecttype@CS}%
  \ifEqString{#1}{BP}{Bachelor's thesis}{\@projecttype@EN}%
- \ifEqString{#1}{SP}{Semestrální projekt}{\@projecttype@CS}%
+ \ifEqString{#1}{SP}{SemestrÃ¡lnÃ­ projekt}{\@projecttype@CS}%
  \ifEqString{#1}{SP}{Term project}{\@projecttype@EN}%
  \ifEqString{#1}{DP}{Master's thesis}{\@projecttype@CS}%
  \ifEqString{#1}{DP}{Master's thesis}{\@projecttype@EN}%
- \ifEqString{#1}{DR}{Disertaèní práce}{\@projecttype@CS}%
+ \ifEqString{#1}{DR}{DisertaÄnÃ­ prÃ¡ce}{\@projecttype@CS}%
  \ifEqString{#1}{DR}{PhD thesis}{\@projecttype@EN}%
  \ifnasel
  \else
@@ -105,13 +105,13 @@ It is hereby a subject to the copyright laws and its usage without the consent o
 %Vyber ustavu
 \newcommand{\set@department}[1]{%
  \naselfalse
- \ifEqString{#1}{UIFS}{informaèních systémù}{\@department@CS}%
+ \ifEqString{#1}{UIFS}{informaÄnÃ­ch systÃ©mÅ¯}{\@department@CS}%
  \ifEqString{#1}{UIFS}{Information Systems}{\@department@EN}%
- \ifEqString{#1}{UPSY}{poèítaèovıch systémù}{\@department@CS}%
+ \ifEqString{#1}{UPSY}{poÄÃ­taÄovÃ½ch systÃ©mÅ¯}{\@department@CS}%
  \ifEqString{#1}{UPSY}{Computer Systems}{\@department@EN}%
- \ifEqString{#1}{UITS}{inteligentních systémù}{\@department@CS}%
+ \ifEqString{#1}{UITS}{inteligentnÃ­ch systÃ©mÅ¯}{\@department@CS}%
  \ifEqString{#1}{UITS}{Intelligent Systems}{\@department@EN}%
- \ifEqString{#1}{UPGM}{poèítaèové grafiky a multimédií}{\@department@CS}%
+ \ifEqString{#1}{UPGM}{poÄÃ­taÄovÃ© grafiky a multimÃ©diÃ­}{\@department@CS}%
  \ifEqString{#1}{UPGM}{Computer Graphics and Multimedia}{\@department@EN}%
  \ifnasel
  \else
@@ -158,7 +158,7 @@ It is hereby a subject to the copyright laws and its usage without the consent o
 
 %Vychozi hodnoty
 \setkeys{projinfo}{
-  title.cs={Název práce (èesky)},title.en={Název práce(anglicky)}, 
+  title.cs={NÃ¡zev prÃ¡ce (Äesky)},title.en={NÃ¡zev prÃ¡ce(anglicky)}, 
   date=\today, project=BP, department=UIFS, declaration=, 
   abstract.cs=, abstract.en=, keywords.cs=, keywords.en=,
   author=Jmeno Prijmeni, supervisor=Jmeno Prijmeni

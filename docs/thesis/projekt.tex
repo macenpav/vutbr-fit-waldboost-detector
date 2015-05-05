@@ -1,14 +1,4 @@
-%============================================================================
-% tento soubor pouzijte jako zaklad
-% (c) 2008 Michal Bidlo
-% E-mail: bidlom AT fit vutbr cz
-%============================================================================
-% kodovaní: iso-8859-2 (zmena prikazem iconv, recode nebo cstocs)
-%----------------------------------------------------------------------------
-% zpracování: make, make pdf, make desky, make clean
-% pøipomínky posílejte na e-mail: bidlom AT fit.vutbr.cz
-% vim: set syntax=tex encoding=latin2:
-%============================================================================
+%==========================================================
 \documentclass[cover,english]{fitthesis} % odevzdani do wisu - odkazy, na ktere se da klikat
 %\documentclass[cover,print]{fitthesis} % pro tisk - na odkazy se neda klikat
 %\documentclass[english,print]{fitthesis} % pro tisk - na odkazy se neda klikat
@@ -22,7 +12,7 @@
 % zde zvolime kodovani, ve kterem je napsan text prace
 % "latin2" pro iso8859-2 nebo "cp1250" pro windows-1250, "utf8" pro "utf-8"
 %\usepackage{ucs}
-\usepackage[latin2]{inputenc}
+\usepackage[utf8]{inputenc}
 \usepackage[T1, IL2]{fontenc}
 \usepackage{url}
 \DeclareUrlCommand\url{\def\UrlLeft{<}\def\UrlRight{>} \urlstyle{tt}}
@@ -37,9 +27,7 @@
 
 
 % =======================================================================
-% balíèek "hyperref" vytváøí klikací odkazy v pdf, pokud tedy pou¾ijeme pdflatex
-% problém je, ¾e balíèek hyperref musí bıt uveden jako poslední, tak¾e nemù¾e
-% bıt v ¹ablonì
+
 \ifWis
 \ifx\pdfoutput\undefined % nejedeme pod pdflatexem
 \else
@@ -49,7 +37,7 @@
   \definecolor{anchors}{rgb}{1,0,0}
   \def\AnchorColor{anchors}
   \def\LinkColor{links}
-  \def\pdfBorderAttrs{/Border [0 0 0] }  % bez okrajù kolem odkazù
+  \def\pdfBorderAttrs{/Border [0 0 0] }
   \pdfcompresslevel=9
 \fi
 \fi
@@ -62,7 +50,7 @@
   year=2015,             %rok
   date=\today,           %datum odevzdani
   %Nazev prace
-  title.cs={Detekce objektù na GPU},  %nazev prace v cestine
+  title.cs={Detekce objektÅ¯ na GPU},  %nazev prace v cestine
   title.en={Object Detection on GPU}, %nazev prace v anglictine
   %Autor
   author={Pavel Macenauer},   %jmeno prijmeni autora
@@ -71,40 +59,24 @@
   %Ustav
   department=UPGM, % doplnte prislusnou zkratku: UPSY/UIFS/UITS/UPGM
   %Skolitel
-  supervisor= Roman Juránek, %jmeno prijmeni skolitele
+  supervisor= Roman JurÃ¡nek, %jmeno prijmeni skolitele
   supervisor.title.p=Ing.,   %titul pred jmenem (nepovinne)
   supervisor.title.a={Ph.D.},    %titul za jmenem (nepovinne)
   %Klicova slova, abstrakty, prohlaseni a podekovani je mozne definovat 
   %bud pomoci nasledujicich parametru nebo pomoci vyhrazenych maker (viz dale)
   %===========================================================================
   %Klicova slova
-  keywords.cs={Detekce objektù, klasifikátor, WaldBoost, Local Binary Patterns, CUDA, NVidia, grafickı procesor, detekce objektù v reálném èase}, %klicova slova v ceskem jazyce
+  keywords.cs={Detekce objektÅ¯, klasifikÃ¡tor, WaldBoost, Local Binary Patterns, CUDA, NVidia, grafickÃ½ procesor, detekce objektÅ¯ v reÃ¡lnÃ©m Äase}, %klicova slova v ceskem jazyce
   keywords.en={Object detection, Classifier, WaldBoost, Local Binary Patterns, CUDA, NVidia, Graphics Processing Unit, Realtime object detection}, %klicova slova v anglickem jazyce
   %Abstract
-  abstract.cs={Tato práce se zabıvá detekcí objektù pomocí grafickıch procesorù. Jako její souèást byl navr¾en a naimplementován systém pro detekci objektù na technologii NVIDIA CUDA, umo¾òující detekovat objekty ve videu v reálném èase. Jejím pøínosem je prozkoumání aktuálních mo¾ností NVIDIA CUDA a stávajících grafickıch karet k akceleraci detekce a navr¾ení zpùsobù jak dále tyto vıpoèty akcelerovat pomocí paralelních algoritmù.}, % abstrakt v ceskem jazyce
-  abstract.en={This thesis addresses the topic of object detection on graphics processing units. As a part of it, a system for object detection using NVIDIA CUDA was designed and implemented, allowing for realtime video object detection. Its contribution is mainly to study the options of NVIDIA CUDA technology and current graphics processing units for object detection acceleration. Also parallel algorithms for object detection are discussed and suggested.}, % abstrakt v anglickem jazyce
+  abstract.cs={Tato prÃ¡ce se zabÃ½vÃ¡ detekcÃ­ objektÅ¯ pomocÃ­ grafickÃ½ch procesorÅ¯. Jako jejÃ­ souÄÃ¡st byl navrÅ¾en a naimplementovÃ¡n nÃ¡stroj pro detekci objektÅ¯ na technologii NVIDIA CUDA, umoÅ¾ÅˆujÃ­cÃ­ detekovat objekty ve videu v reÃ¡lnÃ©m Äase nebo zpracovÃ¡vat velkÃ© mnoÅ¾stvÃ­ fotografiÃ­. JejÃ­m cÃ­lem je prozkoumat aktuÃ¡lnÃ­ moÅ¾nosti technologie NVIDIA CUDA vzhledem k detekci objektÅ¯ a navrhnout, jak by se dala akcelerovat.}, % abstrakt v ceskem jazyce
+  abstract.en={This thesis addresses the topic of object detection on graphics processing units. As a part of it, a system for object detection using NVIDIA CUDA was designed and implemented, allowing for realtime video object detection and bulk processing. Its contribution is mainly to study the options of NVIDIA CUDA technology and current graphics processing units for object detection acceleration. Also parallel algorithms for object detection are discussed and suggested.}, % abstrakt v anglickem jazyce
   %Prohlaseni
-  declaration={I hereby declare, that this thesis is my own work and has been created under the supervision of Ing. Roman Juránek, Ph.D. All other sources of information, that have been used, have been fully acknowledged.},
+  declaration={I hereby declare, that this thesis is my own work and has been created under the supervision of Ing. Roman JurÃ¡nek, Ph.D. All other sources of information, that have been used, have been fully acknowledged.},
   %Podekovani (nepovinne)
-  acknowledgment={I would like to thank Ing. Roman Juránek, Ph.D. and Ing. Michal Kùla for support and technical consultations provided during the work on this thesis.} % nepovinne
+  acknowledgment={I would like to thank Ing. Roman JurÃ¡nek, Ph.D. and Ing. Michal KÅ¯la for support and technical consultations provided during the work on this thesis.} % nepovinne
 }
 
-%Abstrakt (cesky, anglicky)
-%\abstract[cs]{Do tohoto odstavce bude zapsán vıtah (abstrakt) práce v èeském jazyce.}
-%\abstract[en]{Do tohoto odstavce bude zapsán vıtah (abstrakt) práce v anglickém jazyce.}
-
-%Klicova slova (cesky, anglicky)
-%\keywords[cs]{Sem budou zapsána jednotlivá klíèová slova v èeském jazyce, oddìlená èárkami.}
-%\keywords[en]{Sem budou zapsána jednotlivá klíèová slova v anglickém jazyce, oddìlená èárkami.}
-
-%Prohlaseni
-%\declaration{Prohla¹uji, ¾e jsem tuto bakaláøskou práci vypracoval samostatnì pod vedením pana X...
-%Dal¹í informace mi poskytli...
-%Uvedl jsem v¹echny literární prameny a publikace, ze kterıch jsem èerpal.}
-
-%Podekovani (nepovinne)
-%\acknowledgment{V této sekci je mo¾no uvést podìkování vedoucímu práce a tìm, kteøí poskytli odbornou pomoc
-%(externí zadavatel, konzultant, apod.).}
 
 \begin{document}
   % Vysazeni titulnich stran

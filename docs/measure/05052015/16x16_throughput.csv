@@ -1,0 +1,24 @@
+Name,Start Time(ns),Duration(ns),GridX,GridY,GridZ,BlockX,BlockY,BlockZ,Registers/Thread,Static Shared Memory,Dynamic Shared Memory,Size(bytes),Throughput(bytes/sec),Global Store Throughput(bytes/sec),Global Load Throughput(bytes/sec),Atomic Throughput(bytes/sec)
+"wbd::gpu::pyramid::createPyramidFromPyramid(float*, float*, __int64, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)",129777663,2977425,61,204,1,16,16,1,8,0,0,,,8287701925,0,0
+"wbd::gpu::pyramid::createPyramidFromPyramid(float*, float*, __int64, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)",132758000,735805,31,102,1,16,16,1,8,0,0,,,8455523541,0,0
+"wbd::gpu::pyramid::createPyramidFromPyramid(float*, float*, __int64, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)",133496973,186735,16,51,1,16,16,1,8,0,0,,,8279386712,0,0
+"wbd::gpu::pyramid::createFirstPyramid(float*, float*, __int64, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int, unsigned int)",97909393,31865358,121,407,1,16,16,1,17,0,0,,,3134357765,0,0
+"wbd::gpu::preprocess(float*, unsigned char*, unsigned int, unsigned int)",95850316,2056133,121,68,1,16,16,1,10,0,0,,,4055344421,12166033263,0
+"wbd::gpu::detection::atomicglobal::detectSurvivorsInit(__int64, __int64, unsigned int, unsigned int, wbd::SurvivorData*, unsigned int*, unsigned short)",133695035,35758796,181,407,1,16,16,1,26,0,0,,,6273785987,0,8705452761
+"wbd::gpu::detection::atomicglobal::detectSurvivors(__int64, __int64, wbd::SurvivorData*, wbd::SurvivorData*, unsigned int const *, unsigned int*, unsigned short, unsigned short)",169460295,45345253,181,407,1,16,16,1,28,0,0,,,219653886,2371688423,411277205
+"wbd::gpu::detection::atomicglobal::detectSurvivors(__int64, __int64, wbd::SurvivorData*, wbd::SurvivorData*, unsigned int const *, unsigned int*, unsigned short, unsigned short)",214811979,56620580,181,407,1,16,16,1,28,0,0,,,1819411,422096184,3026124
+"wbd::gpu::detection::atomicglobal::detectSurvivors(__int64, __int64, wbd::SurvivorData*, wbd::SurvivorData*, unsigned int const *, unsigned int*, unsigned short, unsigned short)",271439022,7615596,181,407,1,16,16,1,28,0,0,,,5262593,2467951886,9255482
+"wbd::gpu::detection::atomicglobal::detectSurvivors(__int64, __int64, wbd::SurvivorData*, wbd::SurvivorData*, unsigned int const *, unsigned int*, unsigned short, unsigned short)",279062361,6855441,181,407,1,16,16,1,28,0,0,,,7087712,2938661154,10140957
+"wbd::gpu::detection::atomicglobal::detectDetections(__int64, __int64, wbd::SurvivorData*, unsigned int const *, wbd::Detection*, unsigned int*, unsigned short)",285924233,10978874,181,407,1,16,16,1,26,0,0,,,6647654,1697623823,5559856
+"memset (0)",133685180,3647,,,,,,,,,,4,1096791,,,
+"memset (0)",133690299,2496,,,,,,,,,,4,1602564,,,
+"memset (0)",169455271,2752,,,,,,,,,,4,1453488,,,
+"memset (0)",214806988,2751,,,,,,,,,,4,1454016,,,
+"memset (0)",271433999,2784,,,,,,,,,,4,1436781,,,
+"memset (0)",279056026,2752,,,,,,,,,,4,1453488,,,
+"memset (0)",285919242,2752,,,,,,,,,,4,1453488,,,
+"Memcpy HtoD [sync]",84882929,4608,,,,,,,,,,24576,5333333333,,,
+"Memcpy HtoD [sync]",89818032,317955,,,,,,,,,,2097152,6595750971,,,
+"Memcpy HtoD [sync]",94147271,1691942,,,,,,,,,,6220800,3676721778,,,
+"Memcpy DtoH [sync]",296912930,2912,,,,,,,,,,4,1373626,,,
+"Memcpy DtoH [sync]",297070132,4767,,,,,,,,,,9660,2026431718,,,
