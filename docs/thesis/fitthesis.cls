@@ -1,4 +1,4 @@
-﻿% ----------------------------------------------------------------------------
+% ----------------------------------------------------------------------------
 % FIT thesis
 % ----------------------------------------------------------------------------
 % (C) 2007 Zdenek Vasicek, 2008 Michal Bidlo
@@ -174,14 +174,14 @@ It is hereby a subject to the copyright laws and its usage without the consent o
 
 %Abstrakt
 \renewcommand{\abstract}[2][cs]{%
- \ifEqString{#1}{cs}{#2}{\@tabstract@CS}%
  \ifEqString{#1}{en}{#2}{\@tabstract@EN}%
+ \ifEqString{#1}{cs}{#2}{\@tabstract@CS}%
 }
 
 %Klicova slova
 \newcommand{\keywords}[2][cs]{%
- \ifEqString{#1}{cs}{#2}{\@tkeywords@CS}%
  \ifEqString{#1}{en}{#2}{\@tkeywords@EN}%
+ \ifEqString{#1}{cs}{#2}{\@tkeywords@CS}%
 }
 
 \newlength{\mkspc}
@@ -200,18 +200,18 @@ It is hereby a subject to the copyright laws and its usage without the consent o
 %===================================================
 \fontfamily{phv}\selectfont%
 %  
-\mkuctxt{24}{\@vut@CS}
-\mkuctxt{11}{\@vut@EN}
+\mkuctxt{24}{\@vut@EN}
+\mkuctxt{11}{\@vut@CS}
 
 \vspace{12mm}
 
-\mkuctxt{14}{\@fit@CS}
-\mkuctxt{14}{\@departmentname@CS}
+\mkuctxt{14}{\@fit@EN}
+\mkuctxt{14}{\@departmentname@EN}
 
 \vspace{4mm}
 
-\mkuctxt{11}{\@fit@EN}
-\mkuctxt{11}{\@departmentname@EN}
+\mkuctxt{11}{\@fit@CS}
+\mkuctxt{11}{\@departmentname@CS}
 
 \vfill
 
@@ -219,12 +219,12 @@ It is hereby a subject to the copyright laws and its usage without the consent o
 
 \vfill
 
-\mkuctxt{14}{\@projecttype@CS}
-\mkuctxt{10}{\@projecttype@EN}
+\mkuctxt{14}{\@projecttype@EN}
+\mkuctxt{10}{\@projecttype@CS}
 \vspace{5mm}
 
-\mktxt{14}{\MakeUppercase{\@author@CS} \hfill \get@author}
-\mkuctxt{10}{\@author@EN}
+\mktxt{14}{\MakeUppercase{\@author@EN} \hfill \get@author}
+\mkuctxt{10}{\@author@CS}
 
 \vspace{10mm}
 
@@ -240,19 +240,19 @@ It is hereby a subject to the copyright laws and its usage without the consent o
 \newcommand\makeabstract{%
 \thispagestyle{empty}\null%
 
-\mktxt@b{16}{\@abstract@CS}\noindent\@tabstract@CS
-
-\vfill
-
 \mktxt@b{16}{\@abstract@EN}\noindent\@tabstract@EN
 
 \vfill
 
-\mktxt@b{16}{\@keywords@CS}\noindent\@tkeywords@CS
+\mktxt@b{16}{\@abstract@CS}\noindent\@tabstract@CS
 
 \vfill
 
 \mktxt@b{16}{\@keywords@EN}\noindent\@tkeywords@EN
+
+\vfill
+
+\mktxt@b{16}{\@keywords@CS}\noindent\@tkeywords@CS
 
 \vfill
 
@@ -305,7 +305,7 @@ It is hereby a subject to the copyright laws and its usage without the consent o
 \newsavebox{\@obrlogo}\newsavebox{\@rtext}\newlength{\@vyskartext}\newlength{\@vyskaobr}%
 
 \savebox{\@obrlogo}{\includegraphics[width=3.5cm,keepaspectratio]{fig/vut-zp2}}%logo VUT
-\savebox{\@rtext}{\vbox{\mkuctxt{18}{\@vut@CS}\mkuctxt{11}{\@vut@EN}}}%text VUT
+\savebox{\@rtext}{\vbox{\mkuctxt{18}{\@vut@EN}\mkuctxt{11}{\@vut@CS}}}%text VUT
 \settoheight{\@vyskaobr}{\makebox{\usebox{\@obrlogo}}}% vyska loga
 \settoheight{\@vyskartext}{\makebox{\usebox{\@rtext}}}% vyska textu
 \addtolength{\@vyskaobr}{-\@vyskartext}%odecteme od vysky loga vysku textu
@@ -315,9 +315,9 @@ It is hereby a subject to the copyright laws and its usage without the consent o
 
 \savebox{\@obrlogo}{\includegraphics[width=3.5cm,keepaspectratio]{fig/fit-zp2}}%logo FIT
 \savebox{\@rtext}{%text FIT, USTAV
-\vbox{\mkuctxt{14}{\@fit@CS}\mkuctxt{14}{\@departmentname@CS}
+\vbox{\mkuctxt{13}{\@fit@EN}\mkuctxt{13}{\@departmentname@EN}
 \vspace{3mm}
-\mkuctxt{11}{\@fit@EN}\mkuctxt{11}{\@departmentname@EN}}}%
+\mkuctxt{11}{\@fit@CS}\mkuctxt{11}{\@departmentname@CS}}}%
 \settoheight{\@vyskaobr}{\makebox{\usebox{\@obrlogo}}}% vyska loga
 \settoheight{\@vyskartext}{\makebox{\usebox{\@rtext}}}% vyska textu
 \addtolength{\@vyskaobr}{-\@vyskartext}%odecteme od vysky loga vysku textu
@@ -325,23 +325,23 @@ It is hereby a subject to the copyright laws and its usage without the consent o
 
 \vfill
 
-\mkuctxt{18}{\@title@CS}
-\mkuctxt{10}{\@title@EN}
+\mkuctxt{18}{\@title@EN}
+\mkuctxt{10}{\@title@CS}
 
 \vfill
 
-\mkuctxt{14}{\@projecttype@CS}
-\mkuctxt{10}{\@projecttype@EN}
+\mkuctxt{14}{\@projecttype@EN}
+\mkuctxt{10}{\@projecttype@CS}
 
 \vspace{5mm}
 
-\mktxt{14}{\MakeUppercase{\@author@CS} \hfill \get@author}
-\mkuctxt{10}{\@author@EN}
+\mktxt{14}{\MakeUppercase{\@author@EN} \hfill \get@author}
+\mkuctxt{10}{\@author@CS}
 
 \vspace{5mm}
 
-\mktxt{14}{\MakeUppercase{\@supervisor@CS} \hfill \get@supervisor}
-\mkuctxt{10}{\@supervisor@EN}
+\mktxt{14}{\MakeUppercase{\@supervisor@EN} \hfill \get@supervisor}
+\mkuctxt{10}{\@supervisor@CS}
 
 \vspace{10mm}
 
