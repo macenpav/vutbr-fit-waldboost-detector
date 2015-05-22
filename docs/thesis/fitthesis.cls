@@ -92,7 +92,7 @@ It is hereby a subject to the copyright laws and its usage without the consent o
  \ifEqString{#1}{BP}{Bachelor's thesis}{\@projecttype@EN}%
  \ifEqString{#1}{SP}{Semestrální projekt}{\@projecttype@CS}%
  \ifEqString{#1}{SP}{Term project}{\@projecttype@EN}%
- \ifEqString{#1}{DP}{Master's thesis}{\@projecttype@CS}%
+ \ifEqString{#1}{DP}{Diplomová práce}{\@projecttype@CS}%
  \ifEqString{#1}{DP}{Master's thesis}{\@projecttype@EN}%
  \ifEqString{#1}{DR}{Disertační práce}{\@projecttype@CS}%
  \ifEqString{#1}{DR}{PhD thesis}{\@projecttype@EN}%

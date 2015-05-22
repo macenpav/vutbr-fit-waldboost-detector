@@ -217,8 +217,10 @@ int main(int argc, char** argv)
 		else if (std::string(argv[i]) == "-t")		
 			opts |= wbd::OPT_TIMER;
 		// visual output
-		else if (std::string(argv[i]) == "-vo")
-			opts |= wbd::OPT_VISUAL_OUTPUT;
+        else if (std::string(argv[i]) == "-vo")
+            opts |= wbd::OPT_VISUAL_OUTPUT;
+        else if (std::string(argv[i]) == "-ms")
+            opts |= wbd::OPT_MEASURE_SURVIVORS;
 		// visual debug
 		else if (std::string(argv[i]) == "-vd")
 			opts |= (wbd::OPT_VISUAL_DEBUG|wbd::OPT_TIMER);

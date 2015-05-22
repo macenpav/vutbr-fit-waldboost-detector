@@ -1,0 +1,409 @@
+[waldboost-detector]: width: 1920
+[waldboost-detector]: height: 1080
+[waldboost-detector]: channels: 3
+
+[waldboost-detector]: Precalculating pyramid ...
+[waldboost-detector]: Allocating memory ...
+[waldboost-detector]: Finished allocating memory.
+[waldboost-detector]: Initialized detector.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2200720
+[waldboost-detector]: Surviving samples[1]: 119992
+[waldboost-detector]: Surviving samples[2]: 1216
+[waldboost-detector]: Surviving samples[3]: 528
+[waldboost-detector]: Surviving samples[4]: 487
+[waldboost-detector]: Surviving samples[5]: 528
+[waldboost-detector]: Detection count: 464
+Preprocessing: 2.49926
+Pyramid gen.: 37.3113
+Detection: 155.704
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2200515
+[waldboost-detector]: Surviving samples[1]: 123201
+[waldboost-detector]: Surviving samples[2]: 1249
+[waldboost-detector]: Surviving samples[3]: 549
+[waldboost-detector]: Surviving samples[4]: 507
+[waldboost-detector]: Surviving samples[5]: 549
+[waldboost-detector]: Detection count: 488
+Preprocessing: 2.07152
+Pyramid gen.: 36.2366
+Detection: 152.828
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2190495
+[waldboost-detector]: Surviving samples[1]: 121437
+[waldboost-detector]: Surviving samples[2]: 1239
+[waldboost-detector]: Surviving samples[3]: 567
+[waldboost-detector]: Surviving samples[4]: 537
+[waldboost-detector]: Surviving samples[5]: 567
+[waldboost-detector]: Detection count: 517
+Preprocessing: 2.08954
+Pyramid gen.: 36.2672
+Detection: 156.729
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2203574
+[waldboost-detector]: Surviving samples[1]: 124467
+[waldboost-detector]: Surviving samples[2]: 1201
+[waldboost-detector]: Surviving samples[3]: 571
+[waldboost-detector]: Surviving samples[4]: 537
+[waldboost-detector]: Surviving samples[5]: 571
+[waldboost-detector]: Detection count: 520
+Preprocessing: 2.1024
+Pyramid gen.: 36.1525
+Detection: 159.513
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2207011
+[waldboost-detector]: Surviving samples[1]: 124718
+[waldboost-detector]: Surviving samples[2]: 1230
+[waldboost-detector]: Surviving samples[3]: 608
+[waldboost-detector]: Surviving samples[4]: 580
+[waldboost-detector]: Surviving samples[5]: 608
+[waldboost-detector]: Detection count: 562
+Preprocessing: 2.14048
+Pyramid gen.: 36.1697
+Detection: 160.346
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2174474
+[waldboost-detector]: Surviving samples[1]: 123378
+[waldboost-detector]: Surviving samples[2]: 1190
+[waldboost-detector]: Surviving samples[3]: 587
+[waldboost-detector]: Surviving samples[4]: 555
+[waldboost-detector]: Surviving samples[5]: 587
+[waldboost-detector]: Detection count: 536
+Preprocessing: 2.11843
+Pyramid gen.: 36.188
+Detection: 156.323
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2189966
+[waldboost-detector]: Surviving samples[1]: 123969
+[waldboost-detector]: Surviving samples[2]: 1216
+[waldboost-detector]: Surviving samples[3]: 558
+[waldboost-detector]: Surviving samples[4]: 526
+[waldboost-detector]: Surviving samples[5]: 558
+[waldboost-detector]: Detection count: 504
+Preprocessing: 2.13104
+Pyramid gen.: 36.2086
+Detection: 159.169
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2205689
+[waldboost-detector]: Surviving samples[1]: 127421
+[waldboost-detector]: Surviving samples[2]: 1162
+[waldboost-detector]: Surviving samples[3]: 467
+[waldboost-detector]: Surviving samples[4]: 431
+[waldboost-detector]: Surviving samples[5]: 467
+[waldboost-detector]: Detection count: 404
+Preprocessing: 2.10723
+Pyramid gen.: 36.1488
+Detection: 159.511
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2195474
+[waldboost-detector]: Surviving samples[1]: 125809
+[waldboost-detector]: Surviving samples[2]: 1161
+[waldboost-detector]: Surviving samples[3]: 477
+[waldboost-detector]: Surviving samples[4]: 451
+[waldboost-detector]: Surviving samples[5]: 477
+[waldboost-detector]: Detection count: 430
+Preprocessing: 2.1008
+Pyramid gen.: 36.2034
+Detection: 160.632
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2161582
+[waldboost-detector]: Surviving samples[1]: 121522
+[waldboost-detector]: Surviving samples[2]: 1210
+[waldboost-detector]: Surviving samples[3]: 533
+[waldboost-detector]: Surviving samples[4]: 493
+[waldboost-detector]: Surviving samples[5]: 533
+[waldboost-detector]: Detection count: 476
+Preprocessing: 2.08163
+Pyramid gen.: 36.2026
+Detection: 157.294
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2203467
+[waldboost-detector]: Surviving samples[1]: 126123
+[waldboost-detector]: Surviving samples[2]: 1267
+[waldboost-detector]: Surviving samples[3]: 513
+[waldboost-detector]: Surviving samples[4]: 485
+[waldboost-detector]: Surviving samples[5]: 513
+[waldboost-detector]: Detection count: 460
+Preprocessing: 2.1143
+Pyramid gen.: 36.1452
+Detection: 159.126
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2215863
+[waldboost-detector]: Surviving samples[1]: 128022
+[waldboost-detector]: Surviving samples[2]: 1288
+[waldboost-detector]: Surviving samples[3]: 515
+[waldboost-detector]: Surviving samples[4]: 473
+[waldboost-detector]: Surviving samples[5]: 515
+[waldboost-detector]: Detection count: 455
+Preprocessing: 2.1384
+Pyramid gen.: 36.2027
+Detection: 162.035
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2200851
+[waldboost-detector]: Surviving samples[1]: 127322
+[waldboost-detector]: Surviving samples[2]: 1324
+[waldboost-detector]: Surviving samples[3]: 516
+[waldboost-detector]: Surviving samples[4]: 473
+[waldboost-detector]: Surviving samples[5]: 516
+[waldboost-detector]: Detection count: 448
+Preprocessing: 2.09376
+Pyramid gen.: 36.2507
+Detection: 158.839
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2202650
+[waldboost-detector]: Surviving samples[1]: 127264
+[waldboost-detector]: Surviving samples[2]: 1292
+[waldboost-detector]: Surviving samples[3]: 472
+[waldboost-detector]: Surviving samples[4]: 437
+[waldboost-detector]: Surviving samples[5]: 472
+[waldboost-detector]: Detection count: 422
+Preprocessing: 2.23114
+Pyramid gen.: 36.2612
+Detection: 162.196
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2203306
+[waldboost-detector]: Surviving samples[1]: 127672
+[waldboost-detector]: Surviving samples[2]: 1310
+[waldboost-detector]: Surviving samples[3]: 533
+[waldboost-detector]: Surviving samples[4]: 476
+[waldboost-detector]: Surviving samples[5]: 533
+[waldboost-detector]: Detection count: 450
+Preprocessing: 2.08493
+Pyramid gen.: 36.1894
+Detection: 159.708
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2237772
+[waldboost-detector]: Surviving samples[1]: 131624
+[waldboost-detector]: Surviving samples[2]: 1478
+[waldboost-detector]: Surviving samples[3]: 531
+[waldboost-detector]: Surviving samples[4]: 485
+[waldboost-detector]: Surviving samples[5]: 531
+[waldboost-detector]: Detection count: 449
+Preprocessing: 2.11827
+Pyramid gen.: 36.2383
+Detection: 164.642
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2199628
+[waldboost-detector]: Surviving samples[1]: 126859
+[waldboost-detector]: Surviving samples[2]: 1403
+[waldboost-detector]: Surviving samples[3]: 581
+[waldboost-detector]: Surviving samples[4]: 534
+[waldboost-detector]: Surviving samples[5]: 581
+[waldboost-detector]: Detection count: 509
+Preprocessing: 3.23075
+Pyramid gen.: 36.1951
+Detection: 163.16
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2208819
+[waldboost-detector]: Surviving samples[1]: 127114
+[waldboost-detector]: Surviving samples[2]: 1398
+[waldboost-detector]: Surviving samples[3]: 584
+[waldboost-detector]: Surviving samples[4]: 539
+[waldboost-detector]: Surviving samples[5]: 584
+[waldboost-detector]: Detection count: 499
+Preprocessing: 2.0697
+Pyramid gen.: 36.1501
+Detection: 199.103
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2212028
+[waldboost-detector]: Surviving samples[1]: 126984
+[waldboost-detector]: Surviving samples[2]: 1307
+[waldboost-detector]: Surviving samples[3]: 506
+[waldboost-detector]: Surviving samples[4]: 472
+[waldboost-detector]: Surviving samples[5]: 506
+[waldboost-detector]: Detection count: 453
+Preprocessing: 2.07834
+Pyramid gen.: 36.2194
+Detection: 182.308
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2238815
+[waldboost-detector]: Surviving samples[1]: 131597
+[waldboost-detector]: Surviving samples[2]: 1302
+[waldboost-detector]: Surviving samples[3]: 559
+[waldboost-detector]: Surviving samples[4]: 512
+[waldboost-detector]: Surviving samples[5]: 559
+[waldboost-detector]: Detection count: 491
+Preprocessing: 2.07926
+Pyramid gen.: 36.235
+Detection: 163.561
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2231085
+[waldboost-detector]: Surviving samples[1]: 131468
+[waldboost-detector]: Surviving samples[2]: 1339
+[waldboost-detector]: Surviving samples[3]: 552
+[waldboost-detector]: Surviving samples[4]: 522
+[waldboost-detector]: Surviving samples[5]: 552
+[waldboost-detector]: Detection count: 495
+Preprocessing: 2.0975
+Pyramid gen.: 36.187
+Detection: 164.674
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2235842
+[waldboost-detector]: Surviving samples[1]: 132721
+[waldboost-detector]: Surviving samples[2]: 1484
+[waldboost-detector]: Surviving samples[3]: 553
+[waldboost-detector]: Surviving samples[4]: 504
+[waldboost-detector]: Surviving samples[5]: 553
+[waldboost-detector]: Detection count: 482
+Preprocessing: 2.08179
+Pyramid gen.: 36.2282
+Detection: 166.856
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2200851
+[waldboost-detector]: Surviving samples[1]: 123929
+[waldboost-detector]: Surviving samples[2]: 767
+[waldboost-detector]: Surviving samples[3]: 85
+[waldboost-detector]: Surviving samples[4]: 61
+[waldboost-detector]: Surviving samples[5]: 85
+[waldboost-detector]: Detection count: 47
+Preprocessing: 2.07939
+Pyramid gen.: 36.2346
+Detection: 146.634
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2245143
+[waldboost-detector]: Surviving samples[1]: 123004
+[waldboost-detector]: Surviving samples[2]: 713
+[waldboost-detector]: Surviving samples[3]: 79
+[waldboost-detector]: Surviving samples[4]: 58
+[waldboost-detector]: Surviving samples[5]: 79
+[waldboost-detector]: Detection count: 45
+Preprocessing: 2.11338
+Pyramid gen.: 36.2542
+Detection: 145.223
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...
+[waldboost-detector]: Image set.
+[waldboost-detector]: Running detections ...
+[waldboost-detector]: Processing detections ...
+[waldboost-detector]: Initial samples: 18728640
+[waldboost-detector]: Surviving samples[0]: 2246095
+[waldboost-detector]: Surviving samples[1]: 125537
+[waldboost-detector]: Surviving samples[2]: 692
+[waldboost-detector]: Surviving samples[3]: 98
+[waldboost-detector]: Surviving samples[4]: 80
+[waldboost-detector]: Surviving samples[5]: 98
+[waldboost-detector]: Detection count: 61
+Preprocessing: 2.07834
+Pyramid gen.: 36.2417
+Detection: 148.01
+[waldboost-detector]: Detection finished.
+[waldboost-detector]: Loading image frame ...

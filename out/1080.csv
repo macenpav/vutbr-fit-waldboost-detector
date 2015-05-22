@@ -1,0 +1,10 @@
+==8528== NVPROF is profiling process 8528, command: WaldboostDetector.exe -iv 1920x1080.mp4 -dm aglobal -lf 0
+==8528== Warning: Some kernel(s) will be replayed on device 0 in order to collect all events/metrics.
+==8528== Profiling application: WaldboostDetector.exe -iv 1920x1080.mp4 -dm aglobal -lf 0
+==8528== Profiling result:
+==8528== Metric result:
+"Device","Kernel","Invocations","Metric Name","Metric Description","Min","Max","Avg"
+"Quadro K1000M (0)","wbd::gpu::detection::atomicglobal::detectSurvivors(__int64, __int64, wbd::SurvivorData*, wbd::SurvivorData*, unsigned int const *, unsigned int*, unsigned short, unsigned short)",1,"achieved_occupancy","Achieved Occupancy",0.642299,0.642299,0.642299
+"Quadro K1000M (0)","wbd::gpu::detection::atomicglobal::detectSurvivors(__int64, __int64, wbd::SurvivorData*, wbd::SurvivorData*, unsigned int const *, unsigned int*, unsigned short, unsigned short)",1,"gst_throughput","Global Store Throughput",6.907261MB/s,6.907261MB/s,6.907261MB/s
+"Quadro K1000M (0)","wbd::gpu::detection::atomicglobal::detectSurvivors(__int64, __int64, wbd::SurvivorData*, wbd::SurvivorData*, unsigned int const *, unsigned int*, unsigned short, unsigned short)",1,"gld_throughput","Global Load Throughput",2.974660GB/s,2.974660GB/s,2.974660GB/s
+"Quadro K1000M (0)","wbd::gpu::detection::atomicglobal::detectSurvivors(__int64, __int64, wbd::SurvivorData*, wbd::SurvivorData*, unsigned int const *, unsigned int*, unsigned short, unsigned short)",1,"atomic_throughput","Atomic Throughput",10.910447MB/s,10.910447MB/s,10.910447MB/s

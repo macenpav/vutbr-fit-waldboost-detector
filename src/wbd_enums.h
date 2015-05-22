@@ -38,6 +38,7 @@ namespace wbd
 		
 		/** @brief Max. number of frames processed limited. */
 		OPT_LIMIT_FRAMES	= 0x00000020,
+        OPT_MEASURE_SURVIVORS = 0x00000040,
 
 		/** @brief All options are switched on. */
 		OPT_ALL				= 0xFFFFFFFF

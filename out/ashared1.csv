@@ -1,0 +1,10 @@
+==7184== NVPROF is profiling process 7184, command: WaldboostDetector_30.exe -iv 1920x1080.mp4 -dm ashared -lf 10
+==7184== Warning: Some kernel(s) will be replayed on device 0 in order to collect all events/metrics.
+==7184== Profiling application: WaldboostDetector_30.exe -iv 1920x1080.mp4 -dm ashared -lf 10
+==7184== Profiling result:
+==7184== Metric result:
+"Device","Kernel","Invocations","Metric Name","Metric Description","Min","Max","Avg"
+"Quadro K1000M (0)","wbd::gpu::detection::atomicshared::detect(__int64, __int64, unsigned int, unsigned int, wbd::Detection*, unsigned int*)",1,"achieved_occupancy","Achieved Occupancy",0.468142,0.468142,0.468142
+"Quadro K1000M (0)","wbd::gpu::detection::atomicshared::detect(__int64, __int64, unsigned int, unsigned int, wbd::Detection*, unsigned int*)",1,"gst_throughput","Global Store Throughput",262.822000KB/s,262.822000KB/s,262.822000KB/s
+"Quadro K1000M (0)","wbd::gpu::detection::atomicshared::detect(__int64, __int64, unsigned int, unsigned int, wbd::Detection*, unsigned int*)",1,"gld_throughput","Global Load Throughput",0.000000B/s,0.000000B/s,0.000000B/s
+"Quadro K1000M (0)","wbd::gpu::detection::atomicshared::detect(__int64, __int64, unsigned int, unsigned int, wbd::Detection*, unsigned int*)",1,"atomic_throughput","Atomic Throughput",296.786000KB/s,296.786000KB/s,296.786000KB/s

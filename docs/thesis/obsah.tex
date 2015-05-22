@@ -57,7 +57,7 @@ Compute shaders are very specific. They don't have a set number of inputs, outpu
 
 \section{NVIDIA CUDA}
 
-NVIDIA CUDA is a programming model enabling direct access to the instruction set and memory of NVIDIA GPUs. The other main competitor to CUDA, on the market, is OpenCL. Both of these models are designed with direct access to the GPU's capabilities in mind compared to other parallel platforms. OpenCL has the advantage of not being platform specific. It is supported by both major GPU vendors AMD and NVIDIA. CUDA is only usable on NVIDIA cards, but generally offers more options to the programmer and a better debugging environment.
+NVIDIA CUDA is a programming model enabling direct access to the instruction set and memory of NVIDIA GPUs. The other main competitor to CUDA, on the market, is OpenCL. Both of these models are designed with direct access to the GPUs capabilities in mind compared to other parallel platforms. OpenCL has the advantage of not being platform specific. It is supported by both major GPU vendors AMD and NVIDIA. CUDA is only usable on NVIDIA cards, but generally offers more options to the programmer and a better debugging environment.
 
 \subsection{Programming model}
 
@@ -134,7 +134,7 @@ Max. shared memory per SM & 48 KB & 64 KB\\
 \label{tab:capability-3050}
 \end{table}
 
-Blocks are assigned between multiprocessors, where for modern GPU's, their count ranges between a single multiprocessor for average GPU's and 16 for the high-end. Threads within a block are then divided into warps. Warp execution is controller by a warp scheduler using a prioritized scheduling policy.
+Blocks are assigned between multiprocessors, where for modern GPUs, their count ranges between a single multiprocessor for average GPUs and 16 for the high-end. Threads within a block are then divided into warps. Warp execution is controller by a warp scheduler using a prioritized scheduling policy.
 
 All threads within a warp execute the same instruction at the same time. In case the instruction is not active for the given thread, an active mask is used and as soon as all the threads within the warp finish or are stalled by synchronization, a new warp is assigned.
 
@@ -229,6 +229,34 @@ Threads cannot be synchronized across the whole grid, but only across a block. T
 In certain scenarios, it might take a lot longer for a certain thread to process its code, then for another. An example is the prefix-sum, as described later on in \ref{sec:prefixsum}, where the number of iterations of a for-cycle depends on the thread ID. The problem is, that after the for-cycle finishes, threads must be synchronized. Most of the threads in this case are stalled and cannot be freed until all of them finish to run another warp.
 
 When writing a kernel, it is important to keep this in mind and try to minimize the use of \verb|__syncthreads| calls, where this would lead to stalling most of the threads.
+
+\subsection{Differences between Kepler and Maxwell architecture}
+
+% todo
+
+\begin{figure}
+\textit{"Maxwell improves upon this by implementing native shared memory atomic operations for 32-bit integers and native shared memory 32-bit and 64-bit compare-and-swap (CAS), which can be used to implement other atomic functions with reduced overhead compared to the Fermi and Kepler methods."}
+\caption{Quoted from 1.4.3.3 Fast Shared Memory Atomics in \cite{cuda-toolkit-docs}}
+\end{figure}
+
+\begin{figure}
+\begin{verbatim}
+/*00c8*/ LDSLK P0, R2, [RZ];                          
+/*00d0*/ @P0 IADD R2, R2, 0x1;                            
+/*00d8*/ @P0 STSCUL P1, [RZ], R2;                         
+/*00e0*/ @!P1 BRA 0xc0;                                   
+\end{verbatim}
+\caption{atomicAdd compiled with nvcc -arch=sm\_35 (Kepler) (taken from \cite{first-experience-maxwell})}
+\label{code:atomic-add-kepler}
+\end{figure}
+
+\begin{figure}
+\begin{verbatim}
+/*00f0*/ @!P0 ATOMS.ADD RZ, [RZ], R4;                                 
+\end{verbatim}
+\caption{atomicAdd compiled with nvcc -arch=sm\_50 (Maxwell) (taken from \cite{first-experience-maxwell})} 
+\label{code:atomic-add-maxwell}
+\end{figure}
 
 \chapter{Object detection}
 
@@ -352,7 +380,7 @@ In order to track or recognize a face in real-time, both the detection and the r
 
 In this chapter, research done on the topic of WaldBoost object detection, in the previous years, is summarized. Also tools to choose from for the implementation and the idea how to implement the detector, are discussed. It does now however cover implementations specifics. These are discussed later on in \ref{ch:implementation}.
 
-The idea of implementing a WaldBoost object detector with the use of LBP features on a parallel platform is not a new one and mainly for face detection, it is well researched. On the other hand, since it was first proposed, both OpenCL and CUDA have undergone many changes and as such optimizations and different approaches to the implementation can be discussed. The main focus of this thesis is to produce an implementation, which is optimized for different GPU's and to research how different uses of GPU memory and optimization techniques affect the detector.
+The idea of implementing a WaldBoost object detector with the use of LBP features on a parallel platform is not a new one and mainly for face detection, it is well researched. On the other hand, since it was first proposed, both OpenCL and CUDA have undergone many changes and as such optimizations and different approaches to the implementation can be discussed. The main focus of this thesis is to produce an implementation, which is optimized for different GPUs and to research how different uses of GPU memory and optimization techniques affect the detector.
 
 The implementation of a WaldBoost detector on a CPU, where every pixel is processed sequentially isn't complicated. The general idea, as explained in \ref{sec:waldboost}, is that a sample, in our case a pixel, is processed by a series of weak classifiers, in the implementation called stages. These stages accumulate a response, always adding or subtracting a value based on how the LBP feature is evaluated. In case the accumulated response gets greater than a certain value, the sample is discarded, the program skips the rest of the classifiers and continues with the next pixel.
 
@@ -390,7 +418,7 @@ At the time of writing the paper, detectors with 512 or 1024 stages were used (t
 
 Methods how to achieve this rearrangement are again specific to the implementation and are discussed later in \ref{subsec:thread-reorganization}.
 
-\section{Tools to be used}
+\section{Tools}
 
 \subsection{Debugging and profiling}\label{subsec:debugging-and-profiling}
 
@@ -432,6 +460,26 @@ It consists of two main modules and allows for simple profiling. On the other ha
 
 \paragraph{Graphics Debugger} allows to debug vertex shaders, pixel shaders and view the current state of the graphics pipeline.
 
+\section{Metrics}\label{sec:metrics}
+
+Before the profiling results will be discussed, all the measured metrics will be introduced in terms of what their values mean and how they reflect upon the detection time.
+
+\subsection{Achieved occupancy}\label{subsec:occupancy}
+
+Achieved occupancy is the number of active warps per clock cycle divided by the maximum warps per streaming multiprocessor. In other words, it is the percentage of used up GPU computational resources. It is one of the key factors influencing every GPU application, because when the GPU is not occupied to its maximum, it means, that there are resources being wasted. However, maximum occupancy doesn't always lead to the best results, because other areas of optimization, such as memory access, atomic operation stalls or cache hit rate may outperform it.
+
+\subsection{Memory load/store throughput}\label{subsec:memory-throughtput}
+
+Memory throughput is the amount of data transferred by the kernel per second, either by writing into the memory (store) or reading from it (load). For the global memory implementation, global memory throughput is measured, whereas for the shared memory implementation, its the shared memory throughput. It is not a metric, which can be directly optimized, but it might detect a possible bottleneck with memory access and also shows overall memory performance.
+
+\subsection{Atomics throughput}\label{subsec:atomics-throughput}
+
+Currently (as of Visual Profiler 6.5) the only metric, which reflects it is hard to measure how the execution gets stalled by atomic operations, therefore atomic throughput is measured, which correlates with this. The higher the throughput, the less stalls are performed.
+
+\subsection{L2 hit rate (texture reads)} \label{subsec:l2-hit-rate-texture}
+
+As mentioned in section \ref{}, even though texture memory is as fast as global memory in terms of reads, it is cached. L2 texture cache resides on the streaming multiprocessor, same as the shared memory, and takes advantage of 2D data locality. 
+
 \chapter{Implementation}\label{ch:implementation}
 
 The object detector is implemented in C++ with dependencies on OpenCV\footnote{\url{http://www.opencv.org}} - an open source computer vision library with C and C++ interfaces and CUDA\footnote{\url{http://www.nvidia.com/object/cuda_home_new.html}} - a library for writing NVIDIA GPU code with a CUDA C interface, which is an extension to C compiled by the NVCC compiler.
@@ -440,7 +488,7 @@ It is implemented as an easy-to-use class, which takes a dataset or a video on t
 
 \begin{center}
 \begin{figure}[h]
-	\centering\includegraphics[width=0.8\textwidth]{fig/sample.jpg}
+	\centering\includegraphics[width=\textwidth]{fig/sample.jpg}
 	\caption{A sample output with debug information shown.}
 	\label{fig:sample}
 \end{figure}
@@ -479,7 +527,7 @@ The detector uses a 26x26 pixel-wide scanning window, where \verb|x| and \verb|y
 
 \section{Interface}
 
-The object detector is designed to be used using a class WaldboostDetector, to simplify the detection as much as possible it is able to be run only by loading a video or a dataset and then running the \verb|run()| method, which returns a list of detections. Optionally the programmer can set specific settings described such as the method used ir block configuration. On the other hand when not set, these are set optimally based on results obtained by measurements on different GPU's.
+The object detector is designed to be used using a class WaldboostDetector, to simplify the detection as much as possible it is able to be run only by loading a video or a dataset and then running the \verb|run()| method, which returns a list of detections. Optionally the programmer can set specific settings described such as the method used ir block configuration. On the other hand when not set, these are set optimally based on results obtained by measurements on different GPUs.
 
 The whole interface is described in the added Doxygen\footnote{\url{http://www.doxygen.org}} documentation.
 
@@ -756,7 +804,7 @@ Scenarios for low-detection count (one or two faces, 10's of detections) and hig
 
 This chapter evaluates performance results obtained by measurements on different GPUs and discusses them based on results obtained from profiling.
 
-The technology used in the implementation  is supported only by the Kepler architecture and newer (CUDA 5.0+). Because of this the cutting edge Kepler and Maxwell GPU's were chosen (GTX 980 for the Maxwell architecture and GTX 780Ti for the Kepler architecture) to test the limits of the implementation. Also an average notebook GPU (Quadro K1000M) was used to test the performance in more standard user conditions. Specifications of the GPU's can be found in \ref{tab:parameters-gpu}. The driver version used was 340.62 and for the CPU Intel(R) Core(TM) i7-3610QM CPU @ 2.30 GHz. The discussion focuses on the best results obtained by every GPU.
+The technology used in the implementation  is supported only by the Kepler architecture and newer (CUDA 5.0+). Because of this the cutting edge Kepler and Maxwell GPUs were chosen (GTX 980 for the Maxwell architecture and GTX 780Ti for the Kepler architecture) to test the limits of the implementation. Also an average notebook GPU (Quadro K1000M) was used to test the performance in more standard user conditions. Specifications of the GPUs can be found in \ref{tab:parameters-gpu}. The driver version used was 340.62 and for the CPU Intel(R) Core(TM) i7-3610QM CPU @ 2.30 GHz. The discussion focuses on the best results obtained by every GPU.
 
 The tested use cases were the following:
 
@@ -803,9 +851,37 @@ As mentioned in \ref{subsubsec:thread-hierarchy} the kernels are initialized wit
 
 \subsection{Global and shared memory usage}
 
-\begin{figure}
+\begin{figure}[ht]
 	\label{fig:quadro-det-measurement}
-	\centering\includegraphics[width=0.85\textwidth]{fig/1080_detection_quadrok1000m.png}
+\centering\begin{tikzpicture}
+\begin{axis}[
+	height=10cm,
+	ybar=0.1cm,
+	x=3.5cm,
+	bar width=0.6cm,
+	enlarge x limits={abs=2.5cm},
+    legend style={at={(0.5,-0.15)},
+    anchor=north,legend columns=-1},
+    ylabel={Detection time [ms]},
+    xlabel={Block size [threads]},
+    symbolic x coords={8x8,16x16,32x32},
+    xtick=data,
+	nodes near coords={
+        \pgfmathprintnumber[precision=0]{\pgfplotspointmeta}
+    },
+    nodes near coords align={vertical},
+    ]
+\addplot [draw=none, fill=mblue] coordinates {(8x8, 248.6483134328) (16x16, 204.2498059702) (32x32, 335.6116915423)};
+
+\addplot [draw=none, fill=mred] coordinates {(8x8, 320.7663681592) (16x16, 191.187199005) (32x32, 587.1658457711)};
+
+\addplot [draw=none, fill=myellow] coordinates {(8x8, 168.2858507463) (16x16, 147.3512139303) (32x32, 190.377681592)};
+
+\addplot [draw=none, fill=mgreen] coordinates {(8x8, 734.4752835821) (16x16, 642.0554825871) (32x32, 1264.044079602)};
+
+\legend{Hybrid, Shared, Global, Prefix-sum}
+\end{axis}
+\end{tikzpicture}
 	\caption{Comparison of detection times of different implementations on Quadro K1000M (Kepler)}
 \end{figure}
 
@@ -823,16 +899,71 @@ The main reason, the global memory implementation wasn't affected that much is, 
 
 The size of the block affects the shared memory implementation the most, because the samples within a block share a counter, therefore the larger the number of threads withing a block, the more stalls by the atomic increments of the counter. This would lead to the conclusion, that the smaller the block the better.
 
-
-\begin{figure}
+\begin{figure}[ht]
 	\label{fig:980-det-measurement}
-	\centering\includegraphics[width=0.85\textwidth]{fig/1080_detection_maxwell.png}
+\centering\begin{tikzpicture}
+\begin{axis}[
+	height=10cm,
+	ybar=0.1cm,
+	x=3.5cm,
+	bar width=0.6cm,
+	enlarge x limits={abs=2.5cm},
+    legend style={at={(0.5,-0.15)},
+    anchor=north,legend columns=-1},
+    ylabel={Detection time [ms]},
+    xlabel={Block size [threads]},
+    symbolic x coords={8x8,16x16,32x32},
+    xtick=data,
+	nodes near coords={
+        \pgfmathprintnumber[precision=1]{\pgfplotspointmeta}
+    },
+    nodes near coords align={vertical},
+    ]
+\addplot [draw=none, fill=mblue] coordinates {(8x8, 17.818341791) (16x16, 16.6247671642) (32x32, 18.2170721393)};
+
+\addplot [draw=none, fill=mred] coordinates {(8x8, 8.1987296517) (16x16, 5.8072519403) (32x32, 16.2695338308)};
+
+\addplot [draw=none, fill=myellow] coordinates {(8x8, 24.8028029851) (16x16, 24.5568875622) (32x32, 23.9845751244)};
+
+\addplot [draw=none, fill=mgreen] coordinates {(8x8, 29.0125238806) (16x16, 27.0477900498) (32x32, 33.8991532338)};
+
+\legend{Hybrid, Shared, Global, Prefix-sum}
+\end{axis}
+\end{tikzpicture}
 	\caption{Comparison of detection times of different implementations on GeForce GTX 980 (Maxwell)}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[ht]
 	\label{fig:780ti-det-measurement}
-	\centering\includegraphics[width=0.85\textwidth]{fig/1080_detection_kepler.png}
+\centering\begin{tikzpicture}
+\begin{axis}[
+	height=10cm,
+	ybar=0.1cm,
+	x=3.5cm,
+	bar width=0.6cm,
+	enlarge x limits={abs=2.5cm},
+    legend style={at={(0.5,-0.15)},
+    anchor=north,legend columns=-1},
+    ylabel={Detection time [ms]},
+    xlabel={Block size [threads]},
+    symbolic x coords={8x8,16x16,32x32},
+    xtick=data,
+	nodes near coords={
+        \pgfmathprintnumber[precision=1]{\pgfplotspointmeta}
+    },
+    nodes near coords align={vertical},
+    ]
+\addplot [draw=none, fill=mblue] coordinates {(8x8, 15.6227313433) (16x16, 15.5606298507) (32x32, 22.6902890547)};
+
+\addplot [draw=none, fill=mred] coordinates {(8x8, 14.9011532338) (16x16, 9.5073046269) (32x32, 27.3350124378)};
+
+\addplot [draw=none, fill=myellow] coordinates {(8x8, 17.8485542289) (16x16, 20.8229238806) (32x32, 24.8877955224)};
+
+\addplot [draw=none, fill=mgreen] coordinates {(8x8, 37.0351412935) (16x16, 31.5296278607) (32x32, 52.1291577114)};
+
+\legend{Hybrid, Shared, Global, Prefix-sum}
+\end{axis}
+\end{tikzpicture}
 	\caption{Comparison of detection times of different implementations on GeForce GTX 780Ti (Kepler)}
 \end{figure}
 
@@ -840,14 +971,9 @@ It is however not the case, because of thread occupancy. The Kepler and Maxwell 
 
 \subsection{Hybrid-shared memory method}
 
-The hybrid-shared memory method, which was originally thought to be the most effective, didn't perform that well at the end. For the high-end GPU's, it performed worse in most cases, than the shared memory implementation. A huge difference between the two can be seen for the Maxwell architecture in \ref{fig:980-det-measurement}. This seems to be because of the great improvement of shared memory atomic operations in Maxwell.
+The hybrid-shared memory method, which was originally thought to be the most effective, didn't perform that well at the end. For the high-end GPUs, it performed worse in most cases, than the shared memory implementation. A huge difference between the two can be seen for the Maxwell architecture in \ref{fig:980-det-measurement}. This seems to be because of the great improvement of shared memory atomic operations in Maxwell.
 
-\begin{figure}
-\textit{"Maxwell improves upon this by implementing native shared memory atomic operations for 32-bit integers and native shared memory 32-bit and 64-bit compare-and-swap (CAS), which can be used to implement other atomic functions with reduced overhead compared to the Fermi and Kepler methods."}
-\caption{Quoted from 1.4.3.3 Fast Shared Memory Atomics in \cite{cuda-toolkit-docs}}
-\end{figure}
-
-For the Kepler architecture GPU's it performed slightly worse for the GTX 780Ti and better for the Quadro K1000M, than the shared memory method. This is a result of the GTX 780Ti having 16 streaming multiprocessors, which get occupied by the larger number of blocks with the shared memory method, whereas for the Quadro K1000M, its single multiprocessor becomes the bottleneck.
+For the Kepler architecture GPUs it performed slightly worse for the GTX 780Ti and better for the Quadro K1000M, than the shared memory method. This is a result of the GTX 780Ti having 16 streaming multiprocessors, which get occupied by the larger number of blocks with the shared memory method, whereas for the Quadro K1000M, its single multiprocessor becomes the bottleneck.
 
 \subsection{Prefix-sum}
 
@@ -855,7 +981,7 @@ The prefix-sum implementation performed worse in terms of detection time, than a
 
 \subsection{Summary}
 
-In terms of the best implementation for a given GPU, the implementation was tested on high-end Kepler and Maxwell GPU's with 16 and 15 multiprocessors and an average Kepler GPU with a single multiprocessor. The proposed methods to use with these are the following:
+In terms of the best implementation for a given GPU, the implementation was tested on high-end Kepler and Maxwell GPUs with 16 and 15 multiprocessors and an average Kepler GPU with a single multiprocessor. The proposed methods to use with these are the following:
 
 \begin{table}[htbp]
 \label{tab:proposed-methods}
@@ -874,73 +1000,219 @@ Average Kepler & 16x16 global memory implementation \\
 \caption{Proposed implementation to be used for each configuration.}
 \end{table}
 
-\section{Profiling details}
+\section{Profiling}\label{sec:profiling}
 
-Even though performance-wise all the implementations were already evaluated, in the following sections, details effecting the performance will be discussed. Compared to other GPU technologies, CUDA allows for profiling tools mentions in \ref{subsec:debugging-and-profiling}.
+To further analyze the performance of all the implementations, metrics measurements introduced in \ref{sec:metrics} will be discussed. Compared to other GPU technologies, CUDA allows for great profiling tools mentioned in section \ref{subsec:debugging-and-profiling}, and as such a thorough analysis of the implementations can be made. The main focus will be, not only on the best implementations performance-wise, and why they performed so well, but also on why some implementations performed worse, where are their problems, why are they not viable for the given implementation and how these issues can be solved.
 
-Implementations, which were proposed to be working the best performance-wise, were profiled for every GPU to confirm the assumptions made based on the detection time results.
+\subsection{L2 hit rate (texture reads) for global and shared memory implementations}\label{subsec:l2-hit-rate-prof}
 
-\subsection{Achieved occupancy}\label{subsec:occupancy}
+\begin{table}[htbp]
+\centering
+\begin{tabular}{| l | l |}
+\hline
+GPU & L2 Hit Rate (Texture Reads) (\%) \\
+\hline
+GTX 980 (Maxwell) & 93.263 \\
+\hline
+GTX 780Ti (Kepler) & 94.37 \\
+\hline
+Quadro K1000M (Kepler) & 85.804 \\
+\hline
+\end{tabular}
+\caption{L2 hit rate (texture reads). Shared memory implementation, $16 \times 16$ block size, $1920 \times 1080$ video.}
+\label{tab:l2-hit-rate-shared}
+\end{table}
 
-Achieved occupancy is the number of active warps per clock cycle divided by the maximum warps per multiprocessor and is one of the key factors influencing the detection time. It is important to note, that maximum occupancy doesn't always lead to the best results, because other areas of optimization, such as memory access or atomic operation stalls may outperform it. That is why memory throughput, both shared and global, depending on the implementation type, will also be discussed.
-
-\subsection{Memory load/store throughput}\label{subsec:memory-throughtput}
-
-Memory throughput is the data transferred by the kernel per second, either by writing into the memory (store) or reading from it (load). For the global memory implementation, global memory throughput is measured, whereas for the shared memory implementation, its the shared memory throughput.
-
-\subsection{Atomics throughput}\label{subsec:atomics-throughput}
-
-Currently (Visual Profiler 6.5) it is hard to measure how the execution gets stalled by atomic operations, therefore atomic throughput is measured, which correlates with this. The higher the throughput, the less stalls are performed.
-
-\subsection{Quadro K1000M (Kepler)}
-
-\subsubsection{Achieved occupancy}\label{subsubsec:ach-occupancy}
+Results obtained for the L2 hit rate (texture reads) explained in \ref{subsec:l2-hit-rate-texture} for the shared memory implementation are summarized in table \ref{tab:l2-hit-rate-shared}. These values are averaged across all thread rearrangement stages, because the implementation only uses a single kernel. It is interesting to note, that both of the high-end GPUs, also have almost 10\% bigger hit rate. First, this supports the claim, that it is better to use the shared memory implementation on high-end GPUs. Second, and more importantly, the values for the first two GPUs are close to 100\%. This means, that the implementation only accesses texture memory for the initial reads and later on, the data is mostly read from the cache. For Quadro K1000M it's not as high and it's also one of the reasons another implementation should be used instead.
 
 \begin{figure}[h]
-	\centering\includegraphics[width=0.85\textwidth]{fig/achievedoc_quadro.png}
-	\caption{Achieved occupancy on Quadro K1000M (Kepler) for the global memory method. The numbers 1-6 enumerate the kernels, where 1 is the detectSurvivorsInit kernel, 2-5 are detectSurvivors kernels and 6 is the final detectDetections kernel.}
+\centering\begin{tikzpicture}
+  \begin{axis}
+  [
+	width=0.8\textwidth,
+	ylabel={L2 Hit Rate (Texture Reads) (\%)},
+	xlabel={Kernel},
+    xtick=data,
+    legend pos=south east,
+    nodes near coords={
+        \pgfmathprintnumber[precision=2]{\pgfplotspointmeta}
+    },
+    nodes near coords align={vertical}
+  ]
+        \addplot [sharp plot, color=mred] coordinates {(1, 62.656) (2, 93.742) (3, 26.64) (4, 54.192) (5, 87.189) (6, 90.726)};
+
+    \addplot [sharp plot, color=mblue] coordinates {(1, 85.129) (2, 95.971) (3, 22.749) (4, 71.266) (5, 97.231) (6, 98.734)};
+
+    \addplot [sharp plot, color=mgreen] coordinates {(1, 95.558) (2, 97.52) (3, 29.834) (4, 87.498) (5, 99.63) (6, 97.546)};
+    
+    \legend {Quadro K1000M, GTX 780Ti, GTX 980}
+  \end{axis}
+\end{tikzpicture}
+	\caption{L2 Hit Rate (Texture Reads) for all three GPUs throughout the computation. Global memory method, $16 \times 16$ block size, $1920 \times 1080$ video. Values on the X-axis enumerate kernels in the order, they a run. 1: detectSurvivorsInit, 2-5: detectSurvivors, 6: detectDetections.}
+	\label{fig:l2-hit-rate-global}
+\end{figure}
+
+The hybrid-shared method and the global memory method both use global memory to reorganize the surviving samples and after each rearrangement stage, they run a new kernel. Thread rearrangement stages used were 1, 8, 64, 256, 512, which means that the first kernel ran only for the first stage (weak classifier), the second processed all stages from the 2nd until the 8th and so on. Figure \ref{fig:l2-hit-rate-global} shows L2 hit rate for the global memory method. The hybrid-shared implementation uses the same way of reorganizing the threads, so the results are very similar. The critical part to note is during the 3rd kernel (stages 8-64), where the hit rate significantly decreases, to around 20-30\% for all the GPUs and then it starts to increase again.
+
+\begin{figure}[h]
+\centering\begin{tikzpicture}
+  \begin{axis}
+  [
+	width=0.8\textwidth,
+	ylabel={Surviving samples (\%)},
+	xlabel={Processed stages (weak classifiers)},
+	xtick=data,
+    xmode=log,   
+    log basis x={2},
+    log ticks with fixed point,
+    nodes near coords={
+        \pgfmathprintnumber[fixed,precision=5]{\pgfplotspointmeta}
+    },
+    every node near coord/.append style={font=\small, xshift=-10, yshift=-5, rotate=30, anchor=west},
+  ]
+        \addplot [sharp plot, color=mred] coordinates {(1, 11.93809) (8, 0.70965) (64, 0.00792) (256, 0.00295) (512, 0.00269) (2048, 0.00257)};
+    
+  \end{axis}
+\end{tikzpicture}
+	\caption{Surviving samples after processed number of stages.}
+	\label{fig:survivor-count}
+\end{figure}
+
+The sudden decrease in hit rate can be explained by the behavior of the detector. The first kernel utilizes the cache very well on Maxwell and a bit worse on Kepler, because it has $4 \times$ bigger cache size. The kernel only runs for a single stage of the detector. After this only 10-15\% of the samples survive, as seen in figure \ref{fig:survivor-count}. Most of the surviving samples are in clustered areas, where data locality is utilized very well and so the texture reads are still cached. On the other hand, during the 3rd kernel, which runs after processing 8 stages, there is a huge decrease in hit rate, to around 20-30\%. This is because after the 2nd thread rearrangement only around 1\% of the samples survive, most of them being scattered all over the pyramidal image and not being clustered anymore. These samples don't utilize the data locality very well and the hit rate is very low. It improves later on, when only a few candidate samples remain, and so a lot of them simply fall in the cache. This is shown in figure \ref{fig:survivor-count}, that after processing 64 stages, 30\% of the processed samples survive until the end. After 256 stages, it's almost 90\%. These values correlate with the increase in hit rate.
+
+There are two proposed improvements in order to improve L2 cache hit rate. The first being adding more thread rearrangement stages, and therefore kernels. Experiments with this lead to a decrease in performance, because adding kernels leads to an additional overhead of loading, storing a reorganizing surviving samples. Second improvement can be made by setting the rearrangement stages differently. This is specific to the videos or datasets being used and should be statistically measured for the given case. The current implementation enables to output the number of surviving samples to conduct such experiments.
+
+\subsection{Achieved occupancy}\label{subsubsec:ach-occupancy}
+
+\subsubsection{Global memory implementation}\label{subsubsec:occ-global}
+
+\begin{figure}[ht]
+\centering\begin{tikzpicture}
+  \begin{axis}
+  [
+	width=0.8\textwidth,
+	ylabel={Achieved occupancy [\%]},
+	xlabel={Kernel},
+    xtick=data,
+    ymax=100,
+    nodes near coords={
+        \pgfmathprintnumber[precision=1]{\pgfplotspointmeta}
+    },
+    nodes near coords align={vertical}
+  ]
+    \addplot [sharp plot, color=mred] coordinates {(1, 80.4) (2, 91.5) (3, 81.6) (4, 37.4) (5, 49.3) (6, 18.0)};
+    \addplot [sharp plot, color=mblue] coordinates {(1, 90.0) (2, 86.1) (3, 90.7) (4, 56.7) (5, 62.7) (6, 37.7)};
+    \addplot [sharp plot, color=mgreen] coordinates {(1, 45.1) (2, 46.5) (3, 44.9) (4, 34.5) (5, 35.9) (6, 30.9)};
+    \legend {$32 \times 32$, $16 \times 16$, $8 \times 8$}
+  \end{axis}
+\end{tikzpicture}
+	\caption{Achieved occupancy on Quadro K1000M (Kepler) for the global memory method. Values on the X-axis enumerate kernels in the order, they are run. 1: detectSurvivorsInit, 2-5: detectSurvivors, 6: detectDetections.}
 	\label{fig:occupancy-quadro}
 \end{figure}
 
-There are several things to note here. The first is the low occupancy of the 8x8 configuration, which varies between 30.9\% and 46.5\%. This can actually be predicted from \ref{tab:capability-3050}, where maximum number of blocks per streaming multiprocessor for compute capability 3.0 is 16, but the maximum number of threads is 2048. This means, that to reach full or almost full occupancy, at least 128 threads per block are needed. In case of 8x8 configuration, there are only 64 threads and so the maximum of 50\% occupancy for such configuration can be reached.
+There are several things to note in figure \ref{fig:occupancy-quadro}, which shows the achieved occupancy for Quadro K1000M and global memory implementation. The first is the low occupancy of the $8 \times 8$ configuration, which varies between 30.9\% and 46.5\%. This can actually be predicted from table \ref{tab:capability-3050}, where the maximum number of blocks per streaming multiprocessor for compute capability 3.0 is 16, but the maximum number of threads is 2048. This means, that to reach full or almost full occupancy, at least 128 threads per block are needed. In case of the $8 \times 8$ configuration, there are only 64 threads and so only half of the maximum occupancy can be reached.
 
-On the other hand for the last 3 kernels the occupancy is lower for all 3 configurations anyway, because the number of surviving samples is lower than the maximum occupancy. Lower occupancy doesn't always mean worse performance. In the case of the global memory implementation, even though the achieved occupancy of the 8x8 configuration is around 50\% of the 16x16 configuration, other factors such as atomic instruction usage actually perform better, even though they don't outperform it due to the low achieved occupancy.
+Another fact to note is that for the last 3 kernels the occupancy is lower for all 3 configurations anyway, because the number of surviving samples is lower than the maximum occupancy and so this doesn't matter much anyway. Lower occupancy doesn't always mean worse performance. In the case of the global memory implementation, even though the achieved occupancy of the $8 \times 8$ configuration is twice smaller than that of the $32 \times 32$ configuration, it still performs much better as shown in figure \ref{fig:quadro-det-measurement}
 
-\subsubsection{Global memory and atomic throughput}
+The significant downside of this implementation is the low occupancy for the last 3 kernels. When we look at \ref{fig:survivor-count}, this means stages 64 to 2048. For better GPUs, the global memory method is not viable as shown in figures \ref{fig:780ti-det-measurement} and \ref{fig:980-det-measurement} and was profiled only for the $16 \times 16$ block configuration. The achieved occupancy for these cards gets even lower.
 
-Global memory load (\ref{fig:load-g-throughput}), store (\ref{fig:store-g-throughput}) and the atomic throughput (\ref{fig:atomics-throughput}) correlate with each other. The main bottleneck here is actually the use of atomic operations before the global memory stores are processed and so the store throughput is only as high as the atomic throughput.
+A proposed improvement to this issue would be to implement a method to process the future stages using the unused resources and utilize them as a cache in a way, that the surviving samples would use the preprocessed stages instead of processing them on their own.
 
-\begin{figure}[h]
-	\label{fig:load-g-throughput}
-	\centering\includegraphics[width=0.85\textwidth]{fig/load_gthroughput_quadro.png}
-	\caption{Load global memory throughput on Quadro K1000M (Kepler) for the global memory method. The numbers 1-5 enumerate the kernels, where 1-4 are detectSurvivors kernels and 6 is the final detectDetections kernel.}
+\subsubsection{Shared memory implementation}
+
+
+\begin{table}[htbp]
+\centering
+\begin{tabular}{| l | l |}
+\hline
+GPU & L2 Achieved occupancy [\%] \\
+\hline
+GTX 980 (Maxwell) & 62.1 \\
+\hline
+GTX 780Ti (Kepler) & 46.6 \\
+\hline
+Quadro K1000M (Kepler) & 47.5 \\
+\hline
+\end{tabular}
+\caption{Achieved occupancy. Shared memory implementation, $16 \times 16$ block size, $1920 \times 1080$ video.}
+\label{tab:ach-occupancy-shared}
+\end{table}
+
+Achieved occupancy for the shared memory implementation, summarized in the table \ref{tab:ach-occupancy-shared}, is generally low. Thread rearrangement in this case works similarly to the global or hybrid-shared methods, only it utilizes a single kernel and synchronization across blocks. This means, that even when the overall number of samples decreases, as long as there is a single thread within a warp running, that warp would stay active, and so there should be a slight increase in the number of active warps.
+
+An increase in occupancy can be seen for the Maxwell architecture. This is a result of a change mentioned in section \ref{TODO}, that Maxwell can have more active warps per multiprocessor (32 compared to 16 for Kepler), which helps in cases like this, where blocks with a small number of threads are run.
+
+As mentioned previously, at the end of section \ref{subsubsec:occ-global}, a proposed improvement would be to process future stages and utilize GPU in a better way.
+
+\section{Global memory store, load and atomic throughput}
+
+\subsection{Global memory implementation}
+
+The load and store global memory throughput and the atomic throughput all correlate with each other, because the main bottleneck here is actually the use of atomic operations before the global memory stores are processed, and so the store throughput is only as high as the atomic throughput.
+
+The $8 \times 8$ configuration has a lower overall achieved occupancy as shown in figure \ref{fig:occupancy-quadro} and the $32 \times 32$ on the other hand creates more conflicts when issuing atomic operations, this leads to the $16 \times 16$ being the best compromise between these three configurations. This is also shown in figure \ref{fig:occupancy-quadro}. The low atomic throughput for the kernels 4-6 is the result of a low number of samples and thus lower atomic operation. For kernel 3 it's also a result of longer detection time due to lower L2 hit rate mentioned in section \ref{subsec:l2-hit-rate-prof}.
+
+\begin{figure}[ht]
+\centering\begin{tikzpicture}
+  \begin{axis}
+  [
+	width=0.8\textwidth,
+	ylabel={Atomic throughput [MB/sec]},
+	xlabel={Kernel},
+    xtick=data,
+    ymode=log,   
+    nodes near coords={
+        \pgfmathprintnumber[precision=3]{\pgfplotspointmeta}
+    }
+  ]
+    \addplot [sharp plot, color=mred] coordinates {(1, 6692) (2, 280.762) (3, 2.984) (4, 5.365) (5, 6.576) (6, 2.436)};
+    \addplot [sharp plot, color=mblue] coordinates {(1, 8604) (2, 397.481) (3, 3.158) (4, 9.751) (5, 11.113) (6, 5.746)};
+    \addplot [sharp plot, color=mgreen] coordinates {(1, 6148) (2, 352.462) (3, 3.86) (4, 5.894) (5, 6.303) (6,	3.366)};
+  
+    \legend {$32 \times 32$, $16 \times 16$, $8 \times 8$}
+  \end{axis}
+\end{tikzpicture}
+	\caption{Atomic throughput on Quadro K1000M (Kepler) for the global memory method. Values on the X-axis enumerate kernels in the order, they are run. 1: detectSurvivorsInit, 2-5: detectSurvivors, 6: detectDetections.}
+	\label{fig:occupancy-quadro}
 \end{figure}
 
-\begin{figure}[h]
-	\label{fig:store-g-throughput}
-	\centering\includegraphics[width=0.85\textwidth]{fig/store_gthroughput_quadro.png}
-	\caption{Store global memory throughput on Quadro K1000M (Kepler) for the global memory method. The numbers 1-6 enumerate the kernels, where 1 is the detectSurvivorsInit kernel, 2-5 are detectSurvivors kernels.}
+The atomic operation bottleneck is also one of the reasons, why the global memory implementation cannot be used with high-end GPUs. Their increased computational capacity allows them to process more threads at a time, which results in more stalling caused by waiting for atomic operations and so this resource advantage isn't used to its maximum.
+
+\subsubsection{Shared memory atomic throughput}
+
+Maxwell architecture doesn't allow to measure atomic throughput and so L2 throughput for atomic requests was measured. As mentioned in \ref{TODO}, Maxwell architecture implements native shared memory atomic operations compared to the previous architectures (Kepler and Fermi), where shared memory atomic operations were implemented in a software fashion using lock-modify-unlock pattern.
+
+\begin{figure}[ht]
+\centering\begin{tikzpicture}
+\begin{axis}[
+	height=10cm,
+	ybar=0.1cm,
+	x=3.5cm,
+	bar width=0.6cm,
+	enlarge x limits={abs=2.5cm},
+    legend style={at={(0.5,-0.15)},
+    anchor=north,legend columns=-1},
+    ylabel={L2 throughput (atomic requests) [B/sec]},
+    xlabel={Block size [threads]},
+    symbolic x coords={8x8,16x16,32x32},
+    xtick=data,
+	nodes near coords={
+        \pgfmathprintnumber[fixed, precision=0]{\pgfplotspointmeta}
+    },
+    nodes near coords align={vertical},
+    ]
+\addplot [draw=none, fill=mblue] coordinates {(8x8, 1683607) (16x16, 2638143) (32x32, 731513)};
+
+\addplot [draw=none, fill=mred] coordinates {(8x8, 925513) (16x16, 1445978) (32x32, 498445)};
+
+\legend{GTX 980 (Maxwell), GTX 780Ti (Kepler)}
+\end{axis}
+\end{tikzpicture}
+	\caption{L2 throughput for atomic requests.}
+		\label{fig:l2-atomic-shared}
 \end{figure}
 
-\begin{figure}[h]
-	\label{fig:atomics-throughput}
-	\centering\includegraphics[width=0.85\textwidth]{fig/atomics_throughput_quadro.png}
-	\caption{Atomic throughput on Quadro K1000M (Kepler) for the global memory method. The numbers 1-6 enumerate the kernels, where 1 is the detectSurvivorsInit kernel, 2-5 are detectSurvivors kernels and 6 is the final detectDetections kernel.}
-\end{figure}
-
-Again there are two things to be considered here discussed in \ref{subsubsec:ach-occupancy}. The 8x8 has a lower occupancy and the 32x32 creates more conflicts when issuing atomic operations, this leads to 16x16 being the best compromise between the two.
-
-\clearpage
-
-\subsection{GTX 780Ti (Kepler)}
-
-% todo
-TODO (will be measured on 18/05/2014).
-
-\subsection{GTX 980 (Maxwell)}
-
-% todo
-TODO (will be measured on 18/05/2014).
+The shared implementation relies heavily on the use of shared memory atomic instructions to update a single location in memory, which turned out to be very expensive in case of the Kepler/Fermi architecture, but in case of the Maxwell architecture, it emphasized its advantages. The results in figure \ref{fig:l2-atomic-shared} show, that the performance on GTX 980 is almost $2\times$ that of GTX 780Ti for L2 atomic throughput.
 
 \chapter{Summary}
 
@@ -948,14 +1220,14 @@ The goal of this thesis was to design an application or a library for object det
 
 Different approaches to implement the detector were proposed, concentrating on the use of specific features of the GPU programming, to exploit the different bottlenecks of each method, and each on of them was thoroughly measured and profiled. The implementation itself then exploits the fact, that every GPU is very specific and can take advantage of a different feature of the NVidia CUDA Toolkit. As such, based on the GPU parameters, an optimal method for object detection can be run.
 
-The detector\footnote{Latest version is available at: \url{https://github.com/mmaci/vutbr-fit-object-detection}} can process both image datasets, independent on the image size and videos, outputting detections as regions of interest inside an image. It can also be used as a part of another application, which uses object detection and it already was, as mentioned in \ref{subsec:face-tracking}. The application is specifically optimized not only for top-end NVidia GPU's, but also for the average or the low-end ones.
+The detector\footnote{Latest version is available at: \url{https://github.com/mmaci/vutbr-fit-object-detection}} can process both image datasets, independent on the image size and videos, outputting detections as regions of interest inside an image. It can also be used as a part of another application, which uses object detection and it already was, as mentioned in \ref{subsec:face-tracking}. The application is specifically optimized not only for top-end NVidia GPUs, but also for the average or the low-end ones.
 
 \section{Proposed improvements}
 
 Throughout the thesis different methods how to optimize the detector were researched. Some of them were not yet implemented and measured. The ideas on which to focus in the future are the following:
 
 \begin{itemize}
-	\item \textbf{Measurements and profiling on more GPU's}. It was clear, that for the high-end GPU's the best results were obtained by the shared memory implementation and for the opposite extreme - a single multiprocessor GPU, the best results were measured for the global memory implementation. The hybrid-shared memory method didn't perform badly, but there were better tools for the job. GPU's such as the GTX 960, which has 8 streaming multiprocessors weren't available and it might be the case, that a middle way between the two optimal implementations might work the best.
+	\item \textbf{Measurements and profiling on more GPUs}. It was clear, that for the high-end GPUsthe best results were obtained by the shared memory implementation and for the opposite extreme - a single multiprocessor GPU, the best results were measured for the global memory implementation. The hybrid-shared memory method didn't perform badly, but there were better tools for the job. GPUs such as the GTX 960, which has 8 streaming multiprocessors weren't available and it might be the case, that a middle way between the two optimal implementations might work the best.
 	\item \textbf{Processing more stages.} Even on a GPU with a single streaming multiprocessor, the occupancy fell below 50\% for most of the stages and GPU resources were left unused. These resources might be used to process future stages and use them in a similar fashion as a cache. A way of mapping such stages, which were preprocessed to the ones being processed has to be proposed.
 	\item \textbf{Prefix-sum.} The prefix-sum method should be researched more, if it can be optimized to discard unused threads throughout the computation.
 	\item \textbf{Dataset initialization overhead.} When processing a dataset, GPU memory is allocated and freed specifically for every image. This brings a lot of overhead to the whole process, an overhead almost as large as the detection itself. A single texture can be allocated to copy the images to. The size of such has to be discussed, as it will stay the same throughout processing the whole dataset.

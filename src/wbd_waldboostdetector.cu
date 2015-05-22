@@ -464,29 +464,73 @@ namespace wbd
 					GPU_CHECK_ERROR(cudaEventRecord(start_detection));
 				}
 
+                uint32 survivorCount;
+                if (_opt & OPT_MEASURE_SURVIVORS)
+                {
+                    cudaMemcpy(&survivorCount, _devSurvivorCount[0], sizeof(uint32), cudaMemcpyDeviceToHost);
+                    if (_opt & OPT_VERBOSE)
+                        std::cout << LIBHEADER << "Initial samples: " << _pyramid.canvasImageSize << std::endl;
+                }
+
+
                 GPU_CHECK_ERROR(cudaMemset(_devSurvivorCount[0], 0x00, sizeof(uint32)));
 				gpu::detection::atomicglobal::detectSurvivorsInit<<<grid, _kernelBlockConfig[KERTYPE_DETECTION]>>>(_finalPyramidTexture, _alphasTexture, _pyramid.canvasWidth, _pyramid.canvasHeight, _devSurvivors[0], _devSurvivorCount[0], 1);
 				GPU_CHECK_ERROR(cudaPeekAtLastError());
+
+                if (_opt & OPT_MEASURE_SURVIVORS)
+                { 
+                    cudaMemcpy(&survivorCount, _devSurvivorCount[0], sizeof(uint32), cudaMemcpyDeviceToHost);
+                    if (_opt & OPT_VERBOSE)
+                        std::cout << LIBHEADER << "Surviving samples[0]: " << survivorCount << std::endl;
+                }
 
                 GPU_CHECK_ERROR(cudaMemset(_devSurvivorCount[1], 0x00, sizeof(uint32)));
 				gpu::detection::atomicglobal::detectSurvivors<<<grid, _kernelBlockConfig[KERTYPE_DETECTION]>>>(_finalPyramidTexture, _alphasTexture, _devSurvivors[0], _devSurvivors[1], _devSurvivorCount[0], _devSurvivorCount[1], 1, 8);
 				GPU_CHECK_ERROR(cudaPeekAtLastError());
 
+                if (_opt & OPT_MEASURE_SURVIVORS)
+                {
+                    cudaMemcpy(&survivorCount, _devSurvivorCount[1], sizeof(uint32), cudaMemcpyDeviceToHost);
+                    if (_opt & OPT_VERBOSE)
+                        std::cout << LIBHEADER << "Surviving samples[1]: " << survivorCount << std::endl;
+                }
+
                 GPU_CHECK_ERROR(cudaMemset(_devSurvivorCount[0], 0x00, sizeof(uint32)));
 				gpu::detection::atomicglobal::detectSurvivors<<<grid, _kernelBlockConfig[KERTYPE_DETECTION]>>>(_finalPyramidTexture, _alphasTexture, _devSurvivors[1], _devSurvivors[0], _devSurvivorCount[1], _devSurvivorCount[0], 8, 64);
 				GPU_CHECK_ERROR(cudaPeekAtLastError());
+
+                if (_opt & OPT_MEASURE_SURVIVORS)
+                {
+                    cudaMemcpy(&survivorCount, _devSurvivorCount[0], sizeof(uint32), cudaMemcpyDeviceToHost);
+                    if (_opt & OPT_VERBOSE)
+                        std::cout << LIBHEADER << "Surviving samples[2]: " << survivorCount << std::endl;
+                }
 
                 GPU_CHECK_ERROR(cudaMemset(_devSurvivorCount[1], 0x00, sizeof(uint32)));
 				gpu::detection::atomicglobal::detectSurvivors<<<grid, _kernelBlockConfig[KERTYPE_DETECTION]>>>(_finalPyramidTexture, _alphasTexture, _devSurvivors[0], _devSurvivors[1], _devSurvivorCount[0], _devSurvivorCount[1], 64, 256);
 				GPU_CHECK_ERROR(cudaPeekAtLastError());
 
+                if (_opt & OPT_MEASURE_SURVIVORS)
+                {
+                    cudaMemcpy(&survivorCount, _devSurvivorCount[1], sizeof(uint32), cudaMemcpyDeviceToHost);
+                    if (_opt & OPT_VERBOSE)
+                        std::cout << LIBHEADER << "Surviving samples[3]: " << survivorCount << std::endl;
+                }
+
                 GPU_CHECK_ERROR(cudaMemset(_devSurvivorCount[0], 0x00, sizeof(uint32)));
 				gpu::detection::atomicglobal::detectSurvivors<<<grid, _kernelBlockConfig[KERTYPE_DETECTION]>>>(_finalPyramidTexture, _alphasTexture, _devSurvivors[1], _devSurvivors[0], _devSurvivorCount[1], _devSurvivorCount[0], 256, 512);
 				GPU_CHECK_ERROR(cudaPeekAtLastError());
 
+                if (_opt & OPT_MEASURE_SURVIVORS)
+                {
+                    cudaMemcpy(&survivorCount, _devSurvivorCount[0], sizeof(uint32), cudaMemcpyDeviceToHost);
+                    if (_opt & OPT_VERBOSE)
+                        std::cout << LIBHEADER << "Surviving samples[4]: " << survivorCount << std::endl;
+                }
+
                 GPU_CHECK_ERROR(cudaMemset(_devDetectionCount, 0x00, sizeof(uint32)));
 				gpu::detection::atomicglobal::detectDetections<<<grid, _kernelBlockConfig[KERTYPE_DETECTION]>>>(_finalPyramidTexture, _alphasTexture, _devSurvivors[0], _devSurvivorCount[0], _devDetections, _devDetectionCount, 512);
-				GPU_CHECK_ERROR(cudaPeekAtLastError());
+				GPU_CHECK_ERROR(cudaPeekAtLastError());                
 
 				if (_opt & OPT_TIMER)
 				{
