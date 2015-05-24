@@ -196,43 +196,45 @@ int main(int argc, char** argv)
 	for (int i = 1; i < argc; ++i)
 	{
 		// input dataset
-		if (std::string(argv[i]) == "-id" && i + 1 < argc) {
+        if ((std::string(argv[i]) == "-D" || std::string(argv[i]) == "--dataset") && i + 1 < argc) {
 			mode = wbd::INPUT_IMAGE_DATASET;
 			input = argv[++i];
 		}
 		// input video
-		else if (std::string(argv[i]) == "-iv" && i + 1 < argc) {
+        else if ((std::string(argv[i]) == "-V" || std::string(argv[i]) == "--video") && i + 1 < argc) {
 			mode = wbd::INPUT_VIDEO;
 			input = argv[++i];
 		}
 		// output csv
-		else if (std::string(argv[i]) == "-oc" && i + 1 < argc) {
+        else if ((std::string(argv[i]) == "-c" || std::string(argv[i]) == "--csv") && i + 1 < argc) {
 			settings.outputFilename = argv[++i];
 			opts |= wbd::OPT_OUTPUT_CSV;
 		}
 		// verbose
-		else if (std::string(argv[i]) == "-v")			
+        else if (std::string(argv[i]) == "-v" || std::string(argv[i]) == "--verbose")
 			opts |= wbd::OPT_VERBOSE;
-		// visual output
-		else if (std::string(argv[i]) == "-t")		
+		// timer enabled
+        else if (std::string(argv[i]) == "-t" || std::string(argv[i]) == "--timer")
 			opts |= wbd::OPT_TIMER;
 		// visual output
-        else if (std::string(argv[i]) == "-vo")
+        else if (std::string(argv[i]) == "-o" || std::string(argv[i]) == "--visualoutput")
             opts |= wbd::OPT_VISUAL_OUTPUT;
-        else if (std::string(argv[i]) == "-ms")
+        else if (std::string(argv[i]) == "-s" || std::string(argv[i]) == "--survivors")
             opts |= wbd::OPT_MEASURE_SURVIVORS;
 		// visual debug
-		else if (std::string(argv[i]) == "-vd")
+        else if (std::string(argv[i]) == "-d" || std::string(argv[i]) == "--visualdebug")
 			opts |= (wbd::OPT_VISUAL_DEBUG|wbd::OPT_TIMER);
 		// block size
-		else if (std::string(argv[i]) == "-bs" && i + 1 < argc)
+        else if ((std::string(argv[i]) == "-b" || std::string(argv[i]) == "--blocksize") && i + 1 < argc)
 			settings.blockSize = atoi(argv[++i]);
 		// max frames processed
-		else if (std::string(argv[i]) == "-lf" && i + 1 < argc)
+        else if ((std::string(argv[i]) == "-l" || std::string(argv[i]) == "--limitframes") && i + 1 < argc)
 		{ 
 			settings.maxFrames = atoi(argv[++i]);
 			opts |= wbd::OPT_LIMIT_FRAMES;
 		}
+        // @todo remove this
+        // DEPRACATRED
 		// pyramid generation
 		else if (std::string(argv[i]) == "-pg" && i + 1 < argc)
 		{
@@ -245,27 +247,29 @@ int main(int argc, char** argv)
 				return EXIT_FAILURE;
 			}
 		}
-		else if (std::string(argv[i]) == "-dm" && i + 1 < argc)
+        else if ((std::string(argv[i]) == "-m" || std::string(argv[i]) == "--detectionmode") && i + 1 < argc)
 		{
 			std::string str = argv[++i];
-			if (str == "aglobal")
+			if (str == "global")
 				settings.detectionMode = wbd::DET_ATOMIC_GLOBAL;
-			else if (str == "ashared")
+			else if (str == "shared")
 				settings.detectionMode = wbd::DET_ATOMIC_SHARED;
             else if (str == "prefixsum")
                 settings.detectionMode = wbd::DET_PREFIXSUM;
-            else if (str == "hybridsg")
+            else if (str == "hybrid")
                 settings.detectionMode = wbd::DET_HYBRIG_SG;
 			else if (str == "cpu")
 				settings.detectionMode = wbd::DET_CPU;
 			else
 			{
-				std::cerr << LIBHEADER << "Option -dm (detection mode) has only the following options available: 'aglobal', 'ashared' and 'prefixsum'." << std::endl;
+				std::cerr << LIBHEADER << "Option -d --detectionmode (detection mode) has only the following options available: 'global', 'shared', 'prefixsum', 'hybrid' and 'cpu'." << std::endl;
 				return EXIT_FAILURE;
 			}
 		}
+        // @todo remove this
+        // DEPRECATED
 		// pyramid type
-		else if (std::string(argv[i]) == "-pt" && i + 1 < argc)
+        else if ((std::string(argv[i]) == "-p" || std::string(argv[i]) == "--pyramid") && i + 1 < argc)
 		{
 			std::string str = argv[++i];
 			if (str == "horizontal")
@@ -274,12 +278,12 @@ int main(int argc, char** argv)
 				settings.pyType = wbd::PYTYPE_OPTIMIZED;
 			else
 			{
-				std::cerr << LIBHEADER << "Option -pt (pyramid type) has two options available: 'horizontal' and 'optimized'." << std::endl;
+				std::cerr << LIBHEADER << "Option -p --pyramid (pyramid type) has only the following options available: 'horizontal' and 'optimized'." << std::endl;
 				return EXIT_FAILURE;
 			}
 		}
 		else {
-			std::cerr << "Usage: " << argv[0] << "-id [input dataset] or -iv [input video]" << std::endl;
+            std::cerr << "An error occured during processing parameters." << std::endl;
 			return EXIT_FAILURE;
 		}
 	}
