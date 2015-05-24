@@ -3,10 +3,10 @@
 
 With high demand for real-time image processing, computer vision applications and a need for fast calculations in the scientific world, general-purpose computing on GPU (Graphics Processor Units), also known as the GPGPU, has become a popular programming model to accelerate programs traditionally coded on the CPU (Central Processing Unit).
 
-Until the last decade or so, when technologies for GPGPU became available, the GPU was used mostly to render data given to it by the CPU. This has changed in a way, that the GPU, with its massive parallel capabilities, isn't used only for displaying, but also for computation. The approach to this is to transfer data bidirectionally between the CPU and the GPU, which on one hand brings the overhead of copying the data, but on the other enables to do the calculations many times faster due to the architecture of the GPU. As shown on \ref{fig:cpu-gpu} many more transistors are dedicated to data processing instead of cache or control, which leads to a higher memory bandwidth.
+Until the last decade or so, when technologies for GPGPU became available, the GPU was used mostly to render data given to it by the CPU. This has changed in a way, that the GPU, with its massive parallel capabilities, isn't used only for displaying, but also for computation. The approach to this is to transfer data bidirectionally between the CPU and the GPU, which on one hand brings the overhead of copying the data, but on the other, it enables to do the calculations much faster due to the architecture of the GPU. As shown in figure \ref{fig:cpu-gpu}, many more transistors are dedicated to data processing instead of cache or control, which leads to a higher memory bandwidth.
 
 \begin{center}
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering\includegraphics[height=5cm]{fig/cpu-gpu.png}
 	\caption{CPU and GPU architecture comparison (taken from \cite{cuda-toolkit-docs})}
 	\label{fig:cpu-gpu}
@@ -16,7 +16,7 @@ Until the last decade or so, when technologies for GPGPU became available, the G
 GPUs are also designed with floating-point calculations in mind, which can be taken advantage of, in applications such as object detection, where most of the math is done using single-precision floating-point arithmetic.
 
 \begin{center}
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering\includegraphics[height=10cm]{fig/floating-point-operations-per-second.png}
 	\caption{Floating-Point operations per second for the CPU and GPU (taken from \cite{cuda-toolkit-docs})}
 \end{figure}
@@ -72,7 +72,7 @@ CUDA uses a language called CUDA C, which is an extension to C and uses NVCC com
 The code is executed in a SIMT (Single Instruction, Multiple Thread) fashion, which is very similar to the commonly known SIMD (Single Instruction, Multiple Data) architecture. In reality the code is executed in groups of 32 threads, referred to as warps and a single Kepler or Maxwell multiprocessor supports up to 64 active warps. The important thing to mention about warps is, that when a single thread within a warp is active, the whole warp stays active and so performance-wise it is important to optimize the code to occupy warps as much as possible.
 
 \begin{center}
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering\includegraphics[height=5.5cm]{fig/grid-of-thread-blocks.png}
 	\caption{A grid of blocks and threads run by a kernel (taken from \cite{cuda-toolkit-docs})}
 \end{figure}
@@ -82,7 +82,7 @@ Kernel configuration parameters can be passed as integers or \verb|dim3| structu
 
 Example \ref{code:cuda-example} shows how to add 2 arrays in parallel using N threads and 1 block.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \begin{verbatim}
 // Kernel definition
 __global__ void VecAdd(float* A, float* B, float* C)
@@ -104,17 +104,15 @@ int main()
 \label{code:cuda-example}
 \end{figure}
 
-\FloatBarrier
-
 \subsubsection{Scheduling}\label{subsubsec:scheduling}
 
 After a kernel is launched, the grid is organized in blocks, grids and threads, which are described in section \ref{subsubsec:thread-hierarchy}. Depending on the architecture, blocks can have only up to certain number of warps and threads. For every architecture, these values are summarized in table \ref{tab:compute-capability}.
 
 Blocks are assigned between multiprocessors, where for modern GPUs, their count ranges between a single multiprocessor for average GPUs and 16 for the high-end. Threads within a block are then divided into warps. Warp execution is controller by a warp scheduler using a prioritized scheduling policy.
 
-All threads within a warp execute the same instruction at the same time. In case the instruction is not active for the given thread, an active mask is used and as soon as all the threads within the warp finish or are stalled by synchronization, a new warp is assigned.
+All threads within a warp execute the same instruction at the same time. In case the instruction is not active for the given thread, an active mask is used and as soon as all the threads within the warp finish or are stalled by synchronization, a new warp is assigned. This is shown in figure \ref{fig:scheduling}, where as soon as an instruction finishes, another instruction, processed by a different warp, is assigned.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\begin{center}
 	\includegraphics[width=0.4\textwidth]{fig/scheduling.eps}
 	\caption{As soon as an instruction has its operands ready, it is scheduled by the warp scheduler for execution.}
@@ -161,7 +159,7 @@ Constant memory & \verb|__constant__| & Grid & Read-only & Application \\
 \paragraph{Local memory} is a part of global memory, where everything which doesn't fit into registers is stored. For devices with Compute Capability 2.x there are 32768 32-bit registers.
 
 \begin{center}
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering\includegraphics[height=12cm]{fig/memory-hierarchy.png}
 	\caption{Memory hierarchy (\cite{cuda-toolkit-docs})}
 \end{figure}
@@ -180,16 +178,16 @@ Using global memory is generally slow, but it is unavoidable to use, because it 
 \end{figure}
 \end{center}
 
-GPU can access memory in 32-, 64- or 128-byte transactions. Therefore, in case the memory access is aligned, multiple banks can be read or written to in a single transaction. On the other hand when it is not, more transactions have to be initialized, making the memory bandwidth much lower. Examples of coalesced (top) \ref{code:coalesced} and uncoalesced (bottom) \ref{code:uncoalesced} access with stride of 4 bytes are shown in \ref{fig:coalescing}.
+GPU can access memory in 32-, 64- or 128-byte transactions. Therefore, in case the memory access is aligned, multiple banks can be read or written to in a single transaction. On the other hand when it is not, more transactions have to be initialized, making the memory bandwidth much lower. Examples of coalesced (top) \ref{code:coalesced} and uncoalesced (bottom) \ref{code:uncoalesced} access with stride of 4 bytes are shown in figure \ref{fig:coalescing}.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \begin{verbatim}
 tmp = globalmem[blockIdx.x * blockDim.x + threadIdx.x];
 \end{verbatim}
 \caption{Example of coalesced global memory load.}\label{code:coalesced}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \begin{verbatim}
 tmp = globalmem[blockIdx.x * blockDim.x + threadIdx.x + stride];
 \end{verbatim}
@@ -202,15 +200,13 @@ It is a common optimization technique, to use shared memory in cases, where stri
 
 Threads cannot be synchronized across the whole grid, but only across a block. Therefore, if a result of a certain computation is needed by all the threads, a whole new kernel has to be launched. Synchronization across a block is done by the \verb|__syncthreads| call. When a thread reaches this call, it waits idly until all the threads within the block also reach the call.
 
-In certain scenarios, it might take a lot longer for a certain thread to process its code, then for another. An example is the prefix-sum, as described later on in \ref{sec:prefixsum}, where the number of iterations of a for-cycle depends on the thread ID. The problem is, that after the for-cycle finishes, threads must be synchronized. Most of the threads in this case are stalled and cannot be freed until all of them finish to run another warp.
+In certain scenarios, it might take a lot longer for a certain thread to process its code, then for another. An example is the prefix-sum, as described later on in section \ref{sec:impl-prefixsum}, where the number of iterations of a for-cycle depends on the thread ID. The problem is, that after the for-cycle finishes, threads must be synchronized. Most of the threads in this case are stalled and cannot be freed until all of them finish to run another warp.
 
 When writing a kernel, it is important to keep this in mind and try to minimize the use of \verb|__syncthreads| calls, where this would lead to stalling most of the threads.
 
-\FloatBarrier
-
 \subsection{Compute capability}\label{subsec:cuda-compute-capability}
 
-NVidia GPUs vary not only by their parameters, but also by their architecture. There are 4 architectures supporting CUDA: Tesla (November 2009), Fermi (March 2010), Kepler (March 2012) and Maxwell (March 2014). Another way to describe the architecture is its compute capability, which is 1.x for Tesla, 2.x for Fermi, 3.x for Kepler and 5.x for Maxwell. The higher the compute capability, the more features such GPU supports, also all of the compute capabilities have different parameters summarized in table \ref{tab:compute-capability}.
+NVidia GPUs vary not only by their parameters, but also by their architecture. There are 4 architectures supporting CUDA: Tesla (November 2009) \cite{lindholm2008nvidia}, Fermi (March 2010) \cite{fermi-whitepaper}, Kepler (March 2012) \cite{kepler-whitepaper} and Maxwell (March 2014) \cite{maxwell-whitepaper}. Another way to describe the architecture is its compute capability, which is 1.x for Tesla, 2.x for Fermi, 3.x for Kepler and 5.x for Maxwell. The higher the compute capability, the more features such GPU supports, also all of the compute capabilities have different parameters summarized in table \ref{tab:compute-capability}.
 
 \begin{table}[htbp]
 \begin{center}
@@ -252,9 +248,7 @@ Shared memory, described in section \ref{subsec:memory}, is increased from 64 KB
 
 The size of L2 cache is increased $4 \times$ from 512 KB to 2048 KB. This allows for performance benefits for bandwidth-bound applications such as image processing.
 
-\subsubsection{Shared memory atomic operations}
-
-\FloatBarrier
+\subsubsection{Shared memory atomic operations}\label{subsubsec:maxwell-shared-memory}
 
 Maxwell implements native shared memory atomic operations for 32-bit integers and native shared memory 32-bit and 64-bit compare-and-swap (CAS), which can be used to implement other atomic functions with reduced overhead.
 
@@ -286,63 +280,41 @@ The new Maxwell multiprocessor is called SMM (multiprocessor for Kepler was call
 \begin{center}
 \begin{figure}[ht]
 	\centering\includegraphics[width=0.55\textwidth]{fig/smm.png}
-	\caption{Maxwell's multiprocessor, SMM.	}\label{fig:smm}
+	\caption{Maxwell's multiprocessor, SMM.	Taken from \cite{maxwell-whitepaper}.}\label{fig:smm}
 \end{figure}
 \end{center}
 
-\chapter{Object detection}
+\chapter{Object detection} \label{ch:object-detection}
 
-\section{Introduction}
+Object detection is the process of localizing an object in input image data. The type of object depends on which data the detector was trained for. Typical applications are human faces, pedestrians, cars, traffic signs and others. A more detailed description of such use cases is discussed in section \ref{sec:use-cases}.
 
-Object detection is a computer technology with the capability of localizing an object in input image data. The type of object depends on which data the detector was trained for. Typical applications are human faces, pedestrians, cars, traffic signs and others.
+In this chapter, we will briefly discuss different approaches to object detection and in more detail, the implemented method, which is WaldBoost, a meta-algorithm used to train classifiers and classify samples.
 
-Detector used by the implementation is a frontal-face human detector, which tries to identify a human face within an image. The implementation is therefore optimized for human faces, which means, that the software can be used with other detectors, but it might affect its performance due to specific optimizations. Combined with the capabilities of a GPU, the aim is to produce an object detector capable of real-time object detection on videos or processing large amounts of images.
+\section{Approaches to object detection} \label{sec:approaches}
 
-\section{Features}
+Objects are mostly classified using a features, which were first introduced by Viola in \cite{Viola93feature-basedrecognition}. To explain them more thoroughly, let's take a face as an example. Despite the differences such as lighting, color of eyes or skin or the length of hair, we as humans, can identify we are looking at another human face based on certain similarities. For example a pair of eyes, a nose and a pair of ears in their corresponding positions. These similarities can be called a set of features. To a computer, on the other hand, they are still too abstract and cannot be enumerated, and so a lot of different feature methods were devised.
 
-There are several methods how to access the topic of object detection. In the following sections we will discuss feature-based object detection.
+Classifying an object by a feature-based method can be approached using different strategies. One such classification of object detection was summarized by Yang, Kriegman, Ahuja \cite{Yang02detectingfaces}.
 
-Let's take a frontal human face as an example. Despite the differences such as lighting, color of eyes or skin or the length of hair, we as humans, can identify we are looking at a human face based on similarities. For example a pair of eyes, a nose, a pair of ears and so on. These similarities can be called features, but to a computer, they are still too abstract and cannot be enumerated, and so a lot of different feature methods were devised.
+\paragraph{Knowledge-based methods.} These methods encode knowledge of a certain object and capture relationships between its features. For a face this means capturing relationships between the positions of eyes, mouth, nose or ears.
 
-\subsection{Local Binary Pattern}
+\paragraph{Feature invariant approaches.} These algorithms try to find similarities which don't depend on lighting, viewpoint or pose. 
 
-One of the feature methods to describe an image are local binary patterns (LBP). They are based on encoding local intensities of an image with 8-bit codes. In their elementary form, they take a 3x3 area as an input and compare intensity values of all the pixels with the central one.
+\paragraph{Template matching.} Patterns to describe an object as a whole are stored. Correlations between the input image and the patterns are then computed to detect the object.
 
-\[
- compare(p_{middle},p_{i}) =
-  \begin{cases}
-   1 & \text{if } p_{i} \geq p_{middle} \\
-   0 & \text{else}
-  \end{cases}
-\]
+\paragraph{Appearance-based methods.} Models are learned from a set of training images, which capture a variability of the object. Such set of training images contains positive and negative samples.
 
-LBP value is then evaluated as follows:
+\section{Appearance-based methods} \label{sec:appeareance-based}
 
-\begin{equation}
-lbp(p_{middle})=\sum_{i=0}^{7} 2^{i}
-compare(p_{middle},p_{i})
-\end{equation}
+The most exploited approach to object detection and mainly face detection is the appearance-based. In general, these rely on methods from machine learning or statistical analysis to develop a model for the sought object. Such methods can be characterized from a statistical point of view, where a sample from an image is classified by a Bayesian classification as an object or a non-object. In reality more advanced methods are used.
 
+\section{AdaBoost}\label{sec:adaboost}
 
-\begin{center}
-\begin{figure}[h]
-	\centering\includegraphics[width=12cm]{fig/lbp.eps}
-	\caption{LBP feature}
-\end{figure}
-\end{center}
+One such algorithm to analyze a sample is AdaBoost, an algorithm originally introduced in 1995 by Viola, Jones \cite{Viola01rapidobject}. The main idea is combining several weak classifiers into a single strong classifier. This means, that every weak classifier decides to which class the given sample belongs to. In object detection this is usually a yes or no decision, and after processing all of the weak classifiers a final decision is made, also a called a strong classifier. The strong classifier is evaluated as sum of decisions made by the weak classifiers.
 
-LBPs can be extended to be used not only for single pixels and thus 3x3 areas, but also for larger areas. When comparing larger areas, the sum of the areas is compared instead of single pixel values. For example a 2x2 LBP would sum up areas of 4 pixels and compare them with the sum in the middle.
+\section{WaldBoost}\label{sec:waldboost}
 
-LBP features are invariant to lighting changes, because even though the image is lighter or darker, the sign of intensity differences stays the same. On the other hand they are not invariant to geometrical transformations such as scale or rotation.
-
-As mentioned later on in section \ref{sec:memory-organization}, in reality the sum of the areas doesn't have to be used and an average can be used instead.
-
-\section{Waldboost}
-\label{sec:waldboost}
-
-Each LBP feature represents a single weak classifier, which decides whether the given sample corresponds to the sought object or not. On the other hand only one feature cannot describe the whole face, so a meta-algorithm to process a series of such weak classifiers is needed, combining them in a single strong classifier.
-
-One such algorithm is WaldBoost, which combines AdaBoost and Wald's Sequential Propability Ratio Test (SPRT). SPRT is a strategy to determine what class a sample belongs to, based on a series of measurements.
+Another algorithm and one, which we will discuss in more detail is WaldBoost, because it is used for the implementation. WaldBoost is an algorithm, which combines AdaBoost and Wald's Sequential Propability Ratio Test (SPRT). SPRT is a strategy to determine what class a sample belongs to, based on a series of measurements. It's main advantage over AdaBoost, which was briefly explained in section \ref{sec:adaboost} is, that it doesn't have to process all of the weak classifiers, but can make a decision throughout the process.
 
 \[
  SPRT =
@@ -363,11 +335,11 @@ R_{m}=\frac{p(x_{1}, ..., x_{m}|y=-1)}{p(x_{1}, ..., x_{m}|y=+1)}
 A=\frac{1-\beta}{\alpha}, B=\frac{\beta}{1-\alpha}
 \end{equation}
 
-As mentioned in \cite{sochman-matas-waldboost} with face detection in mind, the positive rate $\beta$ can be set to 0 and the required false negative rate $\alpha$ to a small constant. As such the equations can be simplified to
+As mentioned in \cite{sochman2005waldboost} with face detection in mind, the positive rate $\beta$ can be set to 0 and the required false negative rate $\alpha$ to a small constant. As such the equations can be simplified to
 
 \begin{equation}
 A=\frac{1-0}{\alpha}=\frac{1}{\alpha}, B=\frac{0}{1-\alpha}=0
-\end{equation}
+\end{equation}\label{eq:const-a}
 
 $R_{m}$ is always positive and therefore the algorithm will only classify the sample as a face when it finishes its training cycle or discard it as a background when the ratio gets greater than the given constant A. Therefore the whole strategy can be simplified to the following.
 
@@ -379,69 +351,141 @@ $R_{m}$ is always positive and therefore the algorithm will only classify the sa
   \end{cases}
 \]
 
-\section{Uses cases of object detection}
+\section{WaldBoost as an object detector}
+
+Now we have an idea of how AdaBoost introduced in section \ref{sec:adaboost} and mainly WaldBoost explained in section \ref{sec:waldboost} work, we may explain this in terms of object detection.
+
+The detector scans an image using a scanning window, usually the size of $24 \times 24$ or $26 \times 26$ pixels, for every possible location and searches for the object. Such scanned region of interest is called a sample and to make a decision, whether it's the given object or not, it is processed by a strong classifier (produced by the WaldBoost algorithm).
+
+The algorithm processes weak classifiers and for each one of them compares them to the constant $A$ mentioned in equation \ref{eq:const-a}. Such weak classifiers are trained based on a given method such as LBP, LRD and so on (these methods are covered later on in section \ref{sec:app-image-features}.
+
+After processing all of the weak classifiers, the sample is classified as an object or gets discarded throughout the process. A more detailed explanation is given for the implementation in section \ref{sec:detector}.
+
+\section{Image features}\label{sec:app-image-features}
+
+What we haven't discussed yet is how these image features, which are statistically processed are described. A method of extracting such features from a texture or an image has to be devised. Fortunately, there are many such methods, where the choice heavily affects the performance of the detector. Examples of such features are summarized below.
+
+\begin{itemize}
+	\item Haar-like features \cite{Viola01rapidobject}
+	\item Local Binary Patterns \cite{Ojala02multiresolutiongrayscale}
+	\item Local Rank Differences \cite{herout2008impl}
+	\item Local Rank Patterns \cite{Hradis08localrank}
+\end{itemize}
+
+\subsection{Haar-like features}
+
+A method originally used by Viola and Jones \cite{Viola01rapidobject} in their object detection framework. Haar-like features are described in figure \ref{fig:haar}, where the sum of the pixels in the black area is subtracted from the sum of the pixels in the white area. The calculation can be accelerated by using integral images, which store the image as already precalculated sums.
+
+\begin{center}
+\begin{figure}[ht]
+	\centering\includegraphics[width=0.5\textwidth]{fig/haar.eps}
+	\caption{Haar-like features. (a) Edge feature (b) Line feature (c) Four-rectangle feature.}
+	\label{fig:haar}
+\end{figure}
+\end{center}
+
+\subsection{Local Binary Pattern}
+
+Another method to describe image features, which is used in the implementation, are Local Binary Patterns (LBP) \cite{Ojala02multiresolutiongrayscale}. They are based on encoding local intensities of an image with 8-bit codes. In their elementary form, they take a $3 \times 3$ area as an input and compare intensity values of all the pixels with the central one as shown in figure \ref{fig:lbp}. Mathematically LBP evaluation is summarized below.
+
+\begin{equation}
+ compare(p_{middle},p_{i}) =
+  \begin{cases}
+   1 & \text{if } p_{i} \geq p_{middle} \\
+   0 & \text{else}
+  \end{cases}
+\end{equation}
+
+\begin{equation}
+lbp(p_{middle})=\sum_{i=0}^{7} 2^{i}
+compare(p_{middle},p_{i})
+\end{equation}
+
+\begin{center}
+\begin{figure}[ht]
+	\centering\includegraphics[width=12cm]{fig/lbp.eps}
+	\caption{Evaluation of the LBP feature.}
+	\label{fig:lbp}
+\end{figure}
+\end{center}
+
+LBPs can be extended to be used not only for single pixels and thus 3x3 areas, but also for larger areas. When comparing larger areas, the sum of the areas is compared instead of single pixel values. For example a 2x2 LBP would sum up areas of 4 pixels and compare them with the sum in the middle.
+
+LBP features are invariant to lighting changes, because even though the image is lighter or darker, the sign of intensity differences stays the same. On the other hand they are not invariant to geometrical transformations such as scale or rotation.
+
+As mentioned later on in section \ref{sec:memory-organization}, in reality the sum of the areas doesn't have to be used and an average can be used instead. This is then exploited on the GPU using texture memory.
+
+\section{Uses cases of object detection}\label{sec:use-cases}
 
 Object detection isn't only used on its own, but also is a part of use cases. These range from uses in security surveillance, to traffic analysis or biometrics. A short summary of such applications is given below.
 
-\subsection{Face tracking and recognition}\label{subsec:face-tracking}
+\subsection{Face tracking and recognition}\label{subsec:uc-face-tracking}
 
 In order to recognize a face and track it afterwards, it has to be detected at first. Recognition is done usually by comparing the detected region of interest with a reference and deciding whether it's similar enough. This can be done by different techniques such as comparing image histograms. Face tracking is a similar use case, but for a video, which compares detections in consecutive frames.
 
-\subsection{Biometrics}
+\subsection{Biometrics}\label{subsec:uc-biometrics}
 
-Biometrics are metrics describing human characteristics. Examples can be an iris, retina, scent, fingerprints, palm veins or a face. They are used mainly for authentication and as such they have to be detected first.
+An extension to face recognition is the use of biometrics. These are metrics describing human characteristics. Examples can be an iris, retina, fingerprints, palm veins or a face. They are used mainly for authentication, and as such these metrics have to be detected first. Apart from authentication, they these are starting to be used in modern vehicle systems, which detect whether a person is tired or sleeping and try to wake him or her up.
 
-\chapter{Analysis}
+\subsection{Traffic analysis}\label{subsec:uc-traffic-analysis}
 
-In this chapter, research done on the topic of WaldBoost object detection, in the previous years, is summarized. Also tools to choose from for the implementation and the idea how to implement the detector, are discussed. It does now however cover implementations specifics. These are discussed later on in \ref{ch:implementation}.
+A very important application of object detection is traffic analysis. A trivial use case is vehicle speed measurement, where in order to measure the car's speed, it has to be detected in consecutive frames of a video, after which the speed can be calculated based on framerate and distance traveled.
 
-The idea of implementing a WaldBoost object detector with the use of LBP features on a parallel platform is not a new one and mainly for face detection, it is well researched. On the other hand, since it was first proposed, both OpenCL and CUDA have undergone many changes and as such optimizations and different approaches to the implementation can be discussed. The main focus of this thesis is to produce an implementation, which is optimized for different GPUs and to research how different uses of GPU memory and optimization techniques affect the detector.
+In traffic analysis, object detection actually has many more uses. Traffic congestion can be analyzed and afterwards data sent to inform traffic control or an intersection can be monitored in order to analyze how dangerous it is by measuring the angle or speed at which vehicles enter it.
 
-The implementation of a WaldBoost detector on a CPU, where every pixel is processed sequentially isn't complicated. The general idea, as explained in \ref{sec:waldboost}, is that a sample, in our case a pixel, is processed by a series of weak classifiers, in the implementation called stages. These stages accumulate a response, always adding or subtracting a value based on how the LBP feature is evaluated. In case the accumulated response gets greater than a certain value, the sample is discarded, the program skips the rest of the classifiers and continues with the next pixel.
+\subsection{Other uses}
 
-Image processing tasks are generally suitable for parallel acceleration. On the other hand it is not as simple. The number of pixels is huge and as shown in \ref{fig:survivors}, most of the samples get discarded as background after few initial stages. On a parallel platform, such as the GPU, this presents a problem, because most of the processors have to wait for the few samples, that are still being processed and thus wasting a lot of resources.
+There are many more uses, not only those described above. Other examples can be video stabilization, vehicle parking systems, image panoramas, detecting parts of an image in order to perform more complicated object detection. A smart device GUI can be developed, which adapts itself based on where or at which angle the user is looking.
+
+\chapter{Analysis}\label{ch:analysis}
+
+In this chapter, the general design of an object detector is discussed and later on tools for measuring its performance and profiling. It does not cover implementation specifics. These are discussed later on in chapter \ref{ch:implementation}.
+
+The idea of implementing a WaldBoost object detector with the use of LBP features on a parallel platform such as CUDA is not a new one and mainly for face detection, it is well researched. On the other hand, since it was first proposed, both OpenCL and CUDA have undergone many changes, and so research done in this area tends to get out of date.
+
+The implementation of a WaldBoost detector on a CPU, where every pixel is processed sequentially isn't complicated. The general idea, as explained in section \ref{sec:waldboost}, is that a sample, in our case a pixel, is processed by a series of weak classifiers (also called stages). These stages accumulate a response, always adding or subtracting a value based on how the LBP feature is evaluated. In case the accumulated response gets greater than a certain value, the sample is discarded, the program skips the rest of the classifiers and continues with the next pixel.
+
+Image processing tasks are generally suitable for parallel acceleration. On the other hand it is not as simple. The number of pixels is huge and as shown in figure \ref{fig:survivors}, most of the samples get discarded as background after few initial stages. On a parallel platform, such as the GPU, this presents a problem, because most of the processors have to wait for the few samples, that are still being processed and thus wasting a lot of resources.
 
 \begin{center}
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering\includegraphics[width=0.6\linewidth]{fig/survivors.png}
-	\caption{Surviving percentage of samples gets below 5\% after few initial stages. Taken from \cite{herout-realtime-cuda}.}
+	\caption{Surviving percentage of samples gets below 5\% after few initial stages. Taken from \cite{herout2011real}.}
 	\label{fig:survivors}
 \end{figure}
 \end{center}
 
-\section{Research}
+Most of the current implementations of WaldBoost detectors are based on a work proposed by Herout \cite{herout2011real}. 
 
-\subsection{Real-time object detection on CUDA by Herout et al., 2009}
+\section{Pyramidal image}\label{subsec:anal-pyramidal}
 
-Most of the current implementations of WaldBoost detectors are based on this work. As mentioned previously and shown in \ref{fig:survivors}, only a few samples are being processed after few initial stages. The rest of the samples still occupy GPU resources and wait for these to finish. To free these resources and use them accordingly, a method of thread rearrangement was proposed.
+The detector uses a window for scanning the image, usually 24x24 or 26x26 pixels. In order to detect the object in such window, a pyramidal image was proposed. Such image contains many sub-sampled images stored in a pyramid fashion. The structure of the pyramidal image and the way how to construct it is discussed in section \ref{subsubsec:pyramidal}.
 
-\subsubsection{Pyramidal image}
+\section{Thread rearrangement}\label{subsec:anal-thread-rearrangement}
 
-The detector uses a window for scanning the image, usually 24x24 or 26x26 pixels. In order to detect the object in such window, a pyramidal image was proposed. Such image contains many sub-sampled images stored in a pyramid fashion. The structure of the pyramidal image and the way how to construct it is discussed in \ref{subsubsec:pyramidal}.
+As shown in figure \ref{fig:survivors}, only a few samples are being processed after the few initial stages. Without a thread rearrangement scheme, these few surviving samples compute, meanwhile the others, which were already discarded, wait for these to finish. As such, they occupy GPU resources and most of the computational power and parallelism is wasted. The rest of the samples still occupies GPU resources and waits for these to finish. To free these resources and use them accordingly, a method of thread rearrangement has to be proposed.
 
-\subsubsection{Thread rearrangement}
-
-At the time of writing the paper, detectors with 512 or 1024 stages were used (this implementation uses a detector with 2048 stages). Herout et al. proposed, that every sample can be processed up to a set number of stages, after which thread rearrangement is done as described in \ref{fig:thread-rearrangement} and the process continues.
+At the time of writing the paper, detectors with 512 or 1024 stages were used (this implementation uses a detector with 2048 stages). Herout proposed \cite{herout2011real}, that every sample can be processed up to a set number of stages, after which thread rearrangement is done and the process continues. This is described in figure \ref{fig:thread-rearrangement}.
 
 \begin{center}
-\begin{figure}[h]
-	\centering\includegraphics[width=0.6\linewidth]{fig/threadrear.png}
-	\caption{Thread rearrangement of surviving threads (green) after 5 and 10 processed stages.}
+\begin{figure}[ht]
+	\centering\includegraphics[width=0.75\linewidth]{fig/thread-rearrangement.eps}
+	\caption{Surviving threads (green) after each thread rearrangement. Every thread processes a single sample. (a) 144 initial threads, 7 survive (b) Threads reorganized into 7 threads, 3 survive. (c) Threads reorganized into 3 threads, none survive.}
 	\label{fig:thread-rearrangement}
 \end{figure}
 \end{center}
 
-Methods how to achieve this rearrangement are again specific to the implementation and are discussed later in \ref{subsec:thread-reorganization}.
+Implementation details on how threads are rearranged are covered in section \ref{sec:impl-thread-rearrangement}.
 
-\section{Debugging and profiling tools}
+\section{Debugging and profiling tools}\label{sec:debugging-and-profiling}
 
 One of the main advantages of CUDA over OpenCL are its debugging and profiling environments, which are important for writing optimized and error-free code. There are several CUDA-specific options to use. CUDA Profiler API also provides functions to help with profiling. Only specific parts of the code can be profiled by using \verb|cudaProfilerStart| and \verb|cudaProfilerStop| calls. This allows to collect data only for important parts of the code.
 
 \subsection{Visual Profiler}\label{subsec:proftools-visual-profiler}
 
-The first option to profile and optimize code is the Visual Profiler. As the name itself says, it displays a visual representation of all the GPU calls, where statistics such as memory bandwidth (shared, local, global, \dots), instruction throughput, occupancy and much more can be displayed. It is well documented \footnote{\url{http://docs.nvidia.com/cuda/profiler-users-guide/\#visual-profiler}} and provides a simple interface to use (\ref{fig:visual-profiler}). 
+The first option to profile and optimize code is the Visual Profiler. As the name itself says, it displays a visual representation of all the GPU calls, where statistics such as memory bandwidth (shared, local, global, \dots), instruction throughput, occupancy and much more can be displayed. It is well documented \footnote{\url{http://docs.nvidia.com/cuda/profiler-users-guide/\#visual-profiler}} and provides a simple interface to use (shown in figure \ref{fig:visual-profiler}). 
 
-\begin{figure}[h]
+\begin{figure}[ht]
 	\begin{center}
 	\includegraphics[width=0.8\textwidth]{fig/visual_profiler.jpg}
 	\caption{Visual profiler interface.}
@@ -463,11 +507,11 @@ nvprof --analysis-metrics -o  myprog-analysis.nvprof ./myprog --benchmark -i=1
 \caption{An example how to run nvprof to output profiling data.}
 \end{figure}
 
-\subsubsection{NVIDIA Nsight}\label{subsec:proftools-nsight}
+\subsection{NVIDIA Nsight}\label{subsec:proftools-nsight}
 
 Another handy tool to use is NVIDIA Nsight, which is a set of tools developed for Microsoft Visual Studio \footnote{\url{https://www.visualstudio.com/}} and Eclipse \footnote{\url{https://eclipse.org/}} allowing to debug and analyze GPU and graphics applications.
 
-It consists of two main modules and allows for simple profiling. On the other hand dedicated tools such as \ref{subsubsec:visual-profiler} or \ref{subsubsec:nvprof} are better for the job.
+It consists of two main modules and allows for simple profiling. On the other hand dedicated tools such as visual profiler, described in section \ref{subsec:proftools-visual-profiler}, or nvprof, described in section \ref{subsec:proftools-nvprof}, are better for the job.
 
 \paragraph{CUDA Debugger} allows to set breakpoints inside GPU code and view the local variables, inspect the memory or perform other debugging tasks such as memory checks.
 
@@ -500,7 +544,7 @@ The object detector is implemented in C++ with dependencies on OpenCV\footnote{\
 It is implemented as an easy-to-use class, which takes a dataset or a video on the input and outputs detections. Current implementation uses an open-source face detector trained by R. Juranek\footnote{\url{http://medusa.fit.vutbr.cz/LBPDetector/}} under Brno University of Technology license. As such, it can be used as a part of an application such as face tracking or face recognition, but not only faces have to be processed. Depending on what detector is trained on, anything from traffic signs to humans can be detected.
 
 \begin{center}
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering\includegraphics[width=\textwidth]{fig/sample.jpg}
 	\caption{A sample output with debug information shown.}
 	\label{fig:sample}
@@ -521,7 +565,7 @@ A CMake\footnote{\url{http://www.cmake.org/}} project is included, therefore it 
 
 The detector can be used to detect any object it is trained to, not only faces. Most detectors are stored as XML files, which brings the overhead of reading and parsing a file and so an exported version of an XML detector to a C++ header file is used. As such 2 header files (\verb|wbd_detector.h|, \verb|wbd_alphas.h|) must be compiled with the detector.
 
-These headers are be obtained by parsing a XML detector \footnote{\url{https://github.com/mmaci/classifier-export}}. The detector consists of two main parts, the stages (\ref{fig:stage}) or also called the weak classifiers, which are loaded into a structure \ref{fig:stage} and an $\alpha$-table, which is stored as an array of floating-point values. Every stage points to a specific range inside the $\alpha$-table, where responses for all the LBP values are stored. Training of a detector is not the subject of this thesis and as such it will not be discussed.
+These headers are be obtained by parsing a XML detector \footnote{\url{https://github.com/mmaci/classifier-export}}. The detector consists of two main parts, the stages or also called the weak classifiers, which are loaded into a structure described in \ref{fig:stage} and an $\alpha$-table, which is stored as an array of floating-point values. Every stage points to a specific range inside the $\alpha$-table, where responses for all the LBP values are stored. Training of a detector is not the subject of this thesis and as such it will not be discussed.
 
 \begin{figure}[h!]
 \begin{verbatim}
@@ -548,7 +592,7 @@ The whole interface is described in the added Doxygen\footnote{\url{http://www.d
 
 The detector processes both videos and image datasets, which are passed to the detector as a filename. For a dataset, a text file is used with filenames of the images separated by a newline. OpenCV is used to load both images and videos and as such it supports most common formats.
 
-The application pipeline (\ref{fig:pipeline}) of the detector is a bit different for a dataset, than for a video, but both use the following steps as described in \ref{subsec:init} to \ref{subsec:free}.
+The application pipeline (described in figure \ref{fig:pipeline}) of the detector is a bit different for a dataset, than for a video, but both use the following steps as described in sections \ref{subsec:init} to \ref{subsec:free}.
 
 \begin{center}
 \begin{figure}[h!]
@@ -568,23 +612,17 @@ The initialization of the detector can be separated into two parts. The first be
 
 The other part being allocating GPU memory for the image itself, which is allocated dynamically due to dependence on the size of the input image. For a video this can also be done only once, because every frame has the same size and as such, everything is allocated based on the initial frame. On the other hand a dataset can have completely different image sizes and so this must be done for every photo separately.
 
-A method to skip multiple initialization for datasets was proposed and is discussed in \ref{subsec:dataset-texture}.
-
 \subsection{Setting an image}
 
-After the initialization is complete, an image or a frame is loaded by OpenCV and then copied over to the GPU. This must be done both for every image or every frame. It is copied over to the global memory, there it is preprocessed (\ref{subsubsec:grayscale}) and set as a texture. From the texture, a pyramidal image is generated (\ref{subsubsec:pyramidal}). After that, everything is ready for object detection.
+After the initialization is complete, an image or a frame is loaded by OpenCV and then copied over to the GPU. This must be done both for every image or every frame. It is copied over to the global memory, there it is preprocessed, as discussed in section \ref{subsubsec:grayscale}, and set as a texture. From the texture, a pyramidal image is generated, as described in section \ref{subsubsec:pyramidal}. After that, everything is ready for object detection.
 
 \subsubsection{Preprocessing} \label{subsubsec:grayscale} 
 
 The first kernel to be run is the preprocessing kernel. There are 2 operations to be done - conversion from the initial integers to a floating-point representation and then a conversion to grayscale.
 
-Floats are needed in order to work with textures. Texture memory enables hardware implemented bilinear interpolation for subsampling images, which is done mainly in creating the pyramidal image (\ref{subsubsec:pyramidal}. Even though bilinear interpolation should only be supported for floating-point values, due to official documentation, it is not the case. On the other hand it might be a bug, which might get fixed in the future and it would be wise not to be used.
+Floats are needed in order to work with textures. Texture memory enables hardware implemented bilinear interpolation for subsampling images, which is done mainly in creating the pyramidal image. Even though bilinear interpolation should only be supported for floating-point values, due to official documentation, it is not the case. On the other hand it might be a bug, which might get fixed in the future and it would be wise not to be used.
 
-Conversion to grayscale is a simple image processing operation described by the formula \eqref{eq:rgbtograyscale}. The detector itself is trained on grayscale images, and so the input must also be in grayscale. After the kernel finishes, the result is saved as a texture.
-
-\begin{equation} \label{eq:rgbtograyscale}
-Y=0.2126R + 0.7152G + 0.0722B
-\end{equation}
+The detector itself is trained on grayscale images, and so the input must also be in grayscale. After the kernel finishes, the result is saved as a texture.
 
 \subsubsection{Dynamic texture and texture objects}\label{subsubsec:dynamic-texture}
 
@@ -592,7 +630,7 @@ As of CUDA 5.0 and Kepler GPUs textures don't have to be defined globally as sta
 
 This has several advantages. One of them being the slight overhead (up to $1.5 \mu s$) by binding and unbinding static textures during kernel launch, which is eliminated. Even though this is not our case and doesn't sound as much, it might be quite a significant overhead while launching large quantities of fast kernels.
 
-The main advantage in our case is, that texture objects can be passed as arguments, set to store variable image sizes and therefore easily be used as a part of a library. Also multiple textures can be created using given parameters, which is exploited in pyramidal image creation and explained in \ref{subsubsec:pyramidal}.
+The main advantage in our case is, that texture objects can be passed as arguments, set to store variable image sizes and therefore easily be used as a part of a library. Also multiple textures can be created using given parameters, which is exploited in pyramidal image creation and explained in section \ref{subsubsec:pyramidal}.
 
 \subsubsection{Pyramidal image}\label{subsubsec:pyramidal}
 
@@ -603,13 +641,13 @@ The straight forward method is to create a single pyramidal image and store it a
 As mentioned previously, the implementation uses hardware bilinear interpolation provided by the texture memory for sub-sampling the image. It has to be kept in mind, that bilinear interpolation has some negative side-effects, one of them being the sub-sampling of an image below half its original width.
 
 \begin{center}
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering\includegraphics[height=9cm]{fig/bilinear_error.eps}\label{fig:bilinear-error}
 	\caption{Error when sub-sampling an image below twice the original width using bilinear interpolation}
 \end{figure}
 \end{center}
 
-As shown on \ref{fig:bilinear-error} when sub-sampling an image below half its original width, pixels are left out and a sampling error is created. Other methods, such as Lanczos resampling, solve this at the cost of a computational overhead, because a software implementation has to be used instead of the hardware-based provided by using a floating-point 2D texture.
+As shown in figure \ref{fig:bilinear-error}, when sub-sampling an image below half its original width, pixels are left out and a sampling error is created. Other methods, such as Lanczos resampling, solve this at the cost of a computational overhead, because a software implementation has to be used instead of the hardware-based provided by using a floating-point 2D texture.
 
 The image is generated in octaves. An octave is a structure of several images, where the smallest image has half the width/height of the original image. Depending on the number of images in an octave, every image is $2^1/number_of_images$ smaller than the previous. The following octave is then sub-sampled from the previous octave.
 
@@ -624,7 +662,7 @@ Two methods were tested. The first one using a single texture for both writing a
 \end{enumerate}
 
 \begin{center}
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering\includegraphics[height=9cm]{fig/pyramid.jpg}
 	\caption{Pyramidal image}
 \end{figure}
@@ -634,7 +672,7 @@ The implementation itself uses 8 levels and 4 octaves. This results in the sides
 
 \subsection{Detection}
 
-To detect an object, the detector has to successfully evaluate a given number of stages (weak classifiers) described in \ref{sec:detector}, which are processed sequentially. In our case 2048. This number can be reduced, but it will have an impact on the number of detections. Every weak classifier the algorithm processes, a response is given. The response is a number read from the $\alpha$-table, from the address given by the stage offset and the calculated LBP value. It is then added to the accumulated response. The sample is discarded in case the accumulated value falls below the stage threshold \verb|thetaB|.
+To detect an object, the detector has to successfully evaluate a given number of stages (weak classifiers) described in section \ref{sec:detector}, which are processed sequentially. In our case 2048. This number can be reduced, but it will have an impact on the number of detections. Every weak classifier the algorithm processes, a response is given. The response is a number read from the $\alpha$-table, from the address given by the stage offset and the calculated LBP value. It is then added to the accumulated response. The sample is discarded in case the accumulated value falls below the stage threshold \verb|thetaB|.
 
 \begin{algorithm} \label{alg:detection}
 \For{every pixel (a GPU thread is created)}
@@ -658,7 +696,7 @@ After everything has been processed, the GPU memory can be freed. This also must
 
 \section{Memory organization} \label{sec:memory-organization}
 
-The use of GPU memory is one of the most important parts of programming on GPU architectures. The types of CUDA memories are described in \ref{subsec:memory}.
+The use of GPU memory is one of the most important parts of programming on GPU architectures. The types of CUDA memories are described in section \ref{subsec:memory}.
 
 Below we will discuss, how the most important parts of the detector are stored and why.
 
@@ -670,16 +708,16 @@ Stages are stored in the constant memory. Even though it's not as fast as let's 
 There are 256 coefficients for every stage and every coefficient is stored as a float. This leads to $256 * 2048 * 4 = 2 MB$ and by far exceeds the memory available for constant memory. Another reason the constant memory cannot be used is that the access is random, due to the fact, that we are likely to get different LBP values for every pixel. In this case we wouldn't utilize the broadcast and it would even be slower.
 
 \item \textbf{Original image and pyramidal image} - texture memory \\
-Both are stored in the texture memory. Original image is used to create a pyramidal image using hardware accelerated bilinear interpolation for creating down-sampled images as described in \ref{subsubsec:pyramidal}. It is highly optimized for random read-only access, which is exactly what we want.
+Both are stored in the texture memory. Original image is used to create a pyramidal image using hardware accelerated bilinear interpolation for creating down-sampled images as described in section \ref{subsubsec:pyramidal}. It is highly optimized for random read-only access, which is exactly what we want.
 \end{itemize}
 
 \section{Thread allocation}\label{sec:thread-alloc}
 
-A GPU thread is allocated for every sample, therefore every pixel/sample. Based on \cite{herout-realtime-cuda} only a fraction of samples (around 1\%) is still processed by the classifier after the few initial stages. On the other hand the GPU organizes threads in warps - groups of 32 threads, which are organized in blocks across with they can be synchronized. The problem is, that when only a single thread within a warp is active, the other threads have to wait for it until it finishes, thus wasting GPU resources.
+A GPU thread is allocated for every sample, therefore every pixel/sample. Based on \cite{herout2011real} only a fraction of samples (around 1\%) is still processed by the classifier after the few initial stages. On the other hand the GPU organizes threads in warps - groups of 32 threads, which are organized in blocks across with they can be synchronized. The problem is, that when only a single thread within a warp is active, the other threads have to wait for it until it finishes, thus wasting GPU resources.
 
 \section{Thread rearrangement}\label{sec:impl-thread-rearrangement}
 
-Herout in \cite{herout-realtime-cuda} proposed, that every few stages, threads can be checked if they are still evaluating the classifier stages or they have been dropped. Surviving threads can then be rearranged and the process continues only with the remaining samples.
+Herout in \cite{herout2011real} proposed, that every few stages, threads can be checked if they are still evaluating the classifier stages or they have been dropped. Surviving threads can then be rearranged and the process continues only with the remaining samples.
 
 The detector uses several ways of reorganizing surviving threads. Every one of them works better under different conditions. To discuss and measure such conditions is one of the goals of this thesis. All the implementations are summarized below using the types of functions and memory used.
 
@@ -700,7 +738,7 @@ The whole implementation is based around three functions, which are implemented 
 
 \subsection{Atomic functions and global memory} \label{subsec:impl-global}
 
-The first proposed method uses a counter stored in global memory to count the number of surviving threads within a block and global memory for storing the surviving sample information. After processing a given number of stages of a classifier, every sample which wasn't discarded by the classifier is assigned an ID in global memory by reading the current value of the surviving sample counter and incrementing it. It then saves the information about the surviving sample (\ref{fig:survivordata}) to global memory based on the assigned ID.
+The first proposed method uses a counter stored in global memory to count the number of surviving threads within a block and global memory for storing the surviving sample information. After processing a given number of stages of a classifier, every sample which wasn't discarded by the classifier is assigned an ID in global memory by reading the current value of the surviving sample counter and incrementing it. It then saves the information about the surviving sample (structure is described in figure \ref{fig:survivordata}) to global memory based on the assigned ID.
 
 \begin{figure}[h!] \label{fig:survivordata}
 \begin{verbatim}
@@ -755,7 +793,7 @@ After processing a given number of stages the surviving sample is assigned an ID
 
 The overhead of rerunning a kernel is quite low and so a third method was proposed, which would solve the issue with having a lot of resources wasted on only a few threads occupying whole warps or blocks.
 
-The hybrid method removes the global memory counter bottleneck and still preserves the efficiency of organizing survivors in global memory. It uses two counters, a local counter stored in shared memory, which assigns a local ID the same way as in \ref{subsec:afsm} and a global counter, which gets increased by the total number of its survivors. Adding to the global counter can happen only when a block is synchronized, because a final number of survivors within a block must be known. It is used as an offset to the global memory array for the block of surviving samples, whereas the local counter is used an offset within this block of memory.
+The hybrid method removes the global memory counter bottleneck and still preserves the efficiency of organizing survivors in global memory. It uses two counters, a local counter stored in shared memory, which assigns a local ID the same way as in described in section \ref{subsec:impl-shared} and a global counter, which gets increased by the total number of its survivors. Adding to the global counter can happen only when a block is synchronized, because a final number of survivors within a block must be known. It is used as an offset to the global memory array for the block of surviving samples, whereas the local counter is used an offset within this block of memory.
 
 Basically this method can be looked at as a compromise between the global memory implementation, explained in section \ref{subsec:impl-global} and the shared memory implementation explained in section \ref{subsec:impl-shared}.
 
@@ -784,23 +822,23 @@ The algorithm can be viewed as a tree and be represented as an array in shared m
 In the up-sweep phase, the tree is traversed from its leaves to the root, where in every stage the values are summed up in their parent as shown in figure \ref{fig:sweepup}.
 
 \begin{center}
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering\includegraphics[width=0.6\linewidth]{fig/sweepup.jpg}
-	\caption{Up-sweep phase of the prefix sum algorithm (taken from \cite{gems-prefixsum})}
+	\caption{Up-sweep phase of the prefix sum algorithm (taken from \cite{harris2007parallel})}
 	\label{fig:sweepup}
 \end{figure}
 \end{center}
 
 At the beginning half of the threads in a block are used to calculate the corresponding sums. The next iteration the number of threads used is halved and so on, until the root is reached, in which the total sum of all the values is stored.
 
-In the down-sweep phase as shown in \ref{fig:sweepdown}, the root is zeroed and traversed back to the leaves. Using the partial sums a sum of all the previous values for every leaf is gained.
+In the down-sweep phase as shown in figure \ref{fig:sweepdown}, the root is zeroed and traversed back to the leaves. Using the partial sums a sum of all the previous values for every leaf is gained.
 
 Every surviving thread is then assigned an ID based on its value in the prefix-sum array and the total number of surviving threads inside the block is the last value inside the array.
 
 \begin{center}
-\begin{figure}[h]
+\begin{figure}[ht]
 	\centering\includegraphics[width=0.6\linewidth]{fig/sweepdown.jpg}
-	\caption{Down-sweep phase of the prefix sum algorithm (taken from \cite{gems-prefixsum})}
+	\caption{Down-sweep phase of the prefix sum algorithm (taken from \cite{harris2007parallel})}
 	\label{fig:sweepdown}
 \end{figure}
 \end{center}
@@ -811,7 +849,7 @@ Thread rearrangement is a costly process, but greatly enhances the performance, 
 
 The implementation allows to output the number of surviving threads after each thread rearrangement or in another words after returning from the kernel. A few experiments were conducted and a single strategy had to be devised to be able to measure the performance and profile the implementations. The best results were on average obtained by the configuration 1, 8, 64, 256, 512, which are the numbers of processed stages, after with the thread rearrangement occurred.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering\begin{tikzpicture}
   \begin{axis}
   [
@@ -878,7 +916,7 @@ The detector can process both image datasets and videos. As such the following t
 	\item BioID face dataset with 1512 grayscale images
 \end{itemize}
 
-As a video, a section of the movie "The Game" (1997) was chosen, with a larger group of people, having ~10-50 faces per frame. The detector also has many configurations. One of them being the different implementations, which were discussed in section \ref{subsec:impl-thread-rearrangement} and the second being the block sizes. For a general overview, they are summarized below.
+As a video, a section of the movie "The Game" (1997) was chosen, with a larger group of people, having ~10-50 faces per frame. The detector also has many configurations. One of them being the different implementations, which were discussed in section \ref{sec:impl-thread-rearrangement} and the second being the block sizes. For a general overview, they are summarized below.
 
 \paragraph{Implementations (based on the CUDA feature they exploit)}
 \begin{itemize}
@@ -986,8 +1024,6 @@ The size of the block affects the shared memory implementation the most, because
 	\label{fig:980-det-measurement}
 \end{figure}
 
-\FloatBarrier
-
 \begin{figure}[ht]
 \centering\begin{tikzpicture}
 \begin{axis}[
@@ -1057,7 +1093,7 @@ Average Kepler & $16 \times 16$ global memory implementation \\
 
 \section{Profiling}\label{sec:profiling}
 
-To further analyze the performance of all the implementations, metrics measurements introduced in section \ref{sec:metrics} will be discussed. Compared to other GPU technologies, CUDA allows for great profiling tools described in section \ref{subsec:debugging-and-profiling}, and as such a thorough analysis of the implementations can be made. The main focus will be not only on the best implementations performance-wise, and why they performed so well, but also on why some implementations performed worse, where are their problems, why are they not viable for the given implementation and how these issues can be solved.
+To further analyze the performance of all the implementations, metrics measurements introduced in section \ref{sec:metrics} will be discussed. Compared to other GPU technologies, CUDA allows for great profiling tools described in section \ref{sec:debugging-and-profiling}, and as such a thorough analysis of the implementations can be made. The main focus will be not only on the best implementations performance-wise, and why they performed so well, but also on why some implementations performed worse, where are their problems, why are they not viable for the given implementation and how these issues can be solved.
 
 \subsection{L2 hit rate (texture reads) for global and shared memory implementations}\label{subsec:prof-l2-hit-rate}
 
@@ -1080,7 +1116,7 @@ Quadro K1000M (Kepler) & 85.804 \\
 
 Results obtained for the L2 hit rate (texture reads) for the shared memory implementation are summarized in table \ref{tab:l2-hit-rate-shared}. These values are averaged across all the thread rearrangement stages, because the implementation only uses a single kernel. It is interesting to note, that both of the high-end GPUs, also have almost 10\% bigger hit rate. First, this supports the claim, that it is better to use the shared memory implementation on high-end GPUs. Second, and more importantly, the values for the first two GPUs are close to 100\%. This means, that the implementation only accesses texture memory for the initial reads and later on, the data is mostly read from the cache. For Quadro K1000M it's not as high and it's also one of the reasons another implementation should be used instead.
 
-\begin{figure}[h]
+\begin{figure}[ht]
 \centering\begin{tikzpicture}
   \begin{axis}
   [
@@ -1172,7 +1208,7 @@ Achieved occupancy for the shared memory implementation, summarized in the table
 
 An increase in occupancy can be seen for the Maxwell architecture. This is a result of a change mentioned in section \ref{subsubsec:cuda-new-multip}, that Maxwell can have more active warps per multiprocessor (32 compared to 16 for Kepler), which helps in cases like this, where blocks with a small number of threads are run.
 
-As mentioned previously, at the end of section \ref{subsubsec:occ-global}, a proposed improvement would be to process future stages and utilize GPU in a better way.
+As mentioned previously, at the end of section \ref{subsubsec:prof-occ-global-memory}, a proposed improvement would be to process future stages and utilize GPU in a better way.
 
 \subsection{Global memory store, load and atomic throughput}\label{subsec:prof-throughput}
 
@@ -1180,7 +1216,7 @@ As mentioned previously, at the end of section \ref{subsubsec:occ-global}, a pro
 
 The load and store global memory throughput and the atomic throughput all correlate with each other, because the main bottleneck here is actually the use of atomic operations before the global memory stores are processed, and so the store throughput is only as high as the atomic throughput.
 
-The $8 \times 8$ configuration has a lower overall achieved occupancy as shown in figure \ref{fig:occupancy-quadro} and the $32 \times 32$ on the other hand creates more conflicts when issuing atomic operations, this leads to the $16 \times 16$ being the best compromise between these three configurations. This is also shown in figure \ref{fig:occupancy-quadro}. The low atomic throughput for the kernels 4-6 is the result of a low number of samples and thus lower atomic operation. For kernel 3 it's also a result of longer detection time due to lower L2 hit rate mentioned in section \ref{subsec:l2-hit-rate-prof}.
+The $8 \times 8$ configuration has a lower overall achieved occupancy as shown in figure \ref{fig:occupancy-quadro} and the $32 \times 32$ on the other hand creates more conflicts when issuing atomic operations, this leads to the $16 \times 16$ being the best compromise between these three configurations. This is also shown in figure \ref{fig:occupancy-quadro}. The low atomic throughput for the kernels 4-6 is the result of a low number of samples and thus lower atomic operation. For kernel 3 it's also a result of longer detection time due to lower L2 hit rate mentioned in section \ref{subsec:prof-l2-hit-rate}.
 
 \begin{figure}[ht]
 \centering\begin{tikzpicture}
@@ -1203,14 +1239,14 @@ The $8 \times 8$ configuration has a lower overall achieved occupancy as shown i
   \end{axis}
 \end{tikzpicture}
 	\caption{Atomic throughput on Quadro K1000M (Kepler) for the global memory method. Values on the X-axis enumerate kernels in the order, they are run. 1: detectSurvivorsInit, 2-5: detectSurvivors, 6: detectDetections.}
-	\label{fig:occupancy-quadro}
+	\label{fig:atomic-throughput-quadro}
 \end{figure}
 
 The atomic operation bottleneck is also one of the reasons, why the global memory implementation cannot be used with high-end GPUs. Their increased computational capacity allows them to process more threads at a time, which results in more stalling caused by waiting for atomic operations and so this resource advantage isn't used to its maximum.
 
 \subsubsection{Shared memory atomic throughput}\label{subsubsec:prof-thr-shared-memory}
 
-Maxwell architecture doesn't allow to measure atomic throughput and so L2 throughput for atomic requests was measured. As mentioned in \ref{TODO}, Maxwell architecture implements native shared memory atomic operations compared to the previous architectures (Kepler and Fermi), where shared memory atomic operations were implemented in a software fashion using lock-modify-unlock pattern.
+Maxwell architecture doesn't allow to measure atomic throughput and so L2 throughput for atomic requests was measured. As mentioned in section \ref{subsubsec:maxwell-shared-memory}, Maxwell architecture implements native shared memory atomic operations compared to the previous architectures (Kepler and Fermi), where shared memory atomic operations were implemented in a software fashion using lock-modify-unlock pattern.
 
 \begin{figure}[ht]
 \centering\begin{tikzpicture}
@@ -1244,31 +1280,38 @@ Maxwell architecture doesn't allow to measure atomic throughput and so L2 throug
 
 The shared implementation relies heavily on the use of shared memory atomic instructions to update a single location in memory, which turned out to be very expensive in case of the Kepler/Fermi architecture, but in case of the Maxwell architecture, it emphasized its advantages. The results in figure \ref{fig:l2-atomic-shared} show, that the performance on GTX 980 is almost $2\times$, than that of GTX 780Ti for L2 atomic throughput.
 
-\chapter{Summary}
+\section{Summary of proposed improvements}
+
+Throughout the thesis different methods to the problem of object detection on GPU were implemented, measured and finally profiled. Every implementation always came with some conclusions about its usability, possible problems and raised ideas how to handle these issues.
+
+\paragraph{Measurements and profiling on more GPUs.} It was clear, that for the high-end GPUs the best results were obtained by the shared memory implementation and for the opposite extreme - a single multiprocessor GPU, the best results were measured for the global memory implementation. The hybrid-shared memory method didn't perform all that well, but it performs better on single multiprocessor GPUs, than the shared memory implementation and better on high end GPUs, than the global memory implementation. Based on this, it can be predicted, that it might perform better than both of these on more average GPUs, such as GTX 960, which has 8 streaming multiprocessors.
+
+\paragraph{Exploit parallelism.} Even on a GPU with a single streaming multiprocessor, the occupancy decreased below 50\% for most of the stages and GPU resources were left unused. These resources might be used to process future stages and use them in a similar fashion as a cache. A way of mapping such stages, which were preprocessed to the ones being processed can be discussed.
+
+\paragraph{Prefix-sum.} The prefix-sum method should be researched more, if it can be optimized to discard unused threads throughout the computation.
+
+\paragraph{Dataset initialization overhead.} When processing a dataset, GPU memory is allocated and freed specifically for every image. This brings a lot of overhead to the whole process, an overhead almost as large as the detection itself. A single texture can be allocated to copy the images to. The size of such has to be discussed, as it will stay the same throughout processing the whole dataset.
+
+\paragraph{Minimize size of the block for shared memory implementation.} We found out, that even though $16 \times 16$ configuration performed the best, $8 \times 8$ configuration had good results, even though it had very low occupancy. Based on the architecture, a strategy can be devised for the size of the block, to be as small as possible and still fully occupy the GPU.
+
+\paragraph{Pyramidal image.} Pyramidal image doesn't have to be used. A 1D texture containing pixel values can be used instead, which enables much smaller textures. On the other hand, this approach doesn't allow for hardware accelerated bilinear interpolation and doesn't utilize L2 cache as much for spatial data locality.
+
+
+\chapter{Conclusion}
 
 The goal of this thesis was to design an application or a library for object detection on the GPU. The topic of WaldBoost object detection on the GPU using LBP is well researched, on the other hand there is much less research done on the implementation itself, and so the main focus was to exploit the implementation options of the NVidia CUDA Toolkit.
 
 Different approaches to implement the detector were proposed, concentrating on the use of specific features of the GPU programming, to exploit the different bottlenecks of each method, and each on of them was thoroughly measured and profiled. The implementation itself then exploits the fact, that every GPU is very specific and can take advantage of a different feature of the NVidia CUDA Toolkit. As such, based on the GPU parameters, an optimal method for object detection can be run.
 
-The detector\footnote{Latest version is available at: \url{https://github.com/mmaci/vutbr-fit-object-detection}} can process both image datasets, independent on the image size and videos, outputting detections as regions of interest inside an image. It can also be used as a part of another application, which uses object detection and it already was, as mentioned in \ref{subsec:face-tracking}. The application is specifically optimized not only for top-end NVidia GPUs, but also for the average or the low-end ones.
-
-\section{Proposed improvements}
-
-Throughout the thesis different methods how to optimize the detector were researched. Some of them were not yet implemented and measured. The ideas on which to focus in the future are the following:
-
-\begin{itemize}
-	\item \textbf{Measurements and profiling on more GPUs}. It was clear, that for the high-end GPUsthe best results were obtained by the shared memory implementation and for the opposite extreme - a single multiprocessor GPU, the best results were measured for the global memory implementation. The hybrid-shared memory method didn't perform badly, but there were better tools for the job. GPUs such as the GTX 960, which has 8 streaming multiprocessors weren't available and it might be the case, that a middle way between the two optimal implementations might work the best.
-	\item \textbf{Processing more stages.} Even on a GPU with a single streaming multiprocessor, the occupancy fell below 50\% for most of the stages and GPU resources were left unused. These resources might be used to process future stages and use them in a similar fashion as a cache. A way of mapping such stages, which were preprocessed to the ones being processed has to be proposed.
-	\item \textbf{Prefix-sum.} The prefix-sum method should be researched more, if it can be optimized to discard unused threads throughout the computation.
-	\item \textbf{Dataset initialization overhead.} When processing a dataset, GPU memory is allocated and freed specifically for every image. This brings a lot of overhead to the whole process, an overhead almost as large as the detection itself. A single texture can be allocated to copy the images to. The size of such has to be discussed, as it will stay the same throughout processing the whole dataset.
-	\item \textbf{Minimize size of the block for shared memory implementation.} We found out, that even though $16 \times 16$ configuration performed the best, $8 \times 8$ configuration had good results, even though it had very low occupancy. Based on the architecture, a strategy can be devised for the size of the block, to be as small as possible and still fully occupy the GPU.
-\end{itemize}
+The detector\footnote{Latest version is available at: \url{https://github.com/mmaci/vutbr-fit-waldboost-detector}} can process both image datasets, independent on the image size and videos, outputting detections as regions of interest inside an image. As such, it can also be used as a part of another application, which uses object detection. The application is specifically optimized not only for top-end NVidia GPUs, but also for the average or the low-end ones.
 
 
 %=========================================================================
 
-\nocite{zemcik-high-performance}
-\nocite{herout-realtime-cuda}
+\nocite{freund1997}
+\nocite{lindholm2008nvidia}
+\nocite{owens2007survey}	
+\nocite{zemcik2013high}
 \nocite{warps-occupancy}
 \nocite{memory-coalescing}
 \nocite{gpu-opt-fundamentals}

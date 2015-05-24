@@ -1,77 +1,213 @@
-   
-    @BOOK{herout-realtime-cuda,
-      author =       "A. Herout ; R. Josth ; R. Juranek ; J. Havel ; M. Hradis ; P. Zemcik",
-      title =        "Real-time object detection on CUDA",
-      publisher =    "Springer-Verlag",
-      year =         "2011",
-      note =         "ISSN~1861-8219",
-    }
 
-    @BOOK{zemcik-high-performance,
-      author =       "P. Zemcik ; R. Juranek ; P. Musil ; M. Musil ; M. Hradis",
-      title =        "High performance architecture for object detection in streamed videos",
-      publisher =    "IEEE",
-      year =         "2013",
-    }
+@article{herout2011real,
+  	title={Real-time object detection on CUDA},
+  	author={Herout, Adam and Jo{\v{s}}th, Radovan and Jur{\'a}nek, Roman and Havel, Ji{\v{r}}{\'\i} and Hradi{\v{s}}, Michal and Zem{\v{c}}{\'\i}k, Pavel},
+  	journal={Journal of Real-Time Image Processing},
+  	volume={6},
+  	number={3},
+  	pages={159--170},
+  	year={2011},
+  	publisher={Springer-Verlag}
+}
 
-    @BOOK{sochman-matas-waldboost,
-      author =       "J. Sochman ; J. Matas",
-      title =        "WaldBoost - learning for time constrained sequential detection",
-      publisher =    "IEEE",
-      year =         "2005",
-      note =         "ISBN~0-7695-2372-2",
-    }
+@INPROCEEDINGS{zemcik2013high,
+   	author = {Pavel Zem{\v{c}}{\'{i}}k and Roman Jur{\'{a}}nek and Martin Musil and Petr Musil and Michal Hradi{\v{s}}},
+   	title = {High Performance Architecture for Object Detection in Streamed Videos},
+   	pages = {1--4},
+   	booktitle = {Proceedings of FPL 2013},
+   	year = {2013},
+   	location = {Porto, PT},
+   	publisher = {IEEE Circuits and Systems Society},
+   	ISBN = {978-1-4799-0004-6},
+   	language = {english},
+   	url = {http://www.fit.vutbr.cz/research/view_pub.php.cs?id=10390}
+}
     
-    @MISC{unified-memory,
-      author =       "{http://www.acceleware.com/blog/nvidia-cuda-60-unified-memory-performance}",  
-      title =        "NVIDIA CUDA 6.0 Unified Memory Performance",
-      howpublished=  "{\tt http://www.acceleware.com/blog/nvidia-cuda-60-unified-memory-performance}",
-   }
+@INPROCEEDINGS{Viola93feature-basedrecognition,
+    author = {Paul Viola},
+    title = {Feature-based recognition of objects},
+    booktitle = {in Proceedings of the AAAI Fall Symposium Series: Machine Learning in Computer Vision},
+    year = {1993},
+    pages = {60--64}
+}
+    
+@MISC{Viola01rapidobject,
+    author = {Paul Viola and Michael Jones},
+    title = {Rapid object detection using a boosted cascade of simple features},
+    year = {2001}
+}
+    
+@ARTICLE{Ojala02multiresolutiongrayscale,
+    author = {Timo Ojala and Matti Pietikäinen and Topi Mäenpää},
+    title = {Multiresolution grayscale and rotation invariant texture classification with local binary patterns},
+    journal = {IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE},
+    year = {2002},
+    volume = {24},
+    number = {7},
+    pages = {2002}
+}
+       
+@INPROCEEDINGS{Hradis08localrank,
+   	author = {Michal Hradi{\v{s}} and Adam Herout and Pavel	Zem{\v{c}}{\'{i}}k},
+   	title = {Local Rank Patterns - Novel Features for Rapid Object
+	Detection},
+   	pages = {1--12},
+   	booktitle = {Proceedings of International Conference on Computer Vision	and Graphics 2008},
+   	series = {Lecture Notes in Computer Science},
+   	journal = {Lecture Notes in Computer Science},
+   	number = {12},
+   	year = {2008},
+   	location = {Heidelberg, DE},
+   	publisher = {Springer Verlag},
+   	ISSN = {0302-9743},
+   	language = {english},
+   	url = {http://www.fit.vutbr.cz/research/view_pub.php.cs?id=8838}
+}
 
-   @MISC{cuda-toolkit-docs,
-      author =       "{http://docs.nvidia.com/cuda/cuda-c-programming-guide}",  
-      title =        "CUDA Toolkit Documentation",
-      howpublished=  "{\tt http://docs.nvidia.com/cuda/cuda-c-programming-guide}",
-   }
+@INPROCEEDINGS{herout2008impl,
+   	author = {Adam Herout and Pavel Zem{\v{c}}{\'{i}}k and Roman Jur{\'{a}}nek and Michal Hradi{\v{s}}},
+   	title = {Implementation of the "Local Rank Differences" Image Feature Using SIMD Instructions of CPU},
+   	pages = {9},
+   	booktitle = {Proceedings of Sixth Indian Conference on Computer Vision,
+	Graphics and Image Processing},
+   	year = {2008},
+   	location = {Bhubaneswar, IN},
+   	publisher = {IEEE Computer Society},
+   	ISBN = {978-0-7695-3476-3},
+   	language = {english},
+   	url = {http://www.fit.vutbr.cz/research/view_pub.php.cs?id=8762}
+}
+
+@ARTICLE{Yang02detectingfaces,
+    author = {Ming-hsuan Yang and David J. Kriegman and Narendra Ahuja},
+    title = {Detecting faces in images: A survey},
+    journal = {IEEE TRANSACTIONS ON PATTERN ANALYSIS AND MACHINE INTELLIGENCE},
+    year = {2002},
+    volume = {24},
+    number = {1}
+}
+
+@inproceedings{sochman2005waldboost,
+  	author = {Sochman, Jan and Matas, Jiri},
+  	booktitle = {CVPR (2)},
+  	isbn = {0-7695-2372-2},
+  	pages = {150-156},
+  	publisher = {IEEE Computer Society},
+  	title = {WaldBoost - Learning for Time Constrained Sequential Detection},
+  	url={http://dblp.uni-trier.de/db/conf/cvpr/cvpr2005-2.html#SochmanM05},
+  	year={2005}
+}
+
+@article{cuda-toolkit-docs,
+  	title={CUDA C Programming guide},
+  	author={Nvidia, CUDA},
+  	journal={Cuda Toolkit},
+  	year={2015}
+}
+
+@article{maxwell-tuning-guide,
+  title={Tuning CUDA applications for Maxwell},
+  author={Nvidia, CUDA},
+  journal={Cuda Toolkit},
+  year={2015}
+}
+
+@article{unified-memory,
+  	title={Unified Memory in CUDA 6: A Brief Overview and Related Data Access/Transfer Issues},
+  	author={Dan Negrut and Radu Serban and Ang Li and Andrew Seidl},
+  	year={2014}
+}
    
-   @MISC{maxwell-tuning-guide,
-      author =       "NVIDIA Corporation",  
-      title =        "Tuning CUDA applications for Maxwell (DA-07173-001\_v7.0 1.0)",
-      howpublished=  "{\tt http://docs.nvidia.com/cuda/pdf/Maxwell\_Tuning\_Guide.pdf}",
-   }
+@MISC{cuda-texture-obj,
+	author={M. Clark},
+	title={CUDA Pro Tip: Kepler Texture Objects Improve Performance and Flexibility},
+	journal={Parallel FORALL},
+	year={2013}
+}
    
-   @MISC{cuda-texture-obj,
-      author =       "M. Clark",  
-      title =        "CUDA Pro Tip: Kepler Texture Objects Improve Performance and Flexibility",
-      howpublished=  "{\tt http://devblogs.nvidia.com/parallelforall/cuda-pro-tip-kepler-texture-objects-improve-performance-and-flexibility/}",
-   }
+@article{harris2007parallel,
+  	title={Parallel prefix sum (scan) with CUDA},
+  	author={Harris, Mark and Sengupta, Shubhabrata and Owens, John D},
+  	journal={GPU Gems},
+  	volume={3},
+  	number={39},
+  	pages={851--876},
+  	year={2007}
+}
+
+@article{owens2007survey,
+  	title={A Survey of General-Purpose Computation on Graphics Hardware},
+  	author={Owens, John D and Luebke, David and Govindaraju, Naga and Harris, Mark and Kr{\"u}ger, Jens and Lefohn, Aaron E and Purcell, Timothy J},
+  	journal={Computer graphics forum},
+  	volume={26},
+  	number={1},
+	pages={80--113},
+  	year={2007},
+	publisher={Wiley Online Library}
+}
+
+@MISC{warps-occupancy,
+	author ={J. Luitjen and S. Rennich},
+	title ={CUDA Warps and Occupancy, GPU Tech Conf. GTC Express 2011},
+	url={http://on-demand.gputechconf.com/gtc-express/2011/presentations/cuda_webinars_WarpsAndOccupancy.pdf}
+}
    
-   @MISC{gems-prefixsum,
-      author =       "M. Harris ; S. Sengupta ; J. D. Owens",  
-      title =        "GPU Gems 3: Parallel Prefix Sum (Scan) with CUDA",
-      howpublished=  "{\tt https://developer.nvidia.com/gpugems/GPUGems3/gpugems3\_pref01.html}",
-   }
+@MISC{memory-coalescing,
+	author={J. Verscheldem},
+	title={Memory Coalescing Techniques},
+	year={2014},
+	url={http://homepages.math.uic.edu/~jan/mcs572/memory_coalescing.pdf}
+}
    
-   @MISC{warps-occupancy,
-      author =       "J. Luitjen ; S. Rennich ; NVIDIA Corporation",  
-      title =        "CUDA Warps and Occupancy, GPU Tech Conf. GTC Express 2011",
-      howpublished=  "{\tt http://on-demand.gputechconf.com/gtc-express/2011/presentations/cuda\_webinars\_WarpsAndOccupancy.pdf}",
-   }
+@MISC{gpu-opt-fundamentals,
+	author={C. Woolley},
+	title={GPU Optimization Fundamentals, 2013},
+	url={https://www.olcf.ornl.gov/wp-content/uploads/2013/02/GPU_Opt_Fund-CW1.pdf}
+}
    
-   @MISC{memory-coalescing,
-      author =       "J. Verschelde ; The University of Illinois at Chicago",  
-      title =        "Memory Coalescing Techniques, 2014",
-      howpublished=  "{\tt http://homepages.math.uic.edu/\~jan/mcs572/memory\_coalescing.pdf}",
-   }
-   
-   @MISC{gpu-opt-fundamentals,
-      author =       "C. Woolley ; NVIDIA Corporation",  
-      title =        "GPU Optimization Fundamentals, 2013",
-      howpublished=  "{\tt https://www.olcf.ornl.gov/wp-content/uploads/2013/02/GPU\_Opt\_Fund-CW1.pdf}",
-   }
-   
-   @MISC{first-experience-maxwell,
-      author =       "Andrew V. Adinetz ; NVIDIA Application Lab at Jülich, 8-9 October 2014",  
-      title =        "First Experiences with Maxwell GPUs, October 2014",
-      howpublished=  "{\tt http://www.fz-juelich.de/SharedDocs/Downloads/IAS/JSC/EN/slides/nvidia-ws-2014/02-adinets-maxwell.html?nn=1579708}",
-   }
+@MISC{first-experience-maxwell,
+	author ={Andrew V. Adinetz},
+	journal={NVIDIA Application Lab at Jülich},
+	year={2014},
+	title={First Experiences with Maxwell GPUs},
+	url={http://www.fz-juelich.de/SharedDocs/Downloads/IAS/JSC/EN/slides/nvidia-ws-2014/02-adinets-maxwell.html?nn=1579708}
+}
+
+@article{lindholm2008nvidia,
+  title={NVIDIA Tesla: A unified graphics and computing architecture},
+  author={Lindholm, Erik and Nickolls, John and Oberman, Stuart and Montrym, John},
+  journal={Ieee Micro},
+  volume={28},
+  number={2},
+  pages={39--55},
+  year={2008}
+}
+
+@MISC{fermi-whitepaper,
+  title={Nvidia's next generation cuda compute architecture: Fermi, Whitepaper},
+  author={NVIDIA},
+  year={2009}
+}
+
+@MISC{kepler-whitepaper,
+  title={NVIDIA’s Next Generation Compute Architecture: Kepler GK110, Whitepaper},
+  author={NVIDIA},
+  year={2012}
+}
+
+@MISC{maxwell-whitepaper,
+  title={NVIDIA GeForce GTX 980, Whitepaper},
+  author={NVIDIA},
+  year={2014}
+}
+
+@article{freund1997,
+	title = {A Decision-Theoretic Generalization of On-Line Learning and an Application to Boosting},
+	journal = {Journal of Computer and System Sciences},
+	volume = {55},
+	number = {1},
+	pages = {119 - 139},
+	year = {1997},
+	issn = {0022-0000},
+	author = {Yoav Freund and Robert E Schapire}
+}
