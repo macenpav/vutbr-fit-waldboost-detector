@@ -150,7 +150,7 @@ Constant memory & \verb|__constant__| & Grid & Read-only & Application \\
 
 \begin{center}
 \begin{figure}[ht]
-	\centering\includegraphics[height=11cm]{fig/memory-hierarchy.png}
+	\centering\includegraphics[height=10.5cm]{fig/memory-hierarchy.png}
 	\caption{Memory hierarchy (\cite{cuda-toolkit-docs})}
 \end{figure}
 \end{center}
@@ -379,10 +379,6 @@ What we haven't discussed yet is how these image features, which are statistical
 	\item Local Rank Patterns \cite{Hradis08localrank}
 \end{itemize}
 
-\subsection{Haar-like features}
-
-A method originally used by Viola and Jones \cite{Viola01rapidobject} in their object detection framework. Haar-like features are described in figure \ref{fig:haar}, where the sum of the pixels in the black area is subtracted from the sum of the pixels in the white area. The calculation can be accelerated by using integral images, which store the image as already precalculated sums.
-
 \begin{center}
 \begin{figure}[ht]
 	\centering\includegraphics[width=0.5\textwidth]{fig/haar.eps}
@@ -390,6 +386,10 @@ A method originally used by Viola and Jones \cite{Viola01rapidobject} in their o
 	\label{fig:haar}
 \end{figure}
 \end{center}
+
+\subsection{Haar-like features}
+
+A method originally used by Viola and Jones \cite{Viola01rapidobject} in their object detection framework. Haar-like features are described in figure \ref{fig:haar}, where the sum of the pixels in the black area is subtracted from the sum of the pixels in the white area. The calculation can be accelerated by using integral images, which store the image as already precalculated sums.
 
 \subsection{Local Binary Pattern}
 
@@ -424,7 +424,7 @@ As mentioned later on in section \ref{sec:memory-organization}, in reality the s
 
 \section{Uses cases of object detection}\label{sec:use-cases}
 
-Object detection isn't only used on its own, but also is a part of use cases. These range from uses in security surveillance, to traffic analysis or biometrics. A short summary of such applications is given below.
+Object detection isn't only used on its own, but also is a part of use cases. These range from uses in security surveillance, to traffic analysis or biometrics. Object detection doesn't have to be bound to humans, there are works researching detection on dogs \cite{juranek2008dogs}. A short summary of such applications is given below.
 
 \subsection{Face tracking and recognition}\label{subsec:uc-face-tracking}
 
@@ -438,7 +438,7 @@ An extension to face recognition is the use of biometrics. These are metrics des
 
 A very important application of object detection is traffic analysis. A trivial use case is vehicle speed measurement, where in order to measure the car's speed, it has to be detected in consecutive frames of a video, after which the speed can be calculated based on framerate and distance traveled.
 
-In traffic analysis, object detection actually has many more uses. Traffic congestion can be analyzed and afterwards data sent to inform traffic control or an intersection can be monitored in order to analyze how dangerous it is by measuring the angle or speed at which vehicles enter it.
+In traffic analysis, object detection actually has many more uses. Traffic congestion can be analyzed and afterwards data sent to inform traffic control or an intersection can be monitored in order to analyze how dangerous it is by measuring the angle or speed at which vehicles enter it. Example of such a work is described in \cite{sochor2014}.
 
 \subsection{Other uses}
 
@@ -884,7 +884,7 @@ Figure \ref{fig:survivor-count} shows the number if surviving samples after each
 
 Thread rearrangement strategies are specific to every video or dataset, therefore it can't be said, there there is only one, which is the best. They must be thoroughly measured for every use case.
 
-\chapter{Performance measurements and profiling}
+\chapter{Performance measurements and profiling}\label{ch:measure}
 
 This chapter evaluates performance, which means the time it takes for the detector to process an image. The results obtained by measurements were not only measured, but also profiled on different GPUs.
 
@@ -1306,15 +1306,19 @@ Throughout the thesis different methods to the problem of object detection on GP
 
 \chapter{Conclusion}
 
-The goal of this thesis was to design an application or a library for object detection on the GPU. The topic of WaldBoost object detection on the GPU using LBP is well researched, on the other hand there is much less research done on the implementation itself, and so the main focus was to exploit the implementation options of the NVidia CUDA Toolkit.
+The goal of this thesis was to design a high-performance application or a library for object detection on the GPU. The topic of WaldBoost object detection on the GPU using LBP is well researched, on the other hand there is much less research done on the implementations themselves, and so the main focus was to research how different options of the NVidia CUDA Toolkit affect object detection.
 
-Different approaches to implement the detector were proposed, concentrating on the use of specific features of the GPU programming, to exploit the different bottlenecks of each method, and each on of them was thoroughly measured and profiled. The implementation itself then exploits the fact, that every GPU is very specific and can take advantage of a different feature of the NVidia CUDA Toolkit. As such, based on the GPU parameters, an optimal method for object detection can be run.
+Different approaches to implement the detector were proposed described in section \ref{sec:impl-thread-rearrangement}, concentrating on the use of specific features of the GPU programming. Every approach had different bottlenecks and was thoroughly measured and profiled in chapter \ref{ch:measure}. Based on this research a framework, called WBD, was implemented, which allows to run a specific implementation on a large range of devices, based on their parameters. The framework itself has 4 CUDA C implementations, which are optimized for specific GPUs and a simple C++ implementation to be run on non-CUDA devices.
 
-The detector\footnote{Latest version is available at: \url{https://github.com/mmaci/vutbr-fit-waldboost-detector}} can process both image datasets, independent on the image size and videos, outputting detections as regions of interest inside an image. As such, it can also be used as a part of another application, which uses object detection. The application is specifically optimized not only for top-end NVidia GPUs, but also for the average or the low-end ones.
+The detector\footnote{Latest version is available at: \url{https://github.com/mmaci/vutbr-fit-waldboost-detector}} can process both image datasets, independent on the image size and videos, outputting detections as regions of interest inside an image. As such, it doesn't have to be used on its own, but can also be used as a part of another application, which uses object detection to greater benefits.
+
+The two main contributions of this thesis are, first, the implementation itself, which doesn't have to be used on its own, but can also be used as a part of another application, which uses object detection to greater benefits. Second, new ways of looking at GPU implementations of WaldBoost detectors, which can be further optimized and bring even better results.
 
 
 %=========================================================================
 
+\nocite{wong2010}
+\nocite{sochman2004}
 \nocite{freund1997}
 \nocite{lindholm2008nvidia}
 \nocite{owens2007survey}	
