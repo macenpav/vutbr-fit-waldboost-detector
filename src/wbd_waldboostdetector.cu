@@ -193,11 +193,9 @@ namespace wbd
 
             std::cout << LIBHEADER << "Precalculating pyramid ..." << std::endl;
         }
-
-        
-
-            switch (_settings.pyType)
-            {
+       
+        switch (_settings.pyType)
+        {
             case PYTYPE_OPTIMIZED:
                 _precalc4x8Pyramid();
                 break;
@@ -205,11 +203,10 @@ namespace wbd
             case PYTYPE_HORIZONAL:
                 _precalcHorizontalPyramid();
                 break;
-            }
+        }
 
-            if (_settings.detectionMode != DET_CPU)
-            {
-
+        if (_settings.detectionMode != DET_CPU)
+        {
             if (_opt & OPT_VERBOSE)
                 std::cout << LIBHEADER << "Allocating memory ..." << std::endl;
 
@@ -287,7 +284,7 @@ namespace wbd
                 GPU_CHECK_ERROR(cudaEventRecord(start_preprocess));
             }
 
-            gpu::preprocess << <grid, _kernelBlockConfig[KERTYPE_PREPROCESS] >> >(_devPreprocessedImage, _devOriginalImage, _info.width, _info.height);
+            gpu::preprocess<<<grid, _kernelBlockConfig[KERTYPE_PREPROCESS]>>>(_devPreprocessedImage, _devOriginalImage, _info.width, _info.height);
             GPU_CHECK_ERROR(cudaPeekAtLastError());
 
             if (_opt & OPT_TIMER)
@@ -332,7 +329,7 @@ namespace wbd
                 GPU_CHECK_ERROR(cudaMalloc((void**)&pyramidImage, _pyramid.canvasImageSize * sizeof(float)));
 
                 // copies from statically defined texture
-                gpu::copyImageFromTextureObject << <grid, _kernelBlockConfig[KERTYPE_PYRAMID] >> >(pyramidImage, _finalPyramidTexture, _pyramid.canvasWidth, _pyramid.canvasHeight);
+                gpu::copyImageFromTextureObject<<<grid, _kernelBlockConfig[KERTYPE_PYRAMID]>>>(pyramidImage, _finalPyramidTexture, _pyramid.canvasWidth, _pyramid.canvasHeight);
                 GPU_CHECK_ERROR(cudaPeekAtLastError());
 
                 // display using OpenCV
@@ -345,8 +342,7 @@ namespace wbd
             }
         }
         else
-        {
-            
+        {            
             _pyramidImage = simple::pyramid::createPyramidImage(*image, WB_OCTAVES, WB_LEVELS_PER_OCTAVE);
             if (_opt & OPT_VISUAL_DEBUG)
             {
@@ -417,8 +413,14 @@ namespace wbd
 			d.y -= (_pyramid.octaves[oct].images[lvl].offsetY);
 			d.y = static_cast<uint32>(static_cast<float>(d.y) * scale);
 
-			if (_opt & (OPT_VISUAL_DEBUG|OPT_VISUAL_OUTPUT))
-				cv::rectangle(*_myImage, cvPoint(d.x, d.y), cvPoint(d.x + d.width, d.y + d.height), CV_RGB(0, 255, 0));
+            if (_opt & (OPT_VISUAL_DEBUG | OPT_VISUAL_OUTPUT))
+            {
+                /// @todo maybe comeup with a way to process these detections? problem is we don't know which pyramid image they belong to
+                if ((d.x + d.width > _myImage->cols) || (d.y + d.height > _myImage->rows))
+                    return;
+
+                cv::rectangle(*_myImage, cvPoint(d.x, d.y), cvPoint(d.x + d.width, d.y + d.height), CV_RGB(0, 255, 0));
+            }
 		}	
 	}
 
@@ -634,7 +636,7 @@ namespace wbd
 					det_time_start = Clock::now();
 
 				std::vector<Detection> detections;
-				simple::detect(detections, _pyramidImage.data, _pyramidImage.cols, _pyramidImage.rows, _pyramidImage.cols);				
+				simple::detection::detect(detections, _pyramidImage.data, _pyramidImage.cols, _pyramidImage.rows, _pyramidImage.cols);				
 
 				if (_opt & OPT_TIMER)
 				{
