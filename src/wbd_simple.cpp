@@ -10,6 +10,59 @@ namespace wbd
 {
 	namespace simple 
 	{
+        namespace pyramid
+        {           
+            cv::Mat createPyramidImage(cv::Mat const& input, uint8 octaves, uint8 levelsPerOctave)
+            {
+                float canvasHeight, canvasWidth;
+
+                canvasWidth = input.cols + input.cols / 2.0f;
+                float tmp = 0;
+                for (uint8 i = 0; i <= levelsPerOctave; ++i)
+                    tmp += pow(2, i / levelsPerOctave);
+                canvasHeight = tmp * input.rows;
+
+                cv::Mat grayscale;
+                cv::cvtColor(input, grayscale, CV_BGR2GRAY);
+
+                cv::Mat pyramid(static_cast<uint32>(canvasHeight), static_cast<uint32>(canvasWidth), CV_8UC1);
+                float scalingFactor = powf(2, 1.f / static_cast<float>(levelsPerOctave));
+                                
+                uint32 widthOffset = 0;
+                uint32 heightOffset = 0;
+                uint32 oldHeightOffset = 0;
+                float scale = 1.f;
+                for (uint8 i = 0; i < octaves; ++i)
+                {                      
+                    if (i == 1)
+                    {
+                        widthOffset += input.cols;
+                        heightOffset = 0;
+                    }
+
+                    if (i == 3)
+                    { 
+                        widthOffset += input.cols / 4;
+                        heightOffset = oldHeightOffset;
+                    }
+
+                    if (i == 2)
+                        oldHeightOffset = heightOffset;
+                             
+                    for (uint8 j = 0; j < levelsPerOctave; ++j)
+                    {
+                        cv::Mat tmp;                                                
+                        cv::resize(grayscale, tmp, cv::Size(grayscale.cols / scale, grayscale.rows / scale));                        
+                        tmp.copyTo(pyramid(cv::Rect(widthOffset, heightOffset, tmp.cols, tmp.rows)));
+                        scale *= scalingFactor;
+                        heightOffset += tmp.rows;
+                    }
+                }
+
+                return pyramid;
+            }                    
+        } // pyramid
+
 		void detect(std::vector<Detection>& detections, uint8* image, uint32 const& width, uint32 const& height, uint32 const& pitch)
 		{			
 			for (uint32 x = 0; x < width - WB_CLASSIFIER_WIDTH; ++x)

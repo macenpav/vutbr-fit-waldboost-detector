@@ -183,7 +183,8 @@ namespace wbd
 			uint32*				_devSurvivorCount[2];   ///< pointers to device survivor counts
 
 			/** HOST MEMORY */
-			cv::Mat*			_myImage;				///< pointer to the original processed image			
+			cv::Mat*			_myImage;				///< pointer to the original processed image
+            cv::Mat             _pyramidImage;          ///< simple implementation of pyramid image
 			uint32				_frame;					///< frame counter
 	};
 }

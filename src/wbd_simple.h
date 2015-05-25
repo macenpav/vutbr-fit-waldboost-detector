@@ -12,6 +12,12 @@
 #define H_WB_SIMPLEDETECTOR
 
 #include <vector>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/nonfree/features2d.hpp>
+
 #include "wbd_general.h"
 
 namespace wbd
@@ -100,6 +106,11 @@ namespace wbd
 			uint32*			values, 
 			Stage*			stage
 		);
+
+        namespace pyramid
+        {
+            cv::Mat createPyramidImage(cv::Mat const& input, uint8 octaves, uint8 levelsPerOctave);
+        }
 	}
 }
 

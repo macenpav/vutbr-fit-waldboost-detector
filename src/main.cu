@@ -198,30 +198,31 @@ int main(int argc, char** argv)
     // default detection mode
 
     int32 device_count, device = 0, multiproc_count = 0;
-    GPU_CHECK_ERROR(cudaGetDeviceCount(&device_count));
+    cudaError res;
+    res == cudaGetDeviceCount(&device_count);
 
-    for (int32 i = 0; i < device_count; ++i)
-    {        
-        cudaDeviceProp properties;
-        GPU_CHECK_ERROR(cudaGetDeviceProperties(&properties, i));
-
-        if (properties.multiProcessorCount > multiproc_count)
+    if (res != cudaErrorInsufficientDriver && res != cudaErrorNoDevice)
+    {
+        for (int32 i = 0; i < device_count; ++i)
         {
-            multiproc_count = properties.multiProcessorCount;
-            device = i;
-        }        
-    }
+            cudaDeviceProp properties;
+            GPU_CHECK_ERROR(cudaGetDeviceProperties(&properties, i));
 
-    cudaSetDevice(device);
+            if (properties.multiProcessorCount > multiproc_count)
+            {
+                multiproc_count = properties.multiProcessorCount;
+                device = i;
+            }
+        }
 
-    if (multiproc_count == 0)
-        settings.detectionMode = wbd::DET_CPU;
-    else {
+        cudaSetDevice(device);
         if (multiproc_count >= 2)
             settings.detectionMode = wbd::DET_ATOMIC_SHARED;
         else
             settings.detectionMode = wbd::DET_ATOMIC_GLOBAL;
     }
+    else
+        settings.detectionMode = wbd::DET_CPU;
 
     for (int32 i = 1; i < argc; ++i)
 	{
