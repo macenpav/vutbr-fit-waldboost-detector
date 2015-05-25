@@ -1,6 +1,27 @@
-%\chapter{Obsah CD}
-%\chapter{Manual}
-%\chapter{Konfigurační soubor}
-%\chapter{RelaxNG Schéma konfiguračního soboru}
-%\chapter{Plakat}
+\chapter{DVD contents}
+
+Below, the structure of the DVD is described. Before using it, please read the README.md file.
+
+\paragraph{bin} Win32 binary including sample videos and images.
+\paragraph{docs/doxygen} Doxygen generated documentation in HTML and pdf.
+\paragraph{docs/poster} A poster for presentation.
+\paragraph{docs/thesis} The thesis itself in TeX and PDF.
+\paragraph{measurements} Measurements taken throughout the work on the thesis.
+\paragraph{src} Source codes with a CMake file.
+\paragraph{README.md} A README file containing information about building a binary or usage of the command-line tool.
+\paragraph{LICENSE.md} MIT License.
+
+\chapter{Command-line tool description}
+
+\paragraph{-D --dataset [filename]} Input textfile containing dataset filenames.
+\paragraph{-V --video [filename]} Input video.
+\paragraph{-c --csv} CSV output.
+\paragraph{-v --verbose} Verbose output.
+\paragraph{-t --timer} Measure detection time.
+\paragraph{-o --visualoutput} Shows a visual output.
+\paragraph{-s --survivors} Outputs surviving threads every stage of the classifier.
+\paragraph{-d --visualdebug} Shows a visual output including pyramidal and preprocessed image.
+\paragraph{-b --blocksize [8/16/32]} Sets block size. Should be set to 8, 16 or 32 for (64, 256 or 1024 threads)
+\paragraph{-l --limitframes [number]} Process only a given number of frames.
+\paragraph{-m --detectionmode [global/shared/prefixsum/hybrid/cpu]} Sets the specific implementation to use.
 

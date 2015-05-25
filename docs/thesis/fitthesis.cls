@@ -257,7 +257,7 @@ It is hereby a subject to the copyright laws and its usage without the consent o
 \vfill
 
 \mktxt@b{16}{\@cite@CS}
-\noindent\@author: \@title, \MakeLowercase{\@projecttype@CS}, Faculty of Information Technology, BUT, Brno \@year
+\noindent\@author: \@title, \MakeLowercase{\@projecttype@EN}, Faculty of Information Technology, BUT, Brno \@year
 %===================================================
 \newpage
 }

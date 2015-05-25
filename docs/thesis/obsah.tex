@@ -53,7 +53,7 @@ The last two - Compute shaders and DirectCompute also work in a more high-level 
 
 This change towards a more general-purpose use of GPUs can be also viewed in the current OpenGL pipeline, with which most graphics programmers are familiar. In OpenGL 2.0 (2004) shader programs were introduced enabling to partially program the pipeline itself. With OpenGL 3.* (2008-2010) the shader language had improved significantly and geometry shaders were introduced. Later on in 2010 another programmable stage was introduced with OpenGL 4.0 - the tesselation shader, but still these were set stages with a predefined purpose. The most significant year for the GPGPU was 2012 with OpenGL 4.3 and the Compute Shaders. 
 
-Compute shaders are very specific. They don't have a set number of inputs, outputs or a place in the pipeline. It is up to the programmer to specify these and also to specify a space on which they operate, like per-pixel or per-vertex basis, by fetching the data itself. This means that even the graphics pipeline, traditionally used for visualization, changed in a way, that it can be programmed without the use of traditional shaders, with compute shaders only and a more general-purpose use in mind.
+Compute shaders are very specific. They don't have a predefined number of inputs, outputs or a place in the pipeline. It is up to the programmer to specify these and also to specify a space on which they operate, like per-pixel or per-vertex basis, by fetching the data itself. This means that even the graphics pipeline, traditionally used for visualization, changed in a way, that it can be programmed without the use of traditional shaders, with compute shaders only, and a more general-purpose use in mind.
 
 \section{NVIDIA CUDA}
 
@@ -126,7 +126,7 @@ Another important aspect of CUDA are the types of memories, which can be used. T
 
 \begin{table}
 \centering
-\begin{tabular}{| l | l | l | l | l |}
+\begin{tabularx}{\textwidth}{| X | X | X | X | X |}
 \hline
 Memory & Keyword & Scope & Access & Lifetime \\
 \hline
@@ -142,11 +142,20 @@ Texture memory & - & Grid & Read-only & Application \\
 \hline
 Constant memory & \verb|__constant__| & Grid & Read-only & Application \\
 \hline
-\end{tabular}
-\caption{Memory types}
+\end{tabularx}
+\caption{CUDA Memory types}
 \end{table}
 
 \paragraph{Global memory} is accessible by all threads in a grid and allows both reading and writing. It is also the slowest memory type. Its access is the bottleneck for most applications with access latency ranging from 400 to 800 cycles. There are several strategies for it to be fast like coalescing access with 32-, 64-, 128-byte transactions, described in section \ref{subsubsec:cuda-coalescing}.
+
+\begin{center}
+\begin{figure}[ht]
+	\centering\includegraphics[height=11cm]{fig/memory-hierarchy.png}
+	\caption{Memory hierarchy (\cite{cuda-toolkit-docs})}
+\end{figure}
+\end{center}
+
+\FloatBarrier
 
 \paragraph{Texture memory} can be regarded similarly to global memory. Cache is optimized for 2D spatial access pattern and address modes or interpolation can be used at no additional cost.
 
@@ -158,25 +167,13 @@ Constant memory & \verb|__constant__| & Grid & Read-only & Application \\
 
 \paragraph{Local memory} is a part of global memory, where everything which doesn't fit into registers is stored. For devices with Compute Capability 2.x there are 32768 32-bit registers.
 
-\begin{center}
-\begin{figure}[ht]
-	\centering\includegraphics[height=12cm]{fig/memory-hierarchy.png}
-	\caption{Memory hierarchy (\cite{cuda-toolkit-docs})}
-\end{figure}
-\end{center}
+
 
 \subsection{Optimization methods}\label{subsec:optimization}
 
 \subsubsection{Global memory coalescing}\label{subsubsec:cuda-coalescing}
 
 Using global memory is generally slow, but it is unavoidable to use, because it is the only type of GPU memory, which can be copied to from the CPU. On the other hand, since Compute Capability 1.1, global memory loads and stores can be optimized by coalescing, thus making it much faster.
-
-\begin{center}
-\begin{figure}[ht]
-	\centering\includegraphics[width=0.6\textwidth]{fig/coalescing.png}
-	\caption{Coalescing access to global memory. Top part shows coalesced access, whereas bottom part shows strided uncoalesced access.}\label{fig:coalescing}
-\end{figure}
-\end{center}
 
 GPU can access memory in 32-, 64- or 128-byte transactions. Therefore, in case the memory access is aligned, multiple banks can be read or written to in a single transaction. On the other hand when it is not, more transactions have to be initialized, making the memory bandwidth much lower. Examples of coalesced (top) \ref{code:coalesced} and uncoalesced (bottom) \ref{code:uncoalesced} access with stride of 4 bytes are shown in figure \ref{fig:coalescing}.
 
@@ -196,6 +193,15 @@ tmp = globalmem[blockIdx.x * blockDim.x + threadIdx.x + stride];
 
 It is a common optimization technique, to use shared memory in cases, where strided access is needed. Data is copied between global memory and shared memory in a coalesced fashion, but then strided access is used on shared memory without a penalty.
 
+\FloatBarrier
+
+\begin{center}
+\begin{figure}[ht]
+	\centering\includegraphics[width=0.6\textwidth]{fig/coalescing.png}
+	\caption{Coalescing access to global memory. Top part shows coalesced access, whereas bottom part shows strided uncoalesced access.}\label{fig:coalescing}
+\end{figure}
+\end{center}
+
 \subsubsection{Thread synchronization and stalling}\label{subsubsec:cuda-thread-sync-stall}
 
 Threads cannot be synchronized across the whole grid, but only across a block. Therefore, if a result of a certain computation is needed by all the threads, a whole new kernel has to be launched. Synchronization across a block is done by the \verb|__syncthreads| call. When a thread reaches this call, it waits idly until all the threads within the block also reach the call.
@@ -208,13 +214,13 @@ When writing a kernel, it is important to keep this in mind and try to minimize 
 
 NVidia GPUs vary not only by their parameters, but also by their architecture. There are 4 architectures supporting CUDA: Tesla (November 2009) \cite{lindholm2008nvidia}, Fermi (March 2010) \cite{fermi-whitepaper}, Kepler (March 2012) \cite{kepler-whitepaper} and Maxwell (March 2014) \cite{maxwell-whitepaper}. Another way to describe the architecture is its compute capability, which is 1.x for Tesla, 2.x for Fermi, 3.x for Kepler and 5.x for Maxwell. The higher the compute capability, the more features such GPU supports, also all of the compute capabilities have different parameters summarized in table \ref{tab:compute-capability}.
 
-\begin{table}[htbp]
-\begin{center}
-\begin{tabularx}{0.75\textwidth}{| X | X | X | X |}
+\begin{table}[ht]
+\centering
+\begin{tabularx}{\textwidth}{| X | X | X | X |}
 \hline
 Compute Capability & 2.x & 3.x & 5.x \\
 \hline
-Compute Capability & Fermi & Kepler & Maxwell \\
+Architecture & Fermi & Kepler & Maxwell \\
 \hline
 Max. number of blocks per SM & 8 & 16 & 32 \\
 \hline
@@ -231,7 +237,6 @@ Max. shared memory per SM & 48 KB & 48 or 112 KB & 64 or 96 KB \\
 L2 cache size & 768 KB & 512 KB & 2048 KB \\
 \hline
 \end{tabularx}
-\end{center}
 \caption{Limits of devices for every architecture. SM stands for Streaming Multiprocessor.}
 \label{tab:compute-capability}
 \end{table}
@@ -243,6 +248,8 @@ In march 2014 the new Maxwell architecture was released and it brought several i
 \subsubsection{Larger shared memory}
 
 Shared memory, described in section \ref{subsec:memory}, is increased from 64 KB to 96 KB per multiprocessor. Shared memory is the faster memory type, because it resides on the multiprocessor itself. This means, that it is available only for the given block. On the other hand it's by far the faster memory type and is used mainly for performance optimization. Increasing its size makes it more available.
+
+\FloatBarrier
 
 \subsubsection{Larger L2 cache}
 
@@ -279,7 +286,7 @@ The new Maxwell multiprocessor is called SMM (multiprocessor for Kepler was call
 
 \begin{center}
 \begin{figure}[ht]
-	\centering\includegraphics[width=0.55\textwidth]{fig/smm.png}
+	\centering\includegraphics[width=0.50\textwidth]{fig/smm.png}
 	\caption{Maxwell's multiprocessor, SMM.	Taken from \cite{maxwell-whitepaper}.}\label{fig:smm}
 \end{figure}
 \end{center}
@@ -449,13 +456,13 @@ Image processing tasks are generally suitable for parallel acceleration. On the 
 
 \begin{center}
 \begin{figure}[ht]
-	\centering\includegraphics[width=0.6\linewidth]{fig/survivors.png}
+	\centering\includegraphics[width=0.50\linewidth]{fig/survivors.png}
 	\caption{Surviving percentage of samples gets below 5\% after few initial stages. Taken from \cite{herout2011real}.}
 	\label{fig:survivors}
 \end{figure}
 \end{center}
 
-Most of the current implementations of WaldBoost detectors are based on a work proposed by Herout \cite{herout2011real}. 
+Most of the current implementations of WaldBoost detectors are based on a work proposed by Herout \cite{herout2011real}, which is summarized in sections \ref{subsec:anal-pyramidal} and \ref{subsec:anal-thread-rearrangement}. 
 
 \section{Pyramidal image}\label{subsec:anal-pyramidal}
 
@@ -594,14 +601,6 @@ The detector processes both videos and image datasets, which are passed to the d
 
 The application pipeline (described in figure \ref{fig:pipeline}) of the detector is a bit different for a dataset, than for a video, but both use the following steps as described in sections \ref{subsec:init} to \ref{subsec:free}.
 
-\begin{center}
-\begin{figure}[h!]
-	\centering\includegraphics[width=9cm]{fig/pipeline.eps}
-	\caption{Application pipeline. On the GPU side, kernel methods are mentioned.}
-	\label{fig:pipeline}	
-\end{figure}
-\end{center}
-
 For a video, the detector can be initialized only once with the initial frame. All the other frames have the same size and so the same memory structures can be used. Image setup and the Detection are then run multiple times for every frame. After the video is processed, memory is freed.
 
 For a dataset, every image can be different and so the whole process must be run multiple times for every loaded image.
@@ -615,6 +614,14 @@ The other part being allocating GPU memory for the image itself, which is alloca
 \subsection{Setting an image}
 
 After the initialization is complete, an image or a frame is loaded by OpenCV and then copied over to the GPU. This must be done both for every image or every frame. It is copied over to the global memory, there it is preprocessed, as discussed in section \ref{subsubsec:grayscale}, and set as a texture. From the texture, a pyramidal image is generated, as described in section \ref{subsubsec:pyramidal}. After that, everything is ready for object detection.
+
+\begin{center}
+\begin{figure}[h!]
+	\centering\includegraphics[width=0.6\textwidth]{fig/pipeline.eps}
+	\caption{Application pipeline. On the GPU side, kernel methods are mentioned.}
+	\label{fig:pipeline}	
+\end{figure}
+\end{center}
 
 \subsubsection{Preprocessing} \label{subsubsec:grayscale} 
 
@@ -642,7 +649,7 @@ As mentioned previously, the implementation uses hardware bilinear interpolation
 
 \begin{center}
 \begin{figure}[ht]
-	\centering\includegraphics[height=9cm]{fig/bilinear_error.eps}\label{fig:bilinear-error}
+	\centering\includegraphics[width=0.45\textwidth]{fig/bilinear_error.eps}\label{fig:bilinear-error}
 	\caption{Error when sub-sampling an image below twice the original width using bilinear interpolation}
 \end{figure}
 \end{center}
@@ -847,13 +854,11 @@ Every surviving thread is then assigned an ID based on its value in the prefix-s
 
 Thread rearrangement is a costly process, but greatly enhances the performance, therefore a balance between rearranging threads and running the detection has to be found. Every detection function call has a starting stage and an ending stage. For the initial function call, the stating stage is set to 0 and for the final stage, it's set to the total number of stages, which is in our case 2048. It is important to set these optimally, because it will have large impact on the overall performance.
 
-The implementation allows to output the number of surviving threads after each thread rearrangement or in another words after returning from the kernel. A few experiments were conducted and a single strategy had to be devised to be able to measure the performance and profile the implementations. The best results were on average obtained by the configuration 1, 8, 64, 256, 512, which are the numbers of processed stages, after with the thread rearrangement occurred.
-
 \begin{figure}[ht]
 \centering\begin{tikzpicture}
   \begin{axis}
   [
-	width=0.8\textwidth,
+	width=0.7\textwidth,
 	ylabel={Surviving samples (\%)},
 	xlabel={Processed stages (weak classifiers)},
 	xtick=data,
@@ -872,6 +877,8 @@ The implementation allows to output the number of surviving threads after each t
 	\caption{Surviving samples after processed number of stages.}
 	\label{fig:survivor-count}
 \end{figure}
+
+The implementation allows to output the number of surviving threads after each thread rearrangement or in another words after returning from the kernel. A few experiments were conducted and a single strategy had to be devised to be able to measure the performance and profile the implementations. The best results were on average obtained by the configuration 1, 8, 64, 256, 512, which are the numbers of processed stages, after with the thread rearrangement occurred.
 
 Figure \ref{fig:survivor-count} shows the number if surviving samples after each rearrangement stage or in another words after each kernel run. It can be argued, that the last 2 rearrangement stages aren't needed, because only around 10\% of the surviving samples get discarded. It's important to note in these cases, that there is a lot of stages being processed afterwards, and so every active warp affects the performance much more, than during the previous kernels.
 
@@ -1216,8 +1223,6 @@ As mentioned previously, at the end of section \ref{subsubsec:prof-occ-global-me
 
 The load and store global memory throughput and the atomic throughput all correlate with each other, because the main bottleneck here is actually the use of atomic operations before the global memory stores are processed, and so the store throughput is only as high as the atomic throughput.
 
-The $8 \times 8$ configuration has a lower overall achieved occupancy as shown in figure \ref{fig:occupancy-quadro} and the $32 \times 32$ on the other hand creates more conflicts when issuing atomic operations, this leads to the $16 \times 16$ being the best compromise between these three configurations. This is also shown in figure \ref{fig:occupancy-quadro}. The low atomic throughput for the kernels 4-6 is the result of a low number of samples and thus lower atomic operation. For kernel 3 it's also a result of longer detection time due to lower L2 hit rate mentioned in section \ref{subsec:prof-l2-hit-rate}.
-
 \begin{figure}[ht]
 \centering\begin{tikzpicture}
   \begin{axis}
@@ -1241,6 +1246,8 @@ The $8 \times 8$ configuration has a lower overall achieved occupancy as shown i
 	\caption{Atomic throughput on Quadro K1000M (Kepler) for the global memory method. Values on the X-axis enumerate kernels in the order, they are run. 1: detectSurvivorsInit, 2-5: detectSurvivors, 6: detectDetections.}
 	\label{fig:atomic-throughput-quadro}
 \end{figure}
+
+The $8 \times 8$ configuration has a lower overall achieved occupancy as shown in figure \ref{fig:occupancy-quadro} and the $32 \times 32$ on the other hand creates more conflicts when issuing atomic operations, this leads to the $16 \times 16$ being the best compromise between these three configurations. This is also shown in figure \ref{fig:occupancy-quadro}. The low atomic throughput for the kernels 4-6 is the result of a low number of samples and thus lower atomic operation. For kernel 3 it's also a result of longer detection time due to lower L2 hit rate mentioned in section \ref{subsec:prof-l2-hit-rate}.
 
 The atomic operation bottleneck is also one of the reasons, why the global memory implementation cannot be used with high-end GPUs. Their increased computational capacity allows them to process more threads at a time, which results in more stalling caused by waiting for atomic operations and so this resource advantage isn't used to its maximum.
 
