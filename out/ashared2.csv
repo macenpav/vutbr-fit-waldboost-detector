@@ -1,4 +1,0 @@
-==8756== NVPROF is profiling process 8756, command: WaldboostDetector_30.exe -iv 1920x1080.mp4 -dm ashared -lf 10
-==8756== Profiling application: WaldboostDetector_30.exe -iv 1920x1080.mp4 -dm ashared -lf 10
-==8756== Profiling result:
-No events/metrics were profiled.
